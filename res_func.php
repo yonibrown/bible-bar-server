@@ -147,17 +147,18 @@ function res_get_prt_list($id,$prop){
 
     $res = $id['res'];
 
-    $sort_columns = "prt.collection_id,prt.position";
-    $sort_key = "CONCAT(prt.collection_id,'_',prt.position)";
+    $sort_key = array(
+        'col'=>"CONCAT(LPAD(prt.collection_id,5,0),'_',LPAD(prt.position,11,0))",
+        "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0),'_',LPAD(src.position,11,0))"
+    );
+
+    $order_by = "prt.collection_id,prt.position";
     if (array_key_exists('sort', $prop)){
-        switch($prop['sort']){
-            case 'src':
-                $sort_columns = "prt.src_from_position,prt.src_from_word,src.position";
-                $sort_key = "CONCAT(prt.src_from_position,'_',prt.src_from_word,'_',src.position)";
-                break;
+        if ($prop['sort'] == 'src'){
+            $order_by = "prt.src_from_position,prt.src_from_word,src.position";
         }
     }
-
+    
     $filter = '';
 
     if (array_key_exists('part_id', $prop)){
@@ -173,8 +174,9 @@ function res_get_prt_list($id,$prop){
     $sql = "SELECT prt.part_id, prt.collection_id, c.name_heb col_name, 
                    prt.src_from_position, prt.src_to_position, prt.src_from_word, prt.src_to_word, 
                    src.abs_name_heb src_name,src.text src_text,
-                   ".$sort_key." sort_key
-            FROM a_res_parts prt
+                   ".$sort_key['src']." src_sort_key,
+                   ".$sort_key['col']." col_sort_key
+                   FROM a_res_parts prt
             JOIN a_res_parts src
               ON src.research_id = prt.src_research
              AND src.collection_id = prt.src_collection
@@ -184,7 +186,7 @@ function res_get_prt_list($id,$prop){
              AND c.collection_id = prt.collection_id
            WHERE prt.research_id = ".$res."
            ".$filter."
-           ORDER BY ".$sort_columns;
+           ORDER BY ".$order_by;
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 7 in res_func.php: ' . mysqli_error($con));
@@ -202,7 +204,8 @@ function res_get_prt_list($id,$prop){
             "text_part"=>$mark['text'],
             "text_after"=> mb_substr($row['src_text'],$mark['end']),
             "src_name" => $row['src_name'],
-            "sort_key" => $row['sort_key']
+            "src_sort_key" => $row['src_sort_key'],
+            "col_sort_key" => $row['col_sort_key']
         ));
     }
     return $list;
