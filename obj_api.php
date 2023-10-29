@@ -1,4 +1,9 @@
 <?php
+
+header("Access-Control-Allow-Headers: Authorization, Content-Type");
+header("Access-Control-Allow-Origin: *");
+header('content-type: application/json; charset=utf-8');
+
 include 'connect_db.php';
 include 'text_func.php';
 include 'bar_func.php';
