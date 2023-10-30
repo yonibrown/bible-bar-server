@@ -5,6 +5,59 @@
 function txt_create($id,$prop){
     global $con;
 
+    $attr = txt_gen_attr($id,$prop);
+
+    $sql = "INSERT INTO a_proj_elm_sequence
+                (project_id, element_id, 
+                 research_id, collection_id, from_position, to_position, 
+                 seq_index, seq_level, color_level, 
+                 anchor_position, anchor_word)
+            VALUES(".$id['proj'].",".$id['elm'].", 
+                   ".$attr['src_research'].",".$attr['src_collection'].",".$attr['from_position'].",".$attr['to_position'].",
+                   1,0,0,
+                   ".$attr['anchor_position'].",0)";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 2 in text_func.php: ' . mysqli_error($con));
+    }
+
+    if ($attr['prt_research'] != $attr['src_research']){
+        // create link between prt_research and text element
+        elm_link_to_cat($id,array("res"=>$attr['prt_research'],"col"=>$attr['prt_collection']));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function txt_set($id,$prop){
+    global $con;
+
+    $attr = txt_gen_attr($id,$prop);
+
+    $sql = "UPDATE a_proj_elm_sequence
+               SET research_id = ".$attr['src_research'].", 
+                   collection_id = ".$attr['src_collection'].", 
+                   from_position = ".$attr['from_position'].", 
+                   to_position = ".$attr['to_position'].", 
+                   seq_index = 1, 
+                   seq_level = 0, 
+                   color_level = 0, 
+                   anchor_position = ".$attr['anchor_position'].", 
+                   anchor_word = 0
+             WHERE project_id = ".$id['proj']."
+               AND element_id = ".$id['elm'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 12 in text_func.php: ' . mysqli_error($con));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function txt_gen_attr($id,$prop){
+    global $con;
     if (array_key_exists('division_id',$prop)){
         // get parameters by division_id
         $sql = "SELECT src.research_id src_research,src.collection_id src_collection,
@@ -41,25 +94,7 @@ function txt_create($id,$prop){
         exit_error('Error 1 in text_func.php: ' . mysqli_error($con));
     }
     $row = mysqli_fetch_array($result);
-
-    $sql = "INSERT INTO a_proj_elm_sequence
-                (project_id, element_id, 
-                 research_id, collection_id, from_position, to_position, 
-                 seq_index, seq_level, color_level, 
-                 anchor_position, anchor_word)
-            VALUES(".$id['proj'].",".$id['elm'].", 
-                   ".$row['src_research'].",".$row['src_collection'].",".$row['from_position'].",".$row['to_position'].",
-                   1,0,0,
-                   ".$row['anchor_position'].",0)";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 2 in text_func.php: ' . mysqli_error($con));
-    }
-
-    if ($row['prt_research'] != $row['src_research']){
-        // create link between prt_research and text element
-        elm_link_to_cat($id,array("res"=>$row['prt_research'],"col"=>$row['prt_collection']));
-    }
+    return $row;
 }
 
 // --------------------------------------------------------------------------------------

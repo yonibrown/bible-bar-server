@@ -318,6 +318,7 @@ function proj_get_elm_list($id){
     $list = array();
 
     $sql = "SELECT pe.element_id id,type,name,
+                   opening_element,
                    pe.position,gs_x,gs_y,gs_width,gs_height,
                    show_props
             FROM a_proj_elements pe
@@ -338,7 +339,8 @@ function proj_get_elm_list($id){
         $disp = array(
             "name"=>$row['name'],
             "gs_disp" => $gs_disp,
-            "show_props" => ($row['show_props'] == 1)
+            "show_props" => ($row['show_props'] == 1),
+            "opening_element" => $row['opening_element']
         );
 
         $elmId = array(

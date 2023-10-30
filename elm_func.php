@@ -6,7 +6,7 @@
 function elm_get($id){
     global $con;
 
-    $sql = "SELECT type, name, description, 
+    $sql = "SELECT type, name, description, opening_element,
                    position, gs_x, gs_y, gs_width, gs_height
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
@@ -21,7 +21,8 @@ function elm_get($id){
     $gen_attr = array(
         'type'=>$type,
         'name'=>$row['name'],
-        'description'=>$row['description']
+        'description'=>$row['description'],
+        'opening_element'=>$row['opening_element']
     );
 
     switch($type){
@@ -159,8 +160,11 @@ function elm_set($id,$prop){
     $elm_prop = elm_get($id);
     switch($elm_prop['type']){
         case 'bar':
+            elmseq_set($id,$prop);
+            break;
         case 'text':
             elmseq_set($id,$prop);
+            txt_set($id,$prop);
             break;
         case 'parts':
             elmprt_set($id,$prop);
@@ -169,6 +173,8 @@ function elm_set($id,$prop){
             elmlnk_set($id,$prop);
             break;
     }
+
+    return elm_get($id);
 }
 
 // --------------------------------------------------------------------------------------
