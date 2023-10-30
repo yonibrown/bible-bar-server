@@ -1,9 +1,5 @@
 <?php
 
-header("Access-Control-Allow-Headers: Authorization, Content-Type");
-header("Access-Control-Allow-Origin: *");
-header('content-type: application/json; charset=utf-8');
-
 include 'connect_db.php';
 include 'text_func.php';
 include 'bar_func.php';
@@ -36,7 +32,7 @@ switch ($type){
 
             // set attributes
             case "set":
-                elm_set($id,$prop);
+                $reply['data'] = elm_set($id,$prop);
                 break;
 
             // get linked categories                                     
