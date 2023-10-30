@@ -381,7 +381,7 @@ function bar_calc_points($id,$dsp){
                    pt.src_from_word pt_from_word, pt.src_to_word pt_to_word,
                    pt.src_research pt_src_research,pt.src_collection pt_src_collection
               FROM a_res_parts pt
-              JOIN g_proj_link_elm_col ec
+              JOIN view_proj_link_elm_col ec
                 ON ec.research_id = pt.research_id
                AND ec.collection_id = pt.collection_id
              WHERE ec.project_id = ".$id['proj']."
