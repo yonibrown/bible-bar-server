@@ -93,7 +93,7 @@ function elm_create($prop){
                 '".$type."',
                 ' ',' ',
                 ".$elm.", 
-                0,0,0,0,
+                0,0,0,1,
                 0,0)";
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -101,6 +101,19 @@ function elm_create($prop){
     }
 
     $id = array('proj'=>$proj,'elm'=>$elm);
+
+    if (array_key_exists('opening_element',$prop)){
+        $sql = "INSERT INTO a_proj_link_elements
+                    (project_id, link_id, element_id) 
+                SELECT project_id, link_id, $elm
+                  FROM a_proj_link_elements
+                 WHERE project_id = ".$proj."
+                   AND element_id = ".$prop['opening_element'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 21 in elm_func.php: ' . mysqli_error($con));
+        }
+    }
 
     if (array_key_exists('links',$prop)){
         foreach ($prop['links'] as $link_obj) {
@@ -227,7 +240,7 @@ function elm_get_categories($id,$prop){
 
     $sql = "SELECT ec.research_id,ec.collection_id,ec.division_id,ec.link_id,ec.color,ec.hilight,
                    rd.name_heb div_name,rc.name_heb col_name,r.name_heb res_name
-              FROM g_proj_link_elm_col ec
+              FROM view_proj_link_elm_col ec
               JOIN a_researches r
                 ON ec.research_id = r.research_id
               JOIN a_res_collections rc

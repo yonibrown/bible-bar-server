@@ -21,10 +21,10 @@ function txt_create($id,$prop){
         exit_error('Error 2 in text_func.php: ' . mysqli_error($con));
     }
 
-    if ($attr['prt_research'] != $attr['src_research']){
-        // create link between prt_research and text element
-        elm_link_to_cat($id,array("res"=>$attr['prt_research'],"col"=>$attr['prt_collection']));
-    }
+    // if ($attr['prt_research'] != $attr['src_research']){
+    //     // create link between prt_research and text element
+    //     elm_link_to_cat($id,array("res"=>$attr['prt_research'],"col"=>$attr['prt_collection']));
+    // }
 }
 
 // --------------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ function txt_get_segment($id){
               LEFT JOIN 
                   (SELECT 1 linked,src_from_position,src_to_position
                      FROM a_res_parts rp
-                     JOIN g_proj_link_elm_col ec
+                     JOIN view_proj_link_elm_col ec
                        ON ec.research_id = rp.research_id
                       AND ec.collection_id = rp.collection_id
                       AND ec.project_id = ".$id['proj']."
@@ -170,7 +170,7 @@ function txt_get_segment($id){
             if ($row1['linked'] == 1){
                 $sql2 = "SELECT ec.research_id, ec.collection_id, ec.division_id, rp.part_id, rp.src_to_position, rp.src_to_word, ec.link_id
                            FROM a_res_parts rp
-                           JOIN g_proj_link_elm_col ec
+                           JOIN view_proj_link_elm_col ec
                              ON ec.research_id = rp.research_id
                             AND ec.collection_id = rp.collection_id
                            LEFT JOIN a_res_idx_division rd
@@ -264,7 +264,7 @@ function txt_get_segment_new($id){
               LEFT JOIN 
                   (SELECT 1 linked,src_from_position,src_to_position
                      FROM a_res_parts rp
-                     JOIN g_proj_link_elm_col ec
+                     JOIN view_proj_link_elm_col ec
                        ON ec.research_id = rp.research_id
                       AND ec.collection_id = rp.collection_id
                       AND ec.project_id = ".$id['proj']."
@@ -309,7 +309,7 @@ function txt_get_segment_new($id){
             if ($row1['linked'] == 1){
                 $sql2 = "SELECT ec.research_id, ec.collection_id, ec.division_id, rp.part_id, rp.src_to_position, rp.src_to_word, ec.link_id
                            FROM a_res_parts rp
-                           JOIN g_proj_link_elm_col ec
+                           JOIN view_proj_link_elm_col ec
                              ON ec.research_id = rp.research_id
                             AND ec.collection_id = rp.collection_id
                            LEFT JOIN a_res_idx_division rd
@@ -408,7 +408,7 @@ function txt_get_points($id,$dsp){
                AND pt.src_collection = seq.src_collection 
                AND (pt.src_from_position > seq.src_from_position OR (pt.src_from_position = seq.src_from_position AND pt.src_from_word >= seq.src_from_word)) 
                AND (pt.src_to_position < seq.src_to_position OR (pt.src_to_position = seq.src_to_position AND pt.src_to_word <= seq.src_to_word)) 
-              JOIN g_proj_link_elm_col ec
+              JOIN view_proj_link_elm_col ec
                 ON ec.research_id = pt.research_id
                AND ec.collection_id = pt.collection_id
              WHERE seq.research_id = ".$prop['research_id']."
