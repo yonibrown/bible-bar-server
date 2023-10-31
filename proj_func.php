@@ -443,11 +443,16 @@ function proj_get_lnk_list($id,$prop){
             "proj"=>$proj,
             "link"=>$row['link_id']
         ));
+        $elmlist = lnk_get_elements(array(
+            "proj"=>$proj,
+            "link"=>$row['link_id']
+        ));
         array_push($list,array(
             "id"=>$row['link_id'],
             "name"=>$row['name'],
             "desc"=>$row['description'],
-            "categories"=>$catlist
+            "categories"=>$catlist,
+            "elements"=>$elmlist
         ));
     }
     return $list;

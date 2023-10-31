@@ -108,6 +108,30 @@ function lnk_get_categories($id){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_get_elements($id){
+    global $con;
+
+    $sql = "SELECT le.element_id
+              FROM a_proj_link_elements le
+             WHERE le.project_id = ".$id['proj']."
+               AND le.link_id = ".$id['link']."
+             ORDER BY le.element_id";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 12 in link_func.php: ' . mysqli_error($con));
+    }
+
+    $flatArray = array();
+    while($row = mysqli_fetch_array($result)) {
+        array_push($flatArray,$row['element_id']);
+    }
+
+    return $flatArray;
+}
+
+// --------------------------------------------------------------------------------------
 // ---- add element to a link
 // --------------------------------------------------------------------------------------
 function lnk_add_element($id,$prop){
