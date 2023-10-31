@@ -173,6 +173,36 @@ function proj_save_elements($id,$elements){
 
     $proj = $id['proj'];
 
+    proj_delete_unlisted_elements($id,$elements);
+    // proj_clear_redundant_data();
+
+    // update display for elements in the list
+    // ----------------------------------------
+    foreach ($elements as $elm) {
+        $disp = $elm['disp'];
+        $sql = "UPDATE a_proj_elements
+                   SET position=".$elm['position']."
+                      ,gs_x=".$disp['x']."
+                      ,gs_y=".$disp['y']."
+                      ,gs_width=".$disp['width']."
+                      ,gs_height=".$disp['height']."
+                 WHERE project_id = ".$proj."
+                   AND element_id = ".$elm['id'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 14 in proj_func.php: ' . mysqli_error($con));
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                 
+// --------------------------------------------------------------------------------------
+function proj_delete_unlisted_elements($id,$elements){
+    global $con;
+
+    $proj = $id['proj'];
+
     $elm_ids = array();
     foreach ($elements as $elm) {
         array_push($elm_ids,$elm['id']);
@@ -180,50 +210,65 @@ function proj_save_elements($id,$elements){
     $elm_ids_str = implode(",",$elm_ids);
     $delete_where = "WHERE project_id = ".$proj." AND element_id NOT IN(".$elm_ids_str.")";
 
-    // delete elements that are not in the list
-    // ----------------------------------------
-    $sql = "DELETE FROM a_proj_elements ".$delete_where;
+    $sql = "UPDATE a_proj_elements
+               SET gs_height=0 
+               ".$delete_where;
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 7 in proj_func.php: ' . mysqli_error($con));
     }
 
-    $sql = "DELETE FROM a_proj_elm_sequence ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 8 in proj_func.php: ' . mysqli_error($con));
-    }
+    // delete elements that are not in the list
+    // ----------------------------------------
+    // $sql = "DELETE FROM a_proj_elements ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 7 in proj_func.php: ' . mysqli_error($con));
+    // }
 
-    $sql = "DELETE FROM a_proj_elm_seq_divisions ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 9 in proj_func.php: ' . mysqli_error($con));
-    }
+    // $sql = "DELETE FROM a_proj_elm_sequence ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 8 in proj_func.php: ' . mysqli_error($con));
+    // }
 
-    $sql = "DELETE FROM a_proj_elm_link ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 10 in proj_func.php: ' . mysqli_error($con));
-    }
+    // $sql = "DELETE FROM a_proj_elm_seq_divisions ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 9 in proj_func.php: ' . mysqli_error($con));
+    // }
 
-    $sql = "DELETE FROM a_proj_elm_research ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 11 in proj_func.php: ' . mysqli_error($con));
-    }
+    // $sql = "DELETE FROM a_proj_elm_link ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 10 in proj_func.php: ' . mysqli_error($con));
+    // }
 
-    $sql = "DELETE FROM a_proj_elm_parts ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 12 in proj_func.php: ' . mysqli_error($con));
-    }
+    // $sql = "DELETE FROM a_proj_elm_research ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 11 in proj_func.php: ' . mysqli_error($con));
+    // }
 
-    // unlink elements
-    $sql = "DELETE FROM a_proj_link_elements ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 13 in proj_func.php: ' . mysqli_error($con));
-    }
+    // $sql = "DELETE FROM a_proj_elm_parts ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 12 in proj_func.php: ' . mysqli_error($con));
+    // }
+
+    // // unlink elements
+    // $sql = "DELETE FROM a_proj_link_elements ".$delete_where;
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 13 in proj_func.php: ' . mysqli_error($con));
+    // }
+}
+
+// --------------------------------------------------------------------------------------
+//                                
+// --------------------------------------------------------------------------------------
+function proj_clear_redundant_data(){
+    global $con;
 
     // if there are links that remained without elements, delete them
     $sql = "DELETE FROM a_proj_links
@@ -251,25 +296,6 @@ function proj_save_elements($id,$elements){
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 21 in proj_func.php: ' . mysqli_error($con));
-    }
-
-
-    // update display for elements in the list
-    // ----------------------------------------
-    foreach ($elements as $elm) {
-        $disp = $elm['disp'];
-        $sql = "UPDATE a_proj_elements
-                   SET position=".$elm['position']."
-                      ,gs_x=".$disp['x']."
-                      ,gs_y=".$disp['y']."
-                      ,gs_width=".$disp['width']."
-                      ,gs_height=".$disp['height']."
-                 WHERE project_id = ".$proj."
-                   AND element_id = ".$elm['id'];
-        $result = mysqli_query($con,$sql);
-        if (!$result) {
-            exit_error('Error 14 in proj_func.php: ' . mysqli_error($con));
-        }
     }
 }
 

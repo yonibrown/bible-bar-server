@@ -156,7 +156,11 @@ function elm_set($id,$prop){
                 $sql_set .= $sep.$attr." = ".($val=='true'?1:0);
                 $sep = ',';
                 break;
-        }   
+                case "name":
+                    $sql_set .= $sep.$attr." = '".$val."'";
+                    $sep = ',';
+                    break;
+            }   
     }
 
     if ($sql_set != ''){
