@@ -181,7 +181,7 @@ function elm_set($id,$prop){
             break;
         case 'text':
             elmseq_set($id,$prop);
-            txt_set($id,$prop);
+            // txt_set($id,$prop);
             break;
         case 'parts':
             elmprt_set($id,$prop);

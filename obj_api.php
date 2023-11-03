@@ -110,6 +110,11 @@ switch ($type){
                 $reply['data'] = lnk_add_element($id,$prop);
                 break;
 
+            // remove element to link
+            case "remove_elm":
+                $reply['data'] = lnk_remove_element($id,$prop);
+                break;
+                
             // create new link
             // case "new":
             //     $reply["id"] = elm_create($prop);
