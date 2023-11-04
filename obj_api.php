@@ -27,7 +27,7 @@ switch ($type){
 
             // create new element
             case "new":
-                $reply["id"] = elm_create($prop);
+                $reply["data"] = elm_create($prop);
                 break;
 
             // set attributes

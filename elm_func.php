@@ -7,7 +7,7 @@ function elm_get($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
-                   position, gs_x, gs_y, gs_width, gs_height
+                   position
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
               AND e.element_id = ".$id['elm'];
@@ -18,14 +18,14 @@ function elm_get($id){
     $row = mysqli_fetch_array($result);
     $type = $row['type'];
 
-    $gen_attr = array(
-        'type'=>$type,
-        'name'=>$row['name'],
-        'description'=>$row['description'],
-        'opening_element'=>$row['opening_element']
-    );
+    return elm_prop($id,$row);
+}
 
-    switch($type){
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function elm_prop($id,$prop){
+    switch($prop['type']){
         case 'bar':
         case 'text':
             $spc_attr = elmseq_get($id);
@@ -43,7 +43,13 @@ function elm_get($id){
             $spc_attr = array();
     }
 
-    return array_merge($gen_attr,$spc_attr);
+    return array(
+        "id"=>$id['elm'],
+        "type"=>$prop['type'],
+        "name"=>$prop['name'],
+        "position"=>$prop['position'],
+        "attr"=>$spc_attr
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -54,24 +60,6 @@ function elm_create($prop){
 
     $proj = $prop['proj'];
     $type = $prop['type'];
-
-    // if (array_key_exists('same_element',$prop)){
-    //     $sql = "SELECT element_id
-    //               FROM a_proj_elements 
-    //              WHERE project_id = ".$proj."
-    //                AND type = '".$type."'
-    //                AND gs_height > 0
-    //                AND opening_element = ".$prop['opening_element']."
-    //              ORDER BY element_id DESC
-    //              LIMIT 1";
-    //     $result = mysqli_query($con,$sql);
-    //     if (!$result) {
-    //         exit_error('Error 5 in elm_func.php: ' . mysqli_error($con));
-    //     }
-    //     if($row = mysqli_fetch_array($result)){
-    //         return array('proj'=>$proj,'elm'=>$row['element_id']);
-    //     }
-    // }
 
     $sql = "SELECT MAX(element_id) element_id
               FROM a_proj_elements
@@ -86,14 +74,12 @@ function elm_create($prop){
     $sql = "INSERT INTO a_proj_elements
                 (project_id, element_id, type, 
                  name, description, position, 
-                 gs_x, gs_y, gs_width, gs_height, 
                  show_props, opening_element) 
             VALUES(".$proj.", 
                 ".$elm.", 
                 '".$type."',
-                ' ',' ',
-                ".$elm.", 
-                0,0,0,1,
+                '".$prop['name']."',' ',
+                ".$prop['position'].", 
                 0,0)";
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -139,7 +125,7 @@ function elm_create($prop){
             break;
     }
 
-    return $id;
+    return elm_prop($id,$prop);
 }
 
 // --------------------------------------------------------------------------------------
@@ -554,18 +540,10 @@ function elmseq_get($id){
     );
 
     $fromPos = $row['from_position'];
-    if ($fromPos != 0){
-        $fromKey = residx_position_to_key($indexId,array('position'=>$fromPos))['list'];
-    } else {
-        $fromKey = null;
-    }
+    $fromKey = residx_position_to_key($indexId,array('position'=>$fromPos))['list'];
 
     $toPos = $row['to_position'];
-    if ($toPos != 99999.99999){
-        $toKey = residx_position_to_key($indexId,array('position'=>$toPos))['list'];
-    } else {
-        $toKey = null;
-    }
+    $toKey = residx_position_to_key($indexId,array('position'=>$toPos))['list'];
 
     $attr = array(
         'research_id'=>$row['research_id'],

@@ -574,6 +574,25 @@ function residx_get_levels($id,$prop){
 }
 
 // --------------------------------------------------------------------------------------
+// ----                
+// --------------------------------------------------------------------------------------
+function residx_get_max_level($id){
+    global $con;
+
+    $sql = "SELECT MAX(level) level
+              FROM a_res_idx_levels
+             WHERE research_id = ".$id['res']."
+               AND collection_id = ".$id['col']."
+               AND index_id = ".$id['idx'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 32 in res_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+    return $row['level'];
+}
+
+// --------------------------------------------------------------------------------------
 // ----                                   
 // --------------------------------------------------------------------------------------
 function residx_get_divisions($id,$prop){
@@ -663,19 +682,41 @@ function residx_position_to_key($id,$prop){
     global $con;
 
     $list = array();
-    $sql = "SELECT d.level,d.division_id
-              FROM a_res_idx_division d
-              JOIN a_res_idx_levels l
-                ON l.research_id = d.research_id
-               AND l.collection_id = d.collection_id
-               AND l.index_id = d.index_id
-               AND l.level = d.level
-               AND l.part_of_key = TRUE
-             WHERE d.research_id = ".$id['res']." 
-               AND d.collection_id = ".$id['col']." 
-               AND d.index_id = ".$id['idx']." 
-               AND ".$prop['position']." BETWEEN d.from_position AND d.to_position
-             ORDER BY d.level DESC";
+    if ($prop['position'] > 0){
+        $sql = "SELECT d.level,d.division_id
+                  FROM a_res_idx_division d
+                  JOIN a_res_idx_levels l
+                    ON l.research_id = d.research_id
+                   AND l.collection_id = d.collection_id
+                   AND l.index_id = d.index_id
+                   AND l.level = d.level
+                   AND l.part_of_key = TRUE
+                 WHERE d.research_id = ".$id['res']." 
+                   AND d.collection_id = ".$id['col']." 
+                   AND d.index_id = ".$id['idx']." 
+                   AND ".$prop['position']." BETWEEN d.from_position AND d.to_position
+                 ORDER BY d.level DESC";
+    } else {
+        if ($prop['position'] == 0){
+            $group_func = 'MIN';
+        } else {
+            $group_func = 'MAX';
+        }
+        $sql = "SELECT d.level,".$group_func."(d.division_id) division_id
+                  FROM a_res_idx_division d
+                  JOIN a_res_idx_levels l
+                    ON l.research_id = d.research_id
+                   AND l.collection_id = d.collection_id
+                   AND l.index_id = d.index_id
+                   AND l.level = d.level
+                   AND l.part_of_key = TRUE
+                 WHERE d.research_id = ".$id['res']." 
+                   AND d.collection_id = ".$id['col']." 
+                   AND d.index_id = ".$id['idx']." 
+                 GROUP BY d.level
+                 ORDER BY d.level DESC";
+    }
+
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 30 in res_func.php: ' . mysqli_error($con));
@@ -714,7 +755,5 @@ function res_get_sequences_list(){
 
     return $list;
 }
-
-
 
 ?>

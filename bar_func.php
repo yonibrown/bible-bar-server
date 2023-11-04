@@ -4,18 +4,44 @@
 // --------------------------------------------------------------------------------------
 function bar_create($id,$prop){
     global $con;
+
+    if (array_key_exists('research_id',$prop)){
+        $res = $prop['research_id'];
+        $col = $prop['collection_id'];
+    } else {
+        $res = 1;
+        $col = 1;
+    }
+
+    if (array_key_exists('from_position',$prop)){
+        $fromPos = $prop['from_position'];
+    } else {
+        $fromPos = 0;
+    }
+
+    if (array_key_exists('to_position',$prop)){
+        $toPos = $prop['to_position'];
+    } else {
+        $toPos = -1;
+    }
+
+    $max_level = residx_get_max_level(array(
+        "res"=>$res,
+        "col"=>$col,
+        "idx"=>1
+    ));
+
     $sql = "INSERT INTO a_proj_elm_sequence
                 (project_id, element_id, 
                  research_id, collection_id, from_position, to_position, 
                  seq_index, seq_level, color_level, points_generated,gen_total_words) 
             VALUES(".$id['proj'].", 
                 ".$id['elm'].", 
-                ".$prop['research_id'].", 
-                ".$prop['collection_id'].", 
-                ".$prop['from_position'].", 
-                ".$prop['to_position'].", 
-                1,1,
-                ".$max_index_level.",
+                ".$res.", 
+                ".$col.", 
+                ".$fromPos.", 
+                ".$toPos.", 
+                1,".$max_level.",".$max_level.",
                 FALSE,0)"; 
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -23,6 +49,16 @@ function bar_create($id,$prop){
     }
 
     // bar_update_division_colors($id);
+    $sql = "INSERT INTO a_proj_elm_seq_divisions
+                (project_id, element_id, ord, color1, color2) 
+            SELECT ".$id['proj'].", ".$id['elm'].", ord, color1, color2
+              FROM a_proj_elm_seq_divisions
+             WHERE project_id = 1
+               AND element_id = 1"; 
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 18 in bar_func.php: ' . mysqli_error($con));
+    }
 }
 
 // --------------------------------------------------------------------------------------
@@ -45,6 +81,8 @@ function bar_calc_segments($id,$dsp){
         exit_error('Error 5 in bar_func.php: ' . mysqli_error($con));
     }
     $colorOrd = 1;
+    $colors1 = array();
+    $colors2 = array();
     while($row = mysqli_fetch_array($result)) {
         $colors1[$colorOrd] = $row['color1'];  
         $colors2[$colorOrd] = $row['color2'];  
@@ -69,16 +107,8 @@ function bar_calc_segments($id,$dsp){
     }
 
     // prepare queries
-    $base_table = "(SELECT research_id,collection_id,position,div_name_heb div_name,gen_word_count
-                      FROM a_res_parts
-                     WHERE research_id = ".$prop['research_id']."
-                       AND collection_id = ".$prop['collection_id']."
-                       AND position BETWEEN ".$prop['from_position']." AND ".$prop['to_position']."
-                       ) AS ";
-    $base_where = " base.research_id = ".$prop['research_id']."
-                AND base.collection_id = ".$prop['collection_id']."
-                AND base.position BETWEEN ".$prop['from_position']." AND ".$prop['to_position'];
-
+    $base_table = bar_base_table($prop);
+    $base_where = bar_base_where($prop);
 
     $rep = array();
     $rep['segments'] = array();
@@ -159,9 +189,16 @@ function bar_get_selection_size($id,$prop,$base_table){
     $row = mysqli_fetch_array($result);
 
     $sql = "UPDATE a_proj_elm_sequence
-               SET gen_total_words = ".$row['total_words']."
-             WHERE project_id = ".$id['proj']." 
+               SET gen_total_words = ".$row['total_words']." 
+             WHERE project_id = ".$id['proj']."  
                AND element_id = ".$id['elm'];
+    // try {
+    //     $result = mysqli_query($con,$sql);
+    // }
+    // catch (mysqli_sql_exception $e) {
+    //     // throw $e;
+    //     exit_error('Error 12 in bar_func.php: ' . $sql);
+    // }               
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 12 in bar_func.php: ' . mysqli_error($con));
@@ -317,6 +354,54 @@ function bar_init_gen_points($id){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function bar_base_where($prop){
+    global $con;
+
+    $pos_pred ="";
+    if ($prop['from_position'] > 0){
+        $pos_pred .= " AND base.position >= ".$prop['from_position'];
+    }
+    if ($prop['to_position'] > 0){
+        $pos_pred .= " AND base.position <= ".$prop['to_position'];
+    }
+
+    $base_where = " base.research_id = ".$prop['research_id']."
+                AND base.collection_id = ".$prop['collection_id']."
+                ".$pos_pred;
+
+    return $base_where;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function bar_base_table($prop){
+    global $con;
+
+    $pos_pred ="";
+    if ($prop['from_position'] > 0){
+        $pos_pred .= " AND position >= ".$prop['from_position'];
+    }
+    if ($prop['to_position'] > 0){
+        $pos_pred .= " AND position <= ".$prop['to_position'];
+    }
+
+    $base_table = "(SELECT research_id, part_id, type, 
+                           collection_id, position, div_name_heb div_name, abs_name_heb abs_name,  
+                           src_research, src_collection, src_from_position, src_from_word, src_to_position, src_to_word, 
+                           gen_word_count, text, comment
+                      FROM a_res_parts
+                     WHERE research_id = ".$prop['research_id']."
+                       AND collection_id = ".$prop['collection_id']."
+                       ".$pos_pred."
+                       ) AS ";
+
+    return $base_table;
+}
+
+// --------------------------------------------------------------------------------------
 // ---- calculate points in bar for display
 // --------------------------------------------------------------------------------------
 function bar_calc_points($id,$dsp){
@@ -327,15 +412,7 @@ function bar_calc_points($id,$dsp){
     // get bar properties
     $prop = elmseq_get($id);
 
-    $base_table = "(SELECT research_id, part_id, type, 
-                           collection_id, position, div_name_heb div_name, abs_name_heb abs_name,  
-                           src_research, src_collection, src_from_position, src_from_word, src_to_position, src_to_word, 
-                           gen_word_count, text, comment
-                      FROM a_res_parts
-                     WHERE research_id = ".$prop['research_id']."
-                       AND collection_id = ".$prop['collection_id']."
-                       AND position BETWEEN ".$prop['from_position']." AND ".$prop['to_position']."
-                       ) AS ";
+    $base_table = bar_base_table($prop);
 
     // get total verses in selection
     $total_words = bar_get_selection_size($id,$prop,$base_table);
