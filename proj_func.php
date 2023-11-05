@@ -179,13 +179,8 @@ function proj_save_elements($id,$elements){
     // update display for elements in the list
     // ----------------------------------------
     foreach ($elements as $elm) {
-        $disp = $elm['disp'];
         $sql = "UPDATE a_proj_elements
                    SET position=".$elm['position']."
-                      ,gs_x=".$disp['x']."
-                      ,gs_y=".$disp['y']."
-                      ,gs_width=".$disp['width']."
-                      ,gs_height=".$disp['height']."
                  WHERE project_id = ".$proj."
                    AND element_id = ".$elm['id'];
         $result = mysqli_query($con,$sql);
@@ -211,7 +206,7 @@ function proj_delete_unlisted_elements($id,$elements){
     $delete_where = "WHERE project_id = ".$proj." AND element_id NOT IN(".$elm_ids_str.")";
 
     $sql = "UPDATE a_proj_elements
-               SET gs_height=0 
+               SET position=0 
                ".$delete_where;
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -345,59 +340,22 @@ function proj_get_elm_list($id){
 
     $sql = "SELECT pe.element_id id,type,name,
                    opening_element,
-                   pe.position,gs_x,gs_y,gs_width,gs_height,
+                   pe.position,
                    show_props
             FROM a_proj_elements pe
             WHERE pe.project_id = ".$proj."
-              AND gs_height > 0
-            ORDER BY gs_y,gs_x";
+              AND position > 0
+            ORDER BY position";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 16 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        $gs_disp = array(
-            "x"=>$row['gs_x'],
-            "y"=>$row['gs_y'],
-            "width"=>$row['gs_width'],
-            "height"=>$row['gs_height']
-        );
-        $disp = array(
-            "name"=>$row['name'],
-            "gs_disp" => $gs_disp,
-            "show_props" => ($row['show_props'] == 1),
-            "opening_element" => $row['opening_element']
-        );
-
         $elmId = array(
             "proj"=>$proj,
             "elm"=>$row['id']
         );
-        switch($row['type']){
-            case 'bar':
-            case 'text':
-                $spc_attr = elmseq_get($elmId);
-                break;
-            case 'link':
-                $spc_attr = elmlnk_get($elmId);
-                break;
-            case 'research':
-                $spc_attr = elmres_get($elmId);
-                break;
-            case 'parts':
-                $spc_attr = elmprt_get($elmId);
-                break;
-            default:
-                $spc_attr = array();
-        }
-    
-        array_push($list,array(
-            "position"=>$row['position'],
-            "type"=>$row['type'],
-            "id"=>$row['id'],
-            "disp"=>$disp,
-            "attr"=>$spc_attr
-        ));
+        array_push($list,elm_prop($elmId,$row));
     }
     return $list;
 }

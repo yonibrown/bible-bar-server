@@ -153,6 +153,26 @@ function lnk_add_element($id,$prop){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- remove element from a link
+// --------------------------------------------------------------------------------------
+function lnk_remove_element($id,$prop){
+    global $con;
+
+    $proj = $id['proj'];
+    $link = $id['link'];
+    $elm = $prop['elm'];
+
+    $sql = "DELETE FROM a_proj_link_elements
+             WHERE project_id = ".$proj."
+               AND link_id = ".$link."
+               AND element_id = ".$elm;
+    $result = mysqli_query($con,$sql);
+    if (!$result &&  mysqli_errno($con) != 1062) {
+        exit_error('Error 13 in link_func.php: ' . mysqli_error($con));
+    }
+}
+
+// --------------------------------------------------------------------------------------
 // ---- add categories to a link
 // --------------------------------------------------------------------------------------
 function lnk_add_categories($id,$prop){
