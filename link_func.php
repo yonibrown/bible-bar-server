@@ -150,6 +150,11 @@ function lnk_add_element($id,$prop){
     if (!$result &&  mysqli_errno($con) != 1062) {
         exit_error('Error 2 in link_func.php: ' . mysqli_error($con));
     }
+
+    elm_links_changed(array(
+        'proj'=>$proj,
+        'elm'=>$elm
+    ));
 }
 
 // --------------------------------------------------------------------------------------
