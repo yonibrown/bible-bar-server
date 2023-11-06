@@ -181,6 +181,18 @@ function elm_set($id,$prop){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function elm_links_changed($id){
+    $elm_prop = elm_get($id);
+    switch($elm_prop['type']){
+        case 'bar':
+            elmseq_set($id,array('points_generated'=>FALSE));
+            break;
+    }
+}
+
+// --------------------------------------------------------------------------------------
 // ---- get element's linked categories
 // --------------------------------------------------------------------------------------
 function elm_get_categories($id,$prop){
@@ -585,6 +597,7 @@ function elmseq_set($id,$prop){
                             )";
     }
 
+    $cancel_generated = FALSE;
     foreach($prop as $attr => $val) {
         switch ($attr) {
             case "division_id":
@@ -613,22 +626,34 @@ function elmseq_set($id,$prop){
                     $sql_set .= $sep."seq_level = ".$level;
                     $sep = ',';
                 }
+
+                $cancel_generated = TRUE;
                 break;
+
             case "research_id":
             case "collection_id":
             case "seq_index":
             case "seq_level":
                 $sql_set .= $sep.$attr." = ".$val;
                 $sep = ',';
+                $cancel_generated = TRUE;
                 break;
-        }   
+
+            case "points_generated":
+                $sql_set .= $sep.$attr." = ".($val?"TRUE":"FALSE");
+                $sep = ',';
+                break;
+                }   
+    }
+
+    if ($cancel_generated){
+        $sql_set .= ",points_generated = FALSE
+                     ,gen_total_words = 0";
     }
 
     if ($sql_set != ''){
         $sql = "UPDATE a_proj_elm_sequence 
                 SET ".$sql_set."  
-                    ,points_generated = FALSE
-                    ,gen_total_words = 0
                 WHERE project_id = ".$id['proj']."
                 AND element_id = ".$id['elm'];
         $result = mysqli_query($con,$sql);

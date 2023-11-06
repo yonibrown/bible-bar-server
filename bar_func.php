@@ -499,10 +499,7 @@ function bar_calc_points($id,$dsp){
 
     if ($prop['points_generated'] == FALSE){
         $prop['points_generated'] = TRUE;
-        $sql = "UPDATE a_proj_elm_sequence 
-                SET points_generated = TRUE
-                WHERE project_id = ".$id['proj']."
-                AND element_id = ".$id['elm'];
+        elmseq_set($id,array('points_generated'=>TRUE));
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 16 in bar_func.php: ' . mysqli_error($con));
