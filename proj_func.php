@@ -41,12 +41,14 @@ function proj_get($id){
 
     $elm_list = proj_get_elm_list($id);
     $lnk_list = proj_get_lnk_list($id,array('dummy'=>''));
+    $res_list = proj_get_res_list($id,array('dummy'=>''));
     
     $attr = array(
         'name'=>$row['name'],
         'desc'=>$row['description'],
         'elements'=>$elm_list,
-        'links'=>$lnk_list
+        'links'=>$lnk_list,
+        'researches'=>$res_list
     );
     return $attr;
 }
@@ -323,8 +325,11 @@ function proj_get_res_list($id){
         exit_error('Error 15 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        array_push($list,array("res"=>$row['research_id'],
-                               "res_name"=>$row['res_name']));
+        $catList = res_get_cat_list(array("res"=>$row['research_id']));
+        array_push($list,array("id"=>$row['research_id'],
+                               "name"=>$row['res_name'],
+                               "collections"=>$catList
+                            ));
     }
     return $list;
 }
