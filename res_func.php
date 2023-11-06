@@ -152,10 +152,16 @@ function res_get_prt_list($id,$prop){
         "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0),'_',LPAD(src.position,11,0))"
     );
 
-    $order_by = "prt.collection_id,prt.position";
+    if (array_key_exists('ordering', $prop)){
+        $order = $prop['ordering'];
+    } else {
+        $order = 'ASC';
+    }
+
+    $order_by = "prt.collection_id ".$order.",prt.position ".$order;
     if (array_key_exists('sort', $prop)){
         if ($prop['sort'] == 'src'){
-            $order_by = "prt.src_from_position,prt.src_from_word,src.position";
+            $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order.",src.position ".$order;
         }
     }
     
