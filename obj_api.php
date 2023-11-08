@@ -191,7 +191,7 @@ switch ($type){
             
             // update point in research
             case "duplicate":
-                res_duplicate($id,$prop);
+                $reply['data'] = res_duplicate($id,$prop);
                 break;
         }
         break;    

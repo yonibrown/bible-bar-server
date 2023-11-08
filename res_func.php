@@ -404,7 +404,7 @@ function res_duplicate($id,$prop){
         exit_error('Error 36 in res_func.php: ' . mysqli_error($con));
     }
 
-    return array('newResearchId'=>$newId);
+    return array('new_res_id'=>$newId);
 
     // $newPartId = 0;
     // $sql1 = "SELECT type, collection_id, position, 
