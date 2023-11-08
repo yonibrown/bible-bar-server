@@ -102,4 +102,25 @@ function csv_to_array($csv){
     return $arr;
 }
 */
+
+function inList($arr,$itemType='num'){
+    function wrapString($str){
+        return "'".$str."'";
+    }
+    if (!is_null($itemType)){
+        if ($itemType == 'string'){
+            $arr = array_map("wrapString",$arr);
+        } 
+    }
+
+    function reduceFunc($carry,$item)
+    {
+      if (!is_null($carry)){
+          return $carry.",".$item;
+      } else {
+          return $item;
+      }
+    }
+    return " IN(".array_reduce($arr,"reduceFunc").") ";
+}
 ?>

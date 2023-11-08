@@ -117,7 +117,7 @@ switch ($type){
                 
             // // create new link
             // // case "new":
-            // //     $reply["id"] = elm_create($prop);
+            // //     $reply["id"] = lnk_create($prop);
             // //     break;
         }
         break;    
@@ -188,6 +188,11 @@ switch ($type){
             // case "get_seq_list":
             //     $reply['list'] = res_get_sequences_list();
             //     break;
+            
+            // update point in research
+            case "duplicate":
+                res_duplicate($id,$prop);
+                break;
         }
         break;    
 
