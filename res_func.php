@@ -347,19 +347,21 @@ function res_upd_parts($id,$prop){
         }   
     }
 
-    function inList($arr,$itemType)
-    {
-        $wrap = "";
+    function inList($arr,$itemType){
+
+        function wrapString($str){
+            return "'".$str."'";
+        }
         if (!is_null($itemType)){
             if ($itemType == 'string'){
-                $wrap = "'";
+                $arr = array_map("wrapString",$arr);
             } 
         }
 
         function reduceFunc($carry,$item)
         {
           if (!is_null($carry)){
-              return $carry . ",".$wrap . $item.$wrap;
+              return $carry.",".$item;
           } else {
               return $item;
           }
