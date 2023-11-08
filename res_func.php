@@ -2,117 +2,117 @@
 // --------------------------------------------------------------------------------------
 // ---- get list of researches in the system
 // --------------------------------------------------------------------------------------
-function res_get_list(){
-    global $con;
+// function res_get_list(){
+//     global $con;
 
-    $list = array();
-    $sql = "SELECT research_id id,name_heb name,description
-              FROM a_researches
-             WHERE project_id = 0 
-             ORDER BY research_id";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 1 in res_func.php: ' . mysqli_error($con));
-    }
-    while($row = mysqli_fetch_array($result)) {
-        array_push($list,array(
-            "id"=>$row['id'],
-            "name"=>$row['name'],
-            "desc"=>$row['description']
-        ));
-    }
+//     $list = array();
+//     $sql = "SELECT research_id id,name_heb name,description
+//               FROM a_researches
+//              WHERE project_id = 0 
+//              ORDER BY research_id";
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 1 in res_func.php: ' . mysqli_error($con));
+//     }
+//     while($row = mysqli_fetch_array($result)) {
+//         array_push($list,array(
+//             "id"=>$row['id'],
+//             "name"=>$row['name'],
+//             "desc"=>$row['description']
+//         ));
+//     }
 
-    return $list;
-}
+//     return $list;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- get research                                     
 // --------------------------------------------------------------------------------------
-function res_get($id){
-    global $con;
+// function res_get($id){
+//     global $con;
 
-    $res = $id['res'];
-    $sql = "SELECT name_heb name,description
-            FROM a_researches
-            WHERE research_id = ".$res;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 2 in res_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $attr = array(
-        'name'=>$row['name'],
-        'desc'=>$row['description']
-    );
-    return $attr;
-}
+//     $res = $id['res'];
+//     $sql = "SELECT name_heb name,description
+//             FROM a_researches
+//             WHERE research_id = ".$res;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 2 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     $attr = array(
+//         'name'=>$row['name'],
+//         'desc'=>$row['description']
+//     );
+//     return $attr;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- set research attributes
 // --------------------------------------------------------------------------------------
-function res_set($id,$prop){
-    global $con;
+// function res_set($id,$prop){
+//     global $con;
 
-    $res = $id['res'];
-    $sql_set = '';
-    $sep = '';
-    foreach($prop as $attr => $val) {
-        switch ($attr) {
-            default:
-                $name = $val;
+//     $res = $id['res'];
+//     $sql_set = '';
+//     $sep = '';
+//     foreach($prop as $attr => $val) {
+//         switch ($attr) {
+//             default:
+//                 $name = $val;
 
-                $sql_set = $sql_set.$sep.$attr." = ".$name;
-                $sep = ',';
-                break;
-        }   
-    }
+//                 $sql_set = $sql_set.$sep.$attr." = ".$name;
+//                 $sep = ',';
+//                 break;
+//         }   
+//     }
 
-    $sql = "UPDATE a_researches 
-            SET ".$sql_set."  
-            WHERE research_id = ".$res;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 3 in res_func.php: ' . mysqli_error($con));
-    }
-}
+//     $sql = "UPDATE a_researches 
+//             SET ".$sql_set."  
+//             WHERE research_id = ".$res;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 3 in res_func.php: ' . mysqli_error($con));
+//     }
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- create new research
 // --------------------------------------------------------------------------------------
-function res_create($prop){
-    global $con;
+// function res_create($prop){
+//     global $con;
 
-    $sql = "SELECT MAX(research_id) research_id
-                FROM a_researches";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 4 in res_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $res = $row['research_id']+1;
+//     $sql = "SELECT MAX(research_id) research_id
+//                 FROM a_researches";
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 4 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     $res = $row['research_id']+1;
 
-    if (isset($prop['proj'])){
-        $proj = $prop['proj'];
-    } else {
-        $proj = 0;
-    }
+//     if (isset($prop['proj'])){
+//         $proj = $prop['proj'];
+//     } else {
+//         $proj = 0;
+//     }
 
-    $sql = "INSERT INTO a_researches
-                (research_id, 
-                name_heb, 
-                description,
-                project_id) 
-            VALUES(".$res.", 
-                '".$prop['name']."', 
-                '".$prop['desc']."', 
-                ".$proj.")";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 5 in res_func.php: ' . mysqli_error($con));
-    }
+//     $sql = "INSERT INTO a_researches
+//                 (research_id, 
+//                 name_heb, 
+//                 description,
+//                 project_id) 
+//             VALUES(".$res.", 
+//                 '".$prop['name']."', 
+//                 '".$prop['desc']."', 
+//                 ".$proj.")";
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 5 in res_func.php: ' . mysqli_error($con));
+//     }
 
-    return array("res"=>$res);
-}
+//     return array("res"=>$res);
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- get category list for research                                   
@@ -220,110 +220,110 @@ function res_get_prt_list($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- create new category in research
 // --------------------------------------------------------------------------------------
-function res_new_category($id,$prop){
-    global $con;
+// function res_new_category($id,$prop){
+//     global $con;
 
-    $res = $id['res'];
-    $sql = "SELECT IFNULL(MAX(collection_id),0) col,
-                   IFNULL(MAX(position),0) pos
-                FROM a_res_collections 
-                WHERE research_id = ".$res;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 8 in res_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $col = $row['col']+1;
-    $pos = $row['pos']+1;
+//     $res = $id['res'];
+//     $sql = "SELECT IFNULL(MAX(collection_id),0) col,
+//                    IFNULL(MAX(position),0) pos
+//                 FROM a_res_collections 
+//                 WHERE research_id = ".$res;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 8 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     $col = $row['col']+1;
+//     $pos = $row['pos']+1;
 
-    $sql = "INSERT INTO a_res_collections
-                (research_id, collection_id, type, position, name_eng, name_heb, description)
-            VALUES (
-                ".$res.", 
-                ".$col.", 
-                'list',
-                ".$pos.", 
-                '".$prop['name']."', 
-                '".$prop['name']."', 
-                '".$prop['desc']."')";
+//     $sql = "INSERT INTO a_res_collections
+//                 (research_id, collection_id, type, position, name_eng, name_heb, description)
+//             VALUES (
+//                 ".$res.", 
+//                 ".$col.", 
+//                 'list',
+//                 ".$pos.", 
+//                 '".$prop['name']."', 
+//                 '".$prop['name']."', 
+//                 '".$prop['desc']."')";
             
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 9 in res_func.php: ' . mysqli_error($con));
-    }
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 9 in res_func.php: ' . mysqli_error($con));
+//     }
 
-    return $col;
-}
+//     return $col;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- create new part in research
 // --------------------------------------------------------------------------------------
-function res_new_part($id,$prop){
-    global $con;
+// function res_new_part($id,$prop){
+//     global $con;
 
-    $res = $id['res'];
-    $sql = "SELECT IFNULL(MAX(part_id),0) part,
-                   IFNULL(MAX(position),0) pos
-              FROM a_res_parts
-             WHERE research_id = ".$res;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 10 in res_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $part = $row['part']+1;
-    $pos = $row['pos']+1;
+//     $res = $id['res'];
+//     $sql = "SELECT IFNULL(MAX(part_id),0) part,
+//                    IFNULL(MAX(position),0) pos
+//               FROM a_res_parts
+//              WHERE research_id = ".$res;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 10 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     $part = $row['part']+1;
+//     $pos = $row['pos']+1;
 
-    $sql = "INSERT INTO a_res_parts
-                (research_id, part_id, type, 
-                 collection_id, position,
-                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
-                 src_research, src_part, src_collection, 
-                 src_from_position, src_from_word, src_to_position, src_to_word, 
-                 gen_word_count, 
-                 text, comment) 
-            VALUES(
-            ".$res.",".$part.",'pointer',
-            ".$prop['collection_id'].",".$pos.",
-            '','','','',
-            ".$prop['src_research'].",0,".$prop['src_collection'].",
-            ".$prop['src_from_position'].",".$prop['src_from_word'].",
-            ".$prop['src_to_position'].",".$prop['src_to_word'].",
-            0,'','')";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 11 in res_func.php: ' . mysqli_error($con));
-    }
+//     $sql = "INSERT INTO a_res_parts
+//                 (research_id, part_id, type, 
+//                  collection_id, position,
+//                  div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
+//                  src_research, src_part, src_collection, 
+//                  src_from_position, src_from_word, src_to_position, src_to_word, 
+//                  gen_word_count, 
+//                  text, comment) 
+//             VALUES(
+//             ".$res.",".$part.",'pointer',
+//             ".$prop['collection_id'].",".$pos.",
+//             '','','','',
+//             ".$prop['src_research'].",0,".$prop['src_collection'].",
+//             ".$prop['src_from_position'].",".$prop['src_from_word'].",
+//             ".$prop['src_to_position'].",".$prop['src_to_word'].",
+//             0,'','')";
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 11 in res_func.php: ' . mysqli_error($con));
+//     }
 
-    res_update_generated_columns($res,$part);
+//     res_update_generated_columns($res,$part);
 
-    return $pt;
-}
+//     return $pt;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- delete part from research
 // --------------------------------------------------------------------------------------
-function res_del_part($id,$prop){
-    global $con;
+// function res_del_part($id,$prop){
+//     global $con;
 
-    $res = $id['res'];
-    $where = '';
-    foreach($prop as $attr => $val) {
-        switch ($attr) {
-            default:
-                $where .= " AND ".$attr." = ".$val;
-                break;
-        }   
-    }
+//     $res = $id['res'];
+//     $where = '';
+//     foreach($prop as $attr => $val) {
+//         switch ($attr) {
+//             default:
+//                 $where .= " AND ".$attr." = ".$val;
+//                 break;
+//         }   
+//     }
             
-    $sql = "DELETE FROM a_res_parts
-            WHERE research_id = ".$res."
-            ".$where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 12 in res_func.php: ' . mysqli_error($con));
-    }
-}
+//     $sql = "DELETE FROM a_res_parts
+//             WHERE research_id = ".$res."
+//             ".$where;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 12 in res_func.php: ' . mysqli_error($con));
+//     }
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- 
@@ -384,178 +384,178 @@ function res_upd_parts($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- update point in a research
 // --------------------------------------------------------------------------------------
-function res_upd_point($id,$prop){
-    global $con;
+// function res_upd_point($id,$prop){
+//     global $con;
 
-    $res = $id['res'];
+//     $res = $id['res'];
 
-    $ptId = $prop['pt_id'];
-    $ptAttr = $prop['pt_attr'];
+//     $ptId = $prop['pt_id'];
+//     $ptAttr = $prop['pt_attr'];
 
-    $sql_set = '';
-    $sep = '';
-    foreach($ptAttr as $attr => $val) {
-        switch ($attr) {
-            case 'collection_id':
-                $sql1 = "SELECT MAX(position)+1 pos
-                           FROM a_res_parts
-                          WHERE research_id = ".$res."
-                            AND collection_id = ".$val;
-                $result1 = mysqli_query($con,$sql1);
-                if (!$result1) {
-                    exit_error('Error 13 in res_func.php: ' . mysqli_error($con));
-                }
-                $row1 = mysqli_fetch_array($result1);
-                $sql_set = $sql_set.$sep."collection_id = ".$val.",position = ".$row1['pos'];
-                $sep = ',';
-                break;
-            default:
-                $sql_set = $sql_set.$sep.$attr." = ".$val;
-                $sep = ',';
-                break;
-        }   
-    }
+//     $sql_set = '';
+//     $sep = '';
+//     foreach($ptAttr as $attr => $val) {
+//         switch ($attr) {
+//             case 'collection_id':
+//                 $sql1 = "SELECT MAX(position)+1 pos
+//                            FROM a_res_parts
+//                           WHERE research_id = ".$res."
+//                             AND collection_id = ".$val;
+//                 $result1 = mysqli_query($con,$sql1);
+//                 if (!$result1) {
+//                     exit_error('Error 13 in res_func.php: ' . mysqli_error($con));
+//                 }
+//                 $row1 = mysqli_fetch_array($result1);
+//                 $sql_set = $sql_set.$sep."collection_id = ".$val.",position = ".$row1['pos'];
+//                 $sep = ',';
+//                 break;
+//             default:
+//                 $sql_set = $sql_set.$sep.$attr." = ".$val;
+//                 $sep = ',';
+//                 break;
+//         }   
+//     }
 
-    $sql = "UPDATE a_res_parts 
-            SET ".$sql_set."  
-            WHERE research_id = ".$res."
-              AND part_id = ".$ptId['part_id'];
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 14 in res_func.php: ' . mysqli_error($con));
-    }
-}
+//     $sql = "UPDATE a_res_parts 
+//             SET ".$sql_set."  
+//             WHERE research_id = ".$res."
+//               AND part_id = ".$ptId['part_id'];
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 14 in res_func.php: ' . mysqli_error($con));
+//     }
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- remove categories from research
 // --------------------------------------------------------------------------------------
-function res_del_categories($id,$prop){
-    global $con;
+// function res_del_categories($id,$prop){
+//     global $con;
 
-    $res = $id['res'];
-    $catList = $prop['list'];
-    $catList_str = implode(",",$catList);
-    $delete_where = "WHERE research_id = ".$res." AND collection_id IN(".$catList_str.")";
+//     $res = $id['res'];
+//     $catList = $prop['list'];
+//     $catList_str = implode(",",$catList);
+//     $delete_where = "WHERE research_id = ".$res." AND collection_id IN(".$catList_str.")";
 
-    $sql = "DELETE FROM a_res_collections ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
-    }
+//     $sql = "DELETE FROM a_res_collections ".$delete_where;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+//     }
 
-    $sql = "DELETE FROM a_res_parts ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 16 in res_func.php: ' . mysqli_error($con));
-    }
+//     $sql = "DELETE FROM a_res_parts ".$delete_where;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 16 in res_func.php: ' . mysqli_error($con));
+//     }
 
-    $sql = "DELETE FROM a_proj_link_collections ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 17 in res_func.php: ' . mysqli_error($con));
-    }
-}
+//     $sql = "DELETE FROM a_proj_link_collections ".$delete_where;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 17 in res_func.php: ' . mysqli_error($con));
+//     }
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- update the automatic generated columns of a part (and its related parts)
 // --------------------------------------------------------------------------------------
-function res_update_generated_columns($res,$part){
-    global $con;
+// function res_update_generated_columns($res,$part){
+//     global $con;
 
-    $sql = "SELECT type,src_research,src_collection,src_from_position,src_to_position,src_from_word,src_to_word
-              FROM a_res_parts
-             WHERE research_id = ".$res."
-               AND part_id = ".$part;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 18 in res_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
+//     $sql = "SELECT type,src_research,src_collection,src_from_position,src_to_position,src_from_word,src_to_word
+//               FROM a_res_parts
+//              WHERE research_id = ".$res."
+//                AND part_id = ".$part;
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 18 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
 
-    if ($row['type'] == 'pointer'){
-        $sql1 = "SELECT src.gen_word_count - ".$row['src_to_word']." - 1 words_from_end
-                  FROM a_res_parts src
-                 WHERE src.research_id = ".$row['src_research']."
-                   AND src.collection_id = ".$row['src_collection']."
-                   AND src.position = ".$row['src_to_position'];
-        $result1 = mysqli_query($con,$sql1);
-        if (!$result1) {
-            exit_error('Error 19 in res_func.php: ' . mysqli_error($con));
-        }
-        $row1 = mysqli_fetch_array($result1);
+//     if ($row['type'] == 'pointer'){
+//         $sql1 = "SELECT src.gen_word_count - ".$row['src_to_word']." - 1 words_from_end
+//                   FROM a_res_parts src
+//                  WHERE src.research_id = ".$row['src_research']."
+//                    AND src.collection_id = ".$row['src_collection']."
+//                    AND src.position = ".$row['src_to_position'];
+//         $result1 = mysqli_query($con,$sql1);
+//         if (!$result1) {
+//             exit_error('Error 19 in res_func.php: ' . mysqli_error($con));
+//         }
+//         $row1 = mysqli_fetch_array($result1);
 
-        $sql2 = "SELECT SUM(src.gen_word_count) - ".$row['src_from_word']." - ".$row1['words_from_end']." word_count
-                  FROM a_res_parts src
-                 WHERE src.research_id = ".$row['src_research']."
-                   AND src.collection_id = ".$row['src_collection']."
-                   AND src.position BETWEEN ".$row['src_from_position']." AND ".$row['src_to_position'];
-        $result2 = mysqli_query($con,$sql2);
-        if (!$result2) {
-            exit_error('Error 20 in res_func.php: ' . mysqli_error($con));
-        }
-        $row2 = mysqli_fetch_array($result2);
+//         $sql2 = "SELECT SUM(src.gen_word_count) - ".$row['src_from_word']." - ".$row1['words_from_end']." word_count
+//                   FROM a_res_parts src
+//                  WHERE src.research_id = ".$row['src_research']."
+//                    AND src.collection_id = ".$row['src_collection']."
+//                    AND src.position BETWEEN ".$row['src_from_position']." AND ".$row['src_to_position'];
+//         $result2 = mysqli_query($con,$sql2);
+//         if (!$result2) {
+//             exit_error('Error 20 in res_func.php: ' . mysqli_error($con));
+//         }
+//         $row2 = mysqli_fetch_array($result2);
 
-        $sql3 = "UPDATE a_res_parts 
-                    SET gen_word_count = ".$row2['word_count']."
-                 WHERE research_id = ".$res."
-                   AND part_id = ".$part;
-        $result3 = mysqli_query($con,$sql3);
-        if (!$result3) {
-            exit_error('Error 21 in res_func.php: ' . mysqli_error($con));
-        }
-    }
-}
+//         $sql3 = "UPDATE a_res_parts 
+//                     SET gen_word_count = ".$row2['word_count']."
+//                  WHERE research_id = ".$res."
+//                    AND part_id = ".$part;
+//         $result3 = mysqli_query($con,$sql3);
+//         if (!$result3) {
+//             exit_error('Error 21 in res_func.php: ' . mysqli_error($con));
+//         }
+//     }
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- get collection properties
 // --------------------------------------------------------------------------------------
-function rescol_get($id){
-    global $con;
+// function rescol_get($id){
+//     global $con;
 
-    $sql = "SELECT type, name_heb name, description desc
-              FROM a_res_collections
-             WHERE research_id = ".$id['res']."
-               AND collection_id = ".$id['col'];
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 22 in res_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $name = $row['name'];
+//     $sql = "SELECT type, name_heb name, description desc
+//               FROM a_res_collections
+//              WHERE research_id = ".$id['res']."
+//                AND collection_id = ".$id['col'];
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 22 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     $name = $row['name'];
 
-    $attr = array(
-        'type'=>$type,
-        'name'=>$name,
-        'desc'=>$desc
-    );
-    return $attr;
-}
+//     $attr = array(
+//         'type'=>$type,
+//         'name'=>$name,
+//         'desc'=>$desc
+//     );
+//     return $attr;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
-function rescol_get_indexes($id){
-    global $con;
+// function rescol_get_indexes($id){
+//     global $con;
 
-    $list = array();
-    $sql = "SELECT index_id, name_heb name, description_heb description
-              FROM a_res_indexes
-             WHERE research_id = ".$id['res']."
-               AND collection_id = ".$id['col']."
-             ORDER BY index_id";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 23 in res_func.php: ' . mysqli_error($con));
-    }
-    while($row = mysqli_fetch_array($result)) {
-        array_push($list,array(
-            "id"=>$row['index_id'],
-            "name"=>$row['name'],
-            "desc"=>$row['description']
-        ));
-    }
-    return $list;
-}
+//     $list = array();
+//     $sql = "SELECT index_id, name_heb name, description_heb description
+//               FROM a_res_indexes
+//              WHERE research_id = ".$id['res']."
+//                AND collection_id = ".$id['col']."
+//              ORDER BY index_id";
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 23 in res_func.php: ' . mysqli_error($con));
+//     }
+//     while($row = mysqli_fetch_array($result)) {
+//         array_push($list,array(
+//             "id"=>$row['index_id'],
+//             "name"=>$row['name'],
+//             "desc"=>$row['description']
+//         ));
+//     }
+//     return $list;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- get index properties
@@ -796,26 +796,26 @@ function residx_position_to_key($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- get list of collections of type 'sequence' in all researches
 // --------------------------------------------------------------------------------------
-function res_get_sequences_list(){
-    global $con;
+// function res_get_sequences_list(){
+//     global $con;
 
-    $list = array();
-    $sql = "SELECT research_id,collection_id,name_heb name
-              FROM a_res_collections 
-             WHERE type = 'sequence'";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 25 in res_func.php: ' . mysqli_error($con));
-    }
-    while($row = mysqli_fetch_array($result)) {
-        array_push($list,array(
-            "research_id"=>$row['research_id'],
-            "collection_id"=>$row['collection_id'],
-            "name"=>$row['name']
-        ));
-    }
+//     $list = array();
+//     $sql = "SELECT research_id,collection_id,name_heb name
+//               FROM a_res_collections 
+//              WHERE type = 'sequence'";
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 25 in res_func.php: ' . mysqli_error($con));
+//     }
+//     while($row = mysqli_fetch_array($result)) {
+//         array_push($list,array(
+//             "research_id"=>$row['research_id'],
+//             "collection_id"=>$row['collection_id'],
+//             "name"=>$row['name']
+//         ));
+//     }
 
-    return $list;
-}
+//     return $list;
+// }
 
 ?>
