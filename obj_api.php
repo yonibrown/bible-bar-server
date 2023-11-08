@@ -175,6 +175,11 @@ switch ($type){
                 break;
 
             // update point in research
+            case "update_parts":
+                res_upd_parts($id,$prop);
+                break;
+
+            // update point in research
             case "upd_pt":
                 res_upd_point($id,$prop);
                 break;

@@ -326,6 +326,60 @@ function res_del_part($id,$prop){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_upd_parts($id,$prop){
+    global $con;
+
+    $res = $id['res'];
+
+    $partArr = $prop['partList'];
+    $updAttr = $prop['updAttr'];
+
+    $sql_set = '';
+    $sep = '';
+    foreach($updAttr as $attr => $val) {
+        switch ($attr) {
+            case 'collection_id':
+                $sql_set = $sql_set.$sep.$attr." = ".$val;
+                $sep = ',';
+                break;
+        }   
+    }
+
+    function inList($arr,$itemType)
+    {
+        $wrap = "";
+        if (!is_null($itemType)){
+            if ($itemType == 'string'){
+                $wrap = "'";
+            } 
+        }
+
+        function reduceFunc($carry,$item)
+        {
+          if (!is_null($carry)){
+              return $carry . ",".$wrap . $item.$wrap;
+          } else {
+              return $item;
+          }
+        }
+        return " IN(".array_reduce($arr,"reduceFunc").") ";
+    }
+    
+    if ($sql_set != ''){
+        $sql = "UPDATE a_res_parts 
+                SET ".$sql_set."  
+                WHERE research_id = ".$res."
+                  AND part_id ".inList($partArr,'num');
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 33 in res_func.php: ' . mysqli_error($con));
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------
 // ---- update point in a research
 // --------------------------------------------------------------------------------------
 function res_upd_point($id,$prop){
