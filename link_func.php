@@ -180,66 +180,66 @@ function lnk_remove_element($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- add categories to a link
 // --------------------------------------------------------------------------------------
-function lnk_add_categories($id,$prop){
-    global $con;
+// function lnk_add_categories($id,$prop){
+//     global $con;
 
-    $proj = $id['proj'];
-    $link = $id['link'];
+//     $proj = $id['proj'];
+//     $link = $id['link'];
 
-    if ($prop['type'] == 'list'){
-        $list = $prop['data'];
-    } else if ($prop['type'] == 'category'){
-        $list = array($prop['data']);
-    }
+//     if ($prop['type'] == 'list'){
+//         $list = $prop['data'];
+//     } else if ($prop['type'] == 'category'){
+//         $list = array($prop['data']);
+//     }
 
-    $catArray = array();
-    foreach($list as $cat) {
-        // get available color
-        $sql = "SELECT c.color
-                FROM a_proj_link_collections c
-                WHERE c.color NOT IN (
-                    SELECT t.color
-                    FROM a_proj_link_collections t
-                    WHERE t.project_id = ".$proj."
-                        AND t.link_id = ".$link.")
-                LIMIT 1";
-        $result = mysqli_query($con,$sql);
-        if (!$result) {
-            exit_error('Error 4 in link_func.php: ' . mysqli_error($con));
-        }
-        if ($row = mysqli_fetch_array($result)){
-            $color = $row['color'];
-        } else {
-            $color = '#00d8ff';
-        }
-        // add the category to the link
-        $sql = "INSERT INTO a_proj_link_collections
-                    (project_id, link_id, position, research_id, collection_id, division_id, color, hilight) 
-                VALUES (".$proj.",
-                        ".$link.",
-                        0,
-                        ".$cat['res'].",
-                        ".$cat['col'].",
-                        0,
-                        '".$color."',
-                        1)";
-        $result = mysqli_query($con,$sql);
-        if (!$result) {
-            exit_error('Error 5 in link_func.php: ' . mysqli_error($con).$sql);
-        }
+//     $catArray = array();
+//     foreach($list as $cat) {
+//         // get available color
+//         $sql = "SELECT c.color
+//                 FROM a_proj_link_collections c
+//                 WHERE c.color NOT IN (
+//                     SELECT t.color
+//                     FROM a_proj_link_collections t
+//                     WHERE t.project_id = ".$proj."
+//                         AND t.link_id = ".$link.")
+//                 LIMIT 1";
+//         $result = mysqli_query($con,$sql);
+//         if (!$result) {
+//             exit_error('Error 4 in link_func.php: ' . mysqli_error($con));
+//         }
+//         if ($row = mysqli_fetch_array($result)){
+//             $color = $row['color'];
+//         } else {
+//             $color = '#00d8ff';
+//         }
+//         // add the category to the link
+//         $sql = "INSERT INTO a_proj_link_collections
+//                     (project_id, link_id, position, research_id, collection_id, division_id, color, hilight) 
+//                 VALUES (".$proj.",
+//                         ".$link.",
+//                         0,
+//                         ".$cat['res'].",
+//                         ".$cat['col'].",
+//                         0,
+//                         '".$color."',
+//                         1)";
+//         $result = mysqli_query($con,$sql);
+//         if (!$result) {
+//             exit_error('Error 5 in link_func.php: ' . mysqli_error($con).$sql);
+//         }
 
-        // add the category to the returned array
-        array_push($catArray,array("proj"=>$proj,
-                                "link"=>$link,
-                                "res"=>$cat['res'],
-                                "col"=>$cat['col'],
-                                "div"=>0,
-                                "color"=>$color,
-                                "hilight"=>true));
-    }
+//         // add the category to the returned array
+//         array_push($catArray,array("proj"=>$proj,
+//                                 "link"=>$link,
+//                                 "res"=>$cat['res'],
+//                                 "col"=>$cat['col'],
+//                                 "div"=>0,
+//                                 "color"=>$color,
+//                                 "hilight"=>true));
+//     }
 
-    return $catArray;
-}
+//     return $catArray;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- update category in a link
@@ -284,41 +284,41 @@ function lnk_upd_category($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- remove categories from a link
 // --------------------------------------------------------------------------------------
-function lnk_remove_categories($id,$prop){
-    global $con;
+// function lnk_remove_categories($id,$prop){
+//     global $con;
 
-    $proj = $id['proj'];
-    $link = $id['link'];
+//     $proj = $id['proj'];
+//     $link = $id['link'];
 
-    if ($prop['type'] == 'list'){
-        $list = $prop['data'];
-    } else if ($prop['type'] == 'category'){
-        $list = array($prop['data']);
-    }
+//     if ($prop['type'] == 'list'){
+//         $list = $prop['data'];
+//     } else if ($prop['type'] == 'category'){
+//         $list = array($prop['data']);
+//     }
 
-    $catArray = array();
-    foreach($list as $cat) {
-        $sql = "DELETE FROM a_proj_link_collections
-                 WHERE project_id = ".$proj."
-                   AND link_id = ".$link."
-                   AND research_id = ".$cat['res']."
-                   AND collection_id = ".$cat['col']."
-                   AND division_id = ".$cat['div'];
-        $result = mysqli_query($con,$sql);
-        if (!$result) {
-            exit_error('Error 6 in link_func.php: ' . mysqli_error($con));
-        }
+//     $catArray = array();
+//     foreach($list as $cat) {
+//         $sql = "DELETE FROM a_proj_link_collections
+//                  WHERE project_id = ".$proj."
+//                    AND link_id = ".$link."
+//                    AND research_id = ".$cat['res']."
+//                    AND collection_id = ".$cat['col']."
+//                    AND division_id = ".$cat['div'];
+//         $result = mysqli_query($con,$sql);
+//         if (!$result) {
+//             exit_error('Error 6 in link_func.php: ' . mysqli_error($con));
+//         }
 
-        // add the category to the returned array
-        array_push($catArray,array("proj"=>$proj,
-                                "link"=>$link,
-                                "res"=>$cat['res'],
-                                "col"=>$cat['col'],
-                                "div"=>$cat['div'],
-                                "color"=>$color,
-                                "hilight"=>true));
-    }
+//         // add the category to the returned array
+//         array_push($catArray,array("proj"=>$proj,
+//                                 "link"=>$link,
+//                                 "res"=>$cat['res'],
+//                                 "col"=>$cat['col'],
+//                                 "div"=>$cat['div'],
+//                                 "color"=>$color,
+//                                 "hilight"=>true));
+//     }
 
-    return $catArray;
-}
+//     return $catArray;
+// }
 ?>
