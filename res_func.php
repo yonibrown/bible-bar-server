@@ -182,7 +182,7 @@ function res_get_prt_list($id,$prop){
                    src.abs_name_heb src_name,src.text src_text,
                    ".$sort_key['src']." src_sort_key,
                    ".$sort_key['col']." col_sort_key
-                   FROM a_res_parts prt
+            FROM a_res_parts prt
             JOIN a_res_parts src
               ON src.research_id = prt.src_research
              AND src.collection_id = prt.src_collection
