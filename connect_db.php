@@ -32,16 +32,16 @@ $reply = array();
 // $database = "epiz_34309968_bibar";
 
 // connect to Hostinger MySql server
-$host = "localhost";
-$uname = "u825158041_bibar";
-$pwd = "rtavabv465A@";
-$database = "u825158041_bibar";
+// $host = "localhost";
+// $uname = "u825158041_bibar";
+// $pwd = "rtavabv465A@";
+// $database = "u825158041_bibar";
 
 // connect to local MySql server
-// $host = "localhost";
-// $uname = "root";
-// $pwd = "";
-// $database = "bibar";
+$host = "localhost";
+$uname = "root";
+$pwd = "";
+$database = "bibar";
 
 // connect to db
 $con = mysqli_connect($host, $uname, $pwd, $database);

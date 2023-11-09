@@ -132,7 +132,7 @@ function res_get_cat_list($id){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['id'],
+            "id"=>(int)$row['id'],
             "name"=>$row['name']
         ));
     }
@@ -203,8 +203,8 @@ function res_get_prt_list($id,$prop){
         $mark = sub_words($row['src_text'],$row['src_from_word'],$row['src_to_word']);
 
         array_push($list,array(
-            "id"=>$row['part_id'],
-            "col"=>$row['collection_id'],
+            "id"=>(int)$row['part_id'],
+            "col"=>(int)$row['collection_id'],
             "col_name"=>$row['col_name'],
             "text_before"=>mb_substr($row['src_text'],0,$mark['start']),
             "text_part"=>$mark['text'],
@@ -684,7 +684,7 @@ function residx_get_levels($id,$prop){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['level'],
+            "id"=>(int)$row['level'],
             "whole_name"=>$row['whole_name'],
             "unit_name"=>$row['unit_name'],
             "part_of_key"=>($row['part_of_key'] == 1)
@@ -787,7 +787,7 @@ function residx_get_level_divisions($id,$prop){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['division_id'],
+            "id"=>(int)$row['division_id'],
             "name"=>$row['name'],
             "selected"=>($row['division_id'] == $prop['selected_div'])
         ));
@@ -844,8 +844,8 @@ function residx_position_to_key($id,$prop){
     while($row = mysqli_fetch_array($result)) {
         // array_push($list,$row['division_id']);
         array_push($list,array(
-            "level"=>$row['level'],
-            "division_id"=>$row['division_id']
+            "level"=>(int)$row['level'],
+            "division_id"=>(int)$row['division_id']
         ));
     }
     return array('list'=>$list);

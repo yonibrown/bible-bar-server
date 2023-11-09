@@ -98,9 +98,9 @@ function lnk_get_categories($id){
         }
         array_push($flatArray,array("color"=>$row['color'],
                                 "display"=>($row['hilight'] == 1),
-                                "res"=>$row['research_id'],
-                                "col"=>$row['collection_id'],
-                                "div"=>$row['division_id'],
+                                "res"=>(int)$row['research_id'],
+                                "col"=>(int)$row['collection_id'],
+                                "div"=>(int)$row['division_id'],
                                 "name"=>$row1['name']));
     }
 
@@ -125,7 +125,7 @@ function lnk_get_elements($id){
 
     $flatArray = array();
     while($row = mysqli_fetch_array($result)) {
-        array_push($flatArray,$row['element_id']);
+        array_push($flatArray,(int)$row['element_id']);
     }
 
     return $flatArray;

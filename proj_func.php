@@ -326,7 +326,7 @@ function proj_get_res_list($id){
     }
     while($row = mysqli_fetch_array($result)) {
         $catList = res_get_cat_list(array("res"=>$row['research_id']));
-        array_push($list,array("id"=>$row['research_id'],
+        array_push($list,array("id"=>(int)$row['research_id'],
                                "name"=>$row['res_name'],
                                "collections"=>$catList
                             ));
@@ -411,7 +411,7 @@ function proj_get_lnk_list($id,$prop){
             "link"=>$row['link_id']
         ));
         array_push($list,array(
-            "id"=>$row['link_id'],
+            "id"=>(int)$row['link_id'],
             "name"=>$row['name'],
             "desc"=>$row['description'],
             "categories"=>$catlist,
