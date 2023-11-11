@@ -158,10 +158,11 @@ function res_get_prt_list($id,$prop){
         $order = 'ASC';
     }
 
-    $order_by = "prt.collection_id ".$order.",prt.position ".$order;
+
+    $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order;
     if (array_key_exists('sort', $prop)){
-        if ($prop['sort'] == 'src'){
-            $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order.",src.position ".$order;
+        if ($prop['sort'] == 'col'){
+            $order_by = "prt.collection_id ".$order.",".$order_by;
         }
     }
     

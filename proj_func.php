@@ -308,13 +308,21 @@ function proj_get_res_list($id){
               FROM a_researches r
              WHERE r.project_id = ".$proj."
                 OR r.research_id in(
-                 SELECT research_id
-                   FROM a_proj_elm_research
-                  WHERE project_id = ".$proj.")
+                 SELECT pa.research_id
+                   FROM a_proj_elm_research pa
+                   JOIN a_proj_elements pe
+                     ON pa.project_id = pe.project_id
+                    AND pa.element_id = pe.element_id
+                  WHERE pe.project_id = ".$proj."
+                    AND pe.position > 0)
                 OR r.research_id in(
-                 SELECT research_id
-                   FROM a_proj_elm_parts
-                  WHERE project_id = ".$proj.")
+                 SELECT pa.research_id
+                   FROM a_proj_elm_parts pa
+                   JOIN a_proj_elements pe
+                     ON pa.project_id = pe.project_id
+                    AND pa.element_id = pe.element_id
+                  WHERE pe.project_id = ".$proj."
+                    AND pe.position > 0)
                 OR r.research_id in(
                  SELECT research_id
                    FROM a_proj_link_collections
