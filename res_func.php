@@ -221,40 +221,46 @@ function res_get_prt_list($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- create new category in research
 // --------------------------------------------------------------------------------------
-// function res_new_category($id,$prop){
-//     global $con;
+function res_new_category($id,$prop){
+    global $con;
 
-//     $res = $id['res'];
-//     $sql = "SELECT IFNULL(MAX(collection_id),0) col,
-//                    IFNULL(MAX(position),0) pos
-//                 FROM a_res_collections 
-//                 WHERE research_id = ".$res;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 8 in res_func.php: ' . mysqli_error($con));
-//     }
-//     $row = mysqli_fetch_array($result);
-//     $col = $row['col']+1;
-//     $pos = $row['pos']+1;
+    $res = $id['res'];
+    $sql = "SELECT IFNULL(MAX(collection_id),0) col,
+                    IFNULL(MAX(position),0) pos
+                FROM a_res_collections 
+                WHERE research_id = ".$res;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 8 in res_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+    $col = $row['col']+1;
+    $pos = $row['pos']+1;
+    
+    $desc = '';
+    if (array_key_exists('desc',$prop)){
+        $desc = $prop['desc'];
+    }
+    
 
-//     $sql = "INSERT INTO a_res_collections
-//                 (research_id, collection_id, type, position, name_eng, name_heb, description)
-//             VALUES (
-//                 ".$res.", 
-//                 ".$col.", 
-//                 'list',
-//                 ".$pos.", 
-//                 '".$prop['name']."', 
-//                 '".$prop['name']."', 
-//                 '".$prop['desc']."')";
+    $sql = "INSERT INTO a_res_collections
+                (research_id, collection_id, type, position, name_eng, name_heb, description)
+            VALUES (
+                ".$res.", 
+                ".$col.", 
+                'list',
+                ".$pos.", 
+                '".$prop['name']."', 
+                '".$prop['name']."', 
+                '".$desc."')";
             
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 9 in res_func.php: ' . mysqli_error($con));
-//     }
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 9 in res_func.php: ' . mysqli_error($con));
+    }
 
-//     return $col;
-// }
+    return $col;
+}
 
 // --------------------------------------------------------------------------------------
 // ---- create new part in research
@@ -342,7 +348,12 @@ function res_upd_parts($id,$prop){
     foreach($updAttr as $attr => $val) {
         switch ($attr) {
             case 'collection_id':
-                $sql_set = $sql_set.$sep.$attr." = ".$val;
+                if ($val == 0){
+                    $cat = res_new_category($id,array('name'=>$updAttr['collection_name']));
+                } else {
+                    $cat = $val;
+                }
+                $sql_set = $sql_set.$sep.$attr." = ".$cat;
                 $sep = ',';
                 break;
         }   
