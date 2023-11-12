@@ -159,12 +159,12 @@ function bar_calc_segments($id,$dsp){
             $color = $colors1[$colorOrd];
         }
         array_push($rep['segments'],array(
-            "div"=>$row['division_id'],
+            "div"=>(int)$row['division_id'],
             "name"=>$row['name'],
             "width"=>$pct.'%',
             "color"=>$color,
-            "to_pos"=>$row['to_pos'],
-            "max_pos"=>$colorMaxPos[$colorOrd]
+            "to_pos"=>(float)$row['to_pos'],
+            "max_pos"=>(float)$colorMaxPos[$colorOrd]
         ));
     }
     return $rep;
@@ -486,10 +486,10 @@ function bar_calc_points($id,$dsp){
         }
         if ($pt_size['offset_pct'] != ''){
             array_push($rep['points'],array(
-                "link"=>$row1['link_id'],
-                "res"=>$row1['research_id'],
-                "col"=>$row1['collection_id'],
-                "id"=>$row1['part_id'],
+                "link"=>(int)$row1['link_id'],
+                "res"=>(int)$row1['research_id'],
+                "col"=>(int)$row1['collection_id'],
+                "id"=>(int)$row1['part_id'],
                 "position"=>$pt_size['offset_pct'],
                 "width"=>$pt_size['width_pct'],
                 "verse"=>$pt_size['name']

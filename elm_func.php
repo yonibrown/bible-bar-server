@@ -33,9 +33,9 @@ function elm_prop($id,$prop){
         case 'link':
             $spc_attr = elmlnk_get($id);
             break;
-        case 'research':
-            $spc_attr = elmres_get($id);
-            break;
+        // case 'research':
+        //     $spc_attr = elmres_get($id);
+        //     break;
         case 'parts':
             $spc_attr = elmprt_get($id);
             break;
@@ -44,10 +44,10 @@ function elm_prop($id,$prop){
     }
 
     return array(
-        "id"=>$id['elm'],
+        "id"=>(int)$id['elm'],
         "type"=>$prop['type'],
         "name"=>$prop['name'],
-        "position"=>$prop['position'],
+        "position"=>(float)$prop['position'],
         "attr"=>$spc_attr
     );
 }
@@ -324,7 +324,7 @@ function elmlnk_get($id){
     }
     $row = mysqli_fetch_array($result);
     $attr = array(
-        'link_id'=>$row['link_id'],
+        'link_id'=>(int)$row['link_id'],
         'link_display'=>$row['link_display']
     );
 
@@ -358,23 +358,23 @@ function elmlnk_create($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- get research element                                     
 // --------------------------------------------------------------------------------------
-function elmres_get($id){
-    global $con;
+// function elmres_get($id){
+//     global $con;
 
-    $sql = "SELECT research_id
-            FROM a_proj_elm_research
-            WHERE project_id = ".$id['proj']."
-              AND element_id = ".$id['elm'];
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 8 in elm_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $attr = array(
-        'res'=>$row['research_id']
-    );
-    return $attr;
-}
+//     $sql = "SELECT research_id
+//             FROM a_proj_elm_research
+//             WHERE project_id = ".$id['proj']."
+//               AND element_id = ".$id['elm'];
+//     $result = mysqli_query($con,$sql);
+//     if (!$result) {
+//         exit_error('Error 8 in elm_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     $attr = array(
+//         'res'=>(int)$row['research_id']
+//     );
+//     return $attr;
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- create new research element
@@ -409,7 +409,7 @@ function elmprt_get($id){
     }
     $row = mysqli_fetch_array($result);
     $attr = array(
-        'res'=>$row['research_id'],
+        'res'=>(int)$row['research_id'],
         'sort'=>$row['sort'],
         'ordering'=>$row['ordering']
     );
@@ -553,19 +553,19 @@ function elmseq_get($id){
     $toKey = residx_position_to_key($indexId,array('position'=>$toPos))['list'];
 
     $attr = array(
-        'research_id'=>$row['research_id'],
-        'collection_id'=>$row['collection_id'],
-        'from_position'=>$fromPos,
-        'to_position'=>$toPos,
-        'seq_index'=>$row['index_id'],
-        'seq_level'=>$row['seq_level'],
-        'color_level'=>$row['color_level'],
+        'research_id'=>(int)$row['research_id'],
+        'collection_id'=>(int)$row['collection_id'],
+        'from_position'=>(float)$fromPos,
+        'to_position'=>(float)$toPos,
+        'seq_index'=>(int)$row['index_id'],
+        'seq_level'=>(int)$row['seq_level'],
+        'color_level'=>(int)$row['color_level'],
         'from_key'=>$fromKey,
         'to_key'=>$toKey,
-        'anchor_position'=>$row['anchor_position'],
-        'anchor_word'=>$row['anchor_word'],
-        'points_generated'=>$row['points_generated'],
-        'total_words'=>$row['gen_total_words']
+        'anchor_position'=>(float)$row['anchor_position'],
+        'anchor_word'=>(int)$row['anchor_word'],
+        'points_generated'=>($row['points_generated']=='1'),
+        'total_words'=>(int)$row['gen_total_words']
     );
 
     return $attr;

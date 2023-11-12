@@ -132,7 +132,7 @@ function res_get_cat_list($id){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['id'],
+            "id"=>(int)$row['id'],
             "name"=>$row['name']
         ));
     }
@@ -158,10 +158,11 @@ function res_get_prt_list($id,$prop){
         $order = 'ASC';
     }
 
-    $order_by = "prt.collection_id ".$order.",prt.position ".$order;
+
+    $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order;
     if (array_key_exists('sort', $prop)){
-        if ($prop['sort'] == 'src'){
-            $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order.",src.position ".$order;
+        if ($prop['sort'] == 'col'){
+            $order_by = "prt.collection_id ".$order.",".$order_by;
         }
     }
     
@@ -182,7 +183,7 @@ function res_get_prt_list($id,$prop){
                    src.abs_name_heb src_name,src.text src_text,
                    ".$sort_key['src']." src_sort_key,
                    ".$sort_key['col']." col_sort_key
-                   FROM a_res_parts prt
+            FROM a_res_parts prt
             JOIN a_res_parts src
               ON src.research_id = prt.src_research
              AND src.collection_id = prt.src_collection
@@ -203,8 +204,8 @@ function res_get_prt_list($id,$prop){
         $mark = sub_words($row['src_text'],$row['src_from_word'],$row['src_to_word']);
 
         array_push($list,array(
-            "id"=>$row['part_id'],
-            "col"=>$row['collection_id'],
+            "id"=>(int)$row['part_id'],
+            "col"=>(int)$row['collection_id'],
             "col_name"=>$row['col_name'],
             "text_before"=>mb_substr($row['src_text'],0,$mark['start']),
             "text_part"=>$mark['text'],
@@ -684,7 +685,7 @@ function residx_get_levels($id,$prop){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['level'],
+            "id"=>(int)$row['level'],
             "whole_name"=>$row['whole_name'],
             "unit_name"=>$row['unit_name'],
             "part_of_key"=>($row['part_of_key'] == 1)
@@ -787,7 +788,7 @@ function residx_get_level_divisions($id,$prop){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['division_id'],
+            "id"=>(int)$row['division_id'],
             "name"=>$row['name'],
             "selected"=>($row['division_id'] == $prop['selected_div'])
         ));
@@ -844,8 +845,8 @@ function residx_position_to_key($id,$prop){
     while($row = mysqli_fetch_array($result)) {
         // array_push($list,$row['division_id']);
         array_push($list,array(
-            "level"=>$row['level'],
-            "division_id"=>$row['division_id']
+            "level"=>(int)$row['level'],
+            "division_id"=>(int)$row['division_id']
         ));
     }
     return array('list'=>$list);
