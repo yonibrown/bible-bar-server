@@ -265,6 +265,38 @@ function res_new_category($id,$prop){
     return $col;
 }
 
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_update_collection($id,$prop){
+    global $con;
+
+    $res = $id['res'];
+    $col = $prop['col'];
+    $sql_set = '';
+    $sep = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case 'name':
+                $sql_set = $sql_set.$sep."name_heb = '".$val."'";
+                $sep = ',';
+                break;
+        }   
+    }
+
+    if ($sql_set != ""){
+        $sql = "UPDATE a_res_collections 
+                SET ".$sql_set."  
+                WHERE research_id = ".$res."
+                AND collection_id = ".$col;
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 37 in res_func.php: ' . mysqli_error($con));
+        }
+    }
+}
+
 // --------------------------------------------------------------------------------------
 // ---- create new part in research
 // --------------------------------------------------------------------------------------

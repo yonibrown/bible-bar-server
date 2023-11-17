@@ -159,6 +159,11 @@ switch ($type){
             //     $reply["id"] = res_new_category($id,$prop);
             //     break;
 
+            // create new category in research
+            case "update_collection":
+                res_update_collection($id,$prop);
+                break;
+
             // // remove categories from research
             // case "del_cat_list":
             //     res_del_categories($id,$prop);
