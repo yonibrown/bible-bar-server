@@ -422,11 +422,22 @@ function elmprt_get($id){
 function elmprt_create($id,$prop){
     global $con;
 
+    if (array_key_exists('res',$prop)){
+        $res = $prop['res'];
+    } else {
+        $resProp = array(
+            'proj'=>$id['proj'],
+            'name'=>$prop['name'],
+            'desc'=>''
+        );
+        $res = res_create($resProp)['res'];
+    }
+
     $sql = "INSERT INTO a_proj_elm_parts
                 (project_id, element_id, research_id, sort, ordering)
             VALUES(".$id['proj'].", 
                    ".$id['elm'].", 
-                   ".$prop['res'].", 
+                   ".$res.", 
                    'src','ASC')";
     $result = mysqli_query($con,$sql);
     if (!$result) {

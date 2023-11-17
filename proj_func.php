@@ -333,7 +333,7 @@ function proj_get_res_list($id){
         exit_error('Error 15 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        $catList = res_get_cat_list(array("res"=>$row['research_id']));
+        $catList = res_get_col_list(array("res"=>$row['research_id']));
         array_push($list,array("id"=>(int)$row['research_id'],
                                "name"=>$row['res_name'],
                                "collections"=>$catList

@@ -145,9 +145,9 @@ switch ($type){
             //     break;
 
             // // get category list for research                                   
-            // case "get_cat_list":
-            //     $reply['data'] = res_get_cat_list($id);
-            //     break;
+            case "get_col_list":
+                $reply['data'] = res_get_col_list($id);
+                break;
 
             // get point list for research                                   
             case "get_prt_list":
