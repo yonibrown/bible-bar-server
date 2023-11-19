@@ -117,12 +117,12 @@ function res_create($prop){
 // --------------------------------------------------------------------------------------
 // ---- get category list for research                                   
 // --------------------------------------------------------------------------------------
-function res_get_cat_list($id){
+function res_get_col_list($id){
     global $con;
 
     $res = $id['res'];
     $list = array();
-    $sql = "SELECT collection_id id,name_heb name
+    $sql = "SELECT collection_id id,name_heb name,description
             FROM a_res_collections
             WHERE research_id = ".$res."
             ORDER BY collection_id";
@@ -133,7 +133,8 @@ function res_get_cat_list($id){
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
             "id"=>(int)$row['id'],
-            "name"=>$row['name']
+            "name"=>$row['name'],
+            "description"=>$row['description']
         ));
     }
     return $list;
@@ -211,8 +212,10 @@ function res_get_prt_list($id,$prop){
             "text_part"=>$mark['text'],
             "text_after"=> mb_substr($row['src_text'],$mark['end']),
             "src_name" => $row['src_name'],
-            "src_sort_key" => $row['src_sort_key'],
-            "col_sort_key" => $row['col_sort_key']
+            "sort_key" => array(
+                "col"=>$row['col_sort_key'],
+                "src"=>$row['src_sort_key']
+            )
         ));
     }
     return $list;
@@ -260,6 +263,38 @@ function res_new_category($id,$prop){
     }
 
     return $col;
+}
+
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_update_collection($id,$prop){
+    global $con;
+
+    $res = $id['res'];
+    $col = $prop['col'];
+    $sql_set = '';
+    $sep = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case 'name':
+                $sql_set = $sql_set.$sep."name_heb = '".$val."'";
+                $sep = ',';
+                break;
+        }   
+    }
+
+    if ($sql_set != ""){
+        $sql = "UPDATE a_res_collections 
+                SET ".$sql_set."  
+                WHERE research_id = ".$res."
+                AND collection_id = ".$col;
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 37 in res_func.php: ' . mysqli_error($con));
+        }
+    }
 }
 
 // --------------------------------------------------------------------------------------

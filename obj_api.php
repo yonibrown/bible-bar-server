@@ -145,9 +145,9 @@ switch ($type){
             //     break;
 
             // // get category list for research                                   
-            // case "get_cat_list":
-            //     $reply['data'] = res_get_cat_list($id);
-            //     break;
+            case "get_col_list":
+                $reply['data'] = res_get_col_list($id);
+                break;
 
             // get point list for research                                   
             case "get_prt_list":
@@ -158,6 +158,11 @@ switch ($type){
             // case "new_cat":
             //     $reply["id"] = res_new_category($id,$prop);
             //     break;
+
+            // create new category in research
+            case "update_collection":
+                res_update_collection($id,$prop);
+                break;
 
             // // remove categories from research
             // case "del_cat_list":
