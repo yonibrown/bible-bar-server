@@ -132,6 +132,7 @@ function res_get_col_list($id){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
+            "res"=>(int)$res,
             "id"=>(int)$row['id'],
             "name"=>$row['name'],
             "description"=>$row['description']
@@ -282,7 +283,11 @@ function res_update_collection($id,$prop){
                 $sql_set = $sql_set.$sep."name_heb = '".$val."'";
                 $sep = ',';
                 break;
-        }   
+            case 'description':
+                $sql_set = $sql_set.$sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+            }   
     }
 
     if ($sql_set != ""){
