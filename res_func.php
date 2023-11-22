@@ -110,8 +110,12 @@ function res_create($prop){
     if (!$result) {
         exit_error('Error 5 in res_func.php: ' . mysqli_error($con));
     }
-
-    return array("res"=>$res);
+    return array(
+        "id"=>$res,
+        "name"=>$prop['name'],
+        "desc"=>$prop['desc'],
+        "collections"=>array()
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -419,7 +423,8 @@ function res_duplicate($id,$prop){
 
     $attr = res_get($id);
     $attr['name'] = substr($attr['name'],1,15)."-COPY";
-    $newId = res_create($attr)['res'];
+    $newRes = res_create($attr);
+    $newId = $newRes['id'];
 
     // copy parts
     $partArr = $prop['partList'];
@@ -456,7 +461,7 @@ function res_duplicate($id,$prop){
         exit_error('Error 36 in res_func.php: ' . mysqli_error($con));
     }
 
-    return array('new_res_id'=>$newId);
+    return array('new_res'=>$newRes);
 
     // $newPartId = 0;
     // $sql1 = "SELECT type, collection_id, position, 

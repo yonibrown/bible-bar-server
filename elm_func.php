@@ -107,6 +107,7 @@ function elm_create($prop){
         }
     }
 
+    $res = null;
     switch($type){
         case 'bar':
             bar_create($id,$prop);
@@ -121,11 +122,16 @@ function elm_create($prop){
             elmres_create($id,$prop);
             break;
         case 'parts':
-            elmprt_create($id,$prop);
+            $res = elmprt_create($id,$prop);
             break;
     }
 
-    return elm_prop($id,$prop);
+    $rep = array("elm"=>elm_prop($id,$prop));
+    if ($res != null){
+        $rep['res'] = $res;
+    }
+
+    return $rep;
 }
 
 // --------------------------------------------------------------------------------------
@@ -430,7 +436,8 @@ function elmprt_create($id,$prop){
             'name'=>$prop['name'],
             'desc'=>''
         );
-        $res = res_create($resProp)['res'];
+        $resObj = res_create($resProp);
+        $res = $resObj['id'];
     }
 
     $sql = "INSERT INTO a_proj_elm_parts
@@ -443,6 +450,7 @@ function elmprt_create($id,$prop){
     if (!$result) {
         exit_error('Error 11 in elm_func.php: ' . mysqli_error($con));
     }
+    return $resObj;
 }
 
 // --------------------------------------------------------------------------------------
