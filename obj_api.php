@@ -155,9 +155,9 @@ switch ($type){
                 break;
 
             // // create new category in research
-            // case "new_cat":
-            //     $reply["id"] = res_new_category($id,$prop);
-            //     break;
+            case "new_collection":
+                $reply["data"] = res_new_collection($id,$prop);
+                break;
 
             // create new category in research
             case "update_collection":

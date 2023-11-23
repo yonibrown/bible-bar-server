@@ -109,7 +109,7 @@ function proj_get($id){
 //     // create default research for project
 //     $res_prop = array("name"=>"project","desc"=>"project default research","proj"=>$proj);
 //     $res = res_create($res_prop);
-//     res_new_category($res,array("name"=>"default","desc"=>"default collection"));
+//     res_new_collection($res,array("name"=>"default","desc"=>"default collection"));
 
 //     return array("proj"=>$proj);
 // }
@@ -140,7 +140,7 @@ function proj_get($id){
 //         $reply['res'] = $res['res'];
 
 //         // create a collection in the new research
-//         res_new_category($res,array("name"=>"default","desc"=>"default collection"));
+//         res_new_collection($res,array("name"=>"default","desc"=>"default collection"));
 //     }
 //     $cat = array('res'=>$reply['res'],'col'=>1);
 
@@ -306,8 +306,7 @@ function proj_get_res_list($id){
     $list = array();
     $sql = "SELECT r.research_id,r.name_heb res_name
               FROM a_researches r
-             WHERE r.project_id = ".$proj."
-                OR r.research_id in(
+             WHERE r.research_id in(
                  SELECT pa.research_id
                    FROM a_proj_elm_research pa
                    JOIN a_proj_elements pe
@@ -328,6 +327,7 @@ function proj_get_res_list($id){
                    FROM a_proj_link_collections
                   WHERE project_id = ".$proj.")
              ORDER BY r.project_id DESC,r.research_id";
+            //  OR r.project_id = ".$proj."
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 15 in proj_func.php: ' . mysqli_error($con));

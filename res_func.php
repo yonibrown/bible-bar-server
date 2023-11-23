@@ -110,8 +110,12 @@ function res_create($prop){
     if (!$result) {
         exit_error('Error 5 in res_func.php: ' . mysqli_error($con));
     }
-
-    return array("res"=>$res);
+    return array(
+        "id"=>$res,
+        "name"=>$prop['name'],
+        "desc"=>$prop['desc'],
+        "collections"=>array()
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -225,7 +229,7 @@ function res_get_prt_list($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- create new category in research
 // --------------------------------------------------------------------------------------
-function res_new_category($id,$prop){
+function res_new_collection($id,$prop){
     global $con;
 
     $res = $id['res'];
@@ -242,8 +246,8 @@ function res_new_category($id,$prop){
     $pos = $row['pos']+1;
     
     $desc = '';
-    if (array_key_exists('desc',$prop)){
-        $desc = $prop['desc'];
+    if (array_key_exists('description',$prop)){
+        $desc = $prop['description'];
     }
     
 
@@ -263,7 +267,12 @@ function res_new_category($id,$prop){
         exit_error('Error 9 in res_func.php: ' . mysqli_error($con));
     }
 
-    return $col;
+    return array(
+        "res"=>(int)$res,
+        "id"=>(int)$col,
+        "name"=>$prop['name'],
+        "description"=>$desc
+    );
 }
 
 
@@ -389,7 +398,7 @@ function res_upd_parts($id,$prop){
         switch ($attr) {
             case 'collection_id':
                 if ($val == 0){
-                    $cat = res_new_category($id,array('name'=>$updAttr['collection_name']));
+                    $cat = res_new_collection($id,array('name'=>$updAttr['collection_name']))['id'];
                 } else {
                     $cat = $val;
                 }
@@ -419,7 +428,8 @@ function res_duplicate($id,$prop){
 
     $attr = res_get($id);
     $attr['name'] = substr($attr['name'],1,15)."-COPY";
-    $newId = res_create($attr)['res'];
+    $newRes = res_create($attr);
+    $newId = $newRes['id'];
 
     // copy parts
     $partArr = $prop['partList'];
@@ -456,7 +466,7 @@ function res_duplicate($id,$prop){
         exit_error('Error 36 in res_func.php: ' . mysqli_error($con));
     }
 
-    return array('new_res_id'=>$newId);
+    return array('new_res'=>$newRes);
 
     // $newPartId = 0;
     // $sql1 = "SELECT type, collection_id, position, 
