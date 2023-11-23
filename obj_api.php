@@ -165,9 +165,9 @@ switch ($type){
                 break;
 
             // // remove categories from research
-            // case "del_cat_list":
-            //     res_del_categories($id,$prop);
-            //     break;
+            case "delete_collections":
+                res_del_collections($id,$prop);
+                break;
 
             // // create new part in research
             // case "new_part":
