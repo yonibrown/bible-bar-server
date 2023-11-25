@@ -420,6 +420,7 @@ function proj_get_lnk_list($id,$prop){
         ));
         array_push($list,array(
             "id"=>$row['link_id'],
+            "proj"=>$proj,
             "name"=>$row['name'],
             "desc"=>$row['description'],
             "categories"=>$catlist,
