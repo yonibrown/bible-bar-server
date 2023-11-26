@@ -170,9 +170,9 @@ switch ($type){
                 break;
 
             // // create new part in research
-            // case "new_part":
-            //     $reply["id"] = res_new_part($id,$prop);
-            //     break;
+            case "new_part":
+                $reply["id"] = res_new_part($id,$prop);
+                break;
 
             // // delete part from research
             // case "delete_part":
