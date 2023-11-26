@@ -45,6 +45,7 @@ function elm_prop($id,$prop){
 
     return array(
         "id"=>(int)$id['elm'],
+        "proj"=>(int)$id['proj'],
         "type"=>$prop['type'],
         "name"=>$prop['name'],
         "position"=>(float)$prop['position'],

@@ -113,14 +113,16 @@ function inList($arr,$itemType='num'){
         } 
     }
 
-    function reduceFunc($carry,$item)
-    {
-      if (!is_null($carry)){
-          return $carry.",".$item;
-      } else {
-          return $item;
-      }
-    }
-    return " IN(".array_reduce($arr,"reduceFunc").") ";
+    return " IN(".implode(",",$arr).") ";
+
+    // function reduceFunc($carry,$item)
+    // {
+    //   if (!is_null($carry)){
+    //       return $carry.",".$item;
+    //   } else {
+    //       return $item;
+    //   }
+    // }
+    // return " IN(".array_reduce($arr,"reduceFunc").") ";
 }
 ?>

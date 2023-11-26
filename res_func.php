@@ -547,34 +547,33 @@ function res_duplicate($id,$prop){
 // }
 
 // --------------------------------------------------------------------------------------
-// ---- remove categories from research
+// ---- remove categories from research inlist
 // --------------------------------------------------------------------------------------
-// function res_del_categories($id,$prop){
-//     global $con;
+function res_del_collections($id,$prop){
+    global $con;
 
-//     $res = $id['res'];
-//     $catList = $prop['list'];
-//     $catList_str = implode(",",$catList);
-//     $delete_where = "WHERE research_id = ".$res." AND collection_id IN(".$catList_str.")";
+    $res = $id['res'];
+    $colList = $prop['colList'];
+    $delete_where = "WHERE research_id = ".$res." AND collection_id ".inList($colList);
 
-//     $sql = "DELETE FROM a_res_collections ".$delete_where;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
-//     }
+    $sql = "DELETE FROM a_res_collections ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
 
-//     $sql = "DELETE FROM a_res_parts ".$delete_where;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 16 in res_func.php: ' . mysqli_error($con));
-//     }
+    $sql = "DELETE FROM a_res_parts ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 16 in res_func.php: ' . mysqli_error($con));
+    }
 
-//     $sql = "DELETE FROM a_proj_link_collections ".$delete_where;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 17 in res_func.php: ' . mysqli_error($con));
-//     }
-// }
+    $sql = "DELETE FROM a_proj_link_collections ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 17 in res_func.php: ' . mysqli_error($con));
+    }
+}
 
 // --------------------------------------------------------------------------------------
 // ---- update the automatic generated columns of a part (and its related parts)
