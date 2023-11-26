@@ -353,7 +353,9 @@ function res_new_part($id,$prop){
 
     res_update_generated_columns($res,$part);
 
-    return $part;
+    return res_get_prt_list($id,array(
+        "part_id"=>$part
+    ))[0];
 }
 
 // --------------------------------------------------------------------------------------

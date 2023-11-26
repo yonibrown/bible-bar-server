@@ -171,7 +171,7 @@ switch ($type){
 
             // // create new part in research
             case "new_part":
-                $reply["id"] = res_new_part($id,$prop);
+                $reply["data"] = res_new_part($id,$prop);
                 break;
 
             // // delete part from research
