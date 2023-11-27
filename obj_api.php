@@ -184,6 +184,11 @@ switch ($type){
                 res_upd_parts($id,$prop);
                 break;
 
+            // delete point in research
+            case "delete_parts":
+                res_delete_parts($id,$prop);
+                break;
+
             // // update point in research
             // case "upd_pt":
             //     res_upd_point($id,$prop);

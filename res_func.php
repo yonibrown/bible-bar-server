@@ -425,6 +425,25 @@ function res_upd_parts($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
+function res_delete_parts($id,$prop){
+    global $con;
+
+    $res = $id['res'];
+
+    $partArr = $prop['partList'];
+
+    $sql = "DELETE FROM a_res_parts 
+            WHERE research_id = ".$res."
+              AND part_id ".inList($partArr);
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 38 in res_func.php: ' . mysqli_error($con));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
 function res_duplicate($id,$prop){
     global $con;
 
