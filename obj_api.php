@@ -75,10 +75,10 @@ switch ($type){
 
     case "link":
         switch ($oper) {
-            // // create new link
-            // case "new":
-            //     $reply["id"] = lnk_create($prop);
-            //     break;
+            // create new link
+            case "new":
+                $reply["data"] = lnk_create($prop);
+                break;
 
             // // get categories in link            
             // case "get_categories":

@@ -419,8 +419,8 @@ function proj_get_lnk_list($id,$prop){
             "link"=>$row['link_id']
         ));
         array_push($list,array(
-            "id"=>$row['link_id'],
-            "proj"=>$proj,
+            "id"=>(int)$row['link_id'],
+            "proj"=>(int)$proj,
             "name"=>$row['name'],
             "desc"=>$row['description'],
             "categories"=>$catlist,

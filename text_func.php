@@ -209,7 +209,7 @@ function txt_get_segment($id){
                 "space_linked"=>$space_linked
             );
             if ($word_linked){
-                $wordObj['link'] = $row2['link_id'];
+                $wordObj['link'] = (int)$row2['link_id'];
                 $wordObj['res'] = $row2['research_id'];
                 $wordObj['col'] = $row2['collection_id'];
                 $wordObj['div'] = $row2['division_id'];
