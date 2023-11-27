@@ -314,47 +314,49 @@ function res_update_collection($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- create new part in research
 // --------------------------------------------------------------------------------------
-// function res_new_part($id,$prop){
-//     global $con;
+function res_new_part($id,$prop){
+    global $con;
 
-//     $res = $id['res'];
-//     $sql = "SELECT IFNULL(MAX(part_id),0) part,
-//                    IFNULL(MAX(position),0) pos
-//               FROM a_res_parts
-//              WHERE research_id = ".$res;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 10 in res_func.php: ' . mysqli_error($con));
-//     }
-//     $row = mysqli_fetch_array($result);
-//     $part = $row['part']+1;
-//     $pos = $row['pos']+1;
+    $res = $id['res'];
+    $sql = "SELECT IFNULL(MAX(part_id),0) part,
+                   IFNULL(MAX(position),0) pos
+              FROM a_res_parts
+             WHERE research_id = ".$res;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 10 in res_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+    $part = $row['part']+1;
+    $pos = $row['pos']+1;
 
-//     $sql = "INSERT INTO a_res_parts
-//                 (research_id, part_id, type, 
-//                  collection_id, position,
-//                  div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
-//                  src_research, src_part, src_collection, 
-//                  src_from_position, src_from_word, src_to_position, src_to_word, 
-//                  gen_word_count, 
-//                  text, comment) 
-//             VALUES(
-//             ".$res.",".$part.",'pointer',
-//             ".$prop['collection_id'].",".$pos.",
-//             '','','','',
-//             ".$prop['src_research'].",0,".$prop['src_collection'].",
-//             ".$prop['src_from_position'].",".$prop['src_from_word'].",
-//             ".$prop['src_to_position'].",".$prop['src_to_word'].",
-//             0,'','')";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 11 in res_func.php: ' . mysqli_error($con));
-//     }
+    $sql = "INSERT INTO a_res_parts
+                (research_id, part_id, type, 
+                 collection_id, position,
+                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
+                 src_research, src_part, src_collection, 
+                 src_from_position, src_from_word, src_to_position, src_to_word, 
+                 gen_word_count, 
+                 text, comment) 
+            VALUES(
+            ".$res.",".$part.",'pointer',
+            ".$prop['collection_id'].",".$pos.",
+            '','','','',
+            ".$prop['src_research'].",0,".$prop['src_collection'].",
+            ".$prop['src_from_position'].",".$prop['src_from_word'].",
+            ".$prop['src_to_position'].",".$prop['src_to_word'].",
+            0,'','')";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 11 in res_func.php: ' . mysqli_error($con));
+    }
 
-//     res_update_generated_columns($res,$part);
+    res_update_generated_columns($res,$part);
 
-//     return $pt;
-// }
+    return res_get_prt_list($id,array(
+        "part_id"=>$part
+    ))[0];
+}
 
 // --------------------------------------------------------------------------------------
 // ---- delete part from research
@@ -578,52 +580,52 @@ function res_del_collections($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- update the automatic generated columns of a part (and its related parts)
 // --------------------------------------------------------------------------------------
-// function res_update_generated_columns($res,$part){
-//     global $con;
+function res_update_generated_columns($res,$part){
+    global $con;
 
-//     $sql = "SELECT type,src_research,src_collection,src_from_position,src_to_position,src_from_word,src_to_word
-//               FROM a_res_parts
-//              WHERE research_id = ".$res."
-//                AND part_id = ".$part;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 18 in res_func.php: ' . mysqli_error($con));
-//     }
-//     $row = mysqli_fetch_array($result);
+    $sql = "SELECT type,src_research,src_collection,src_from_position,src_to_position,src_from_word,src_to_word
+              FROM a_res_parts
+             WHERE research_id = ".$res."
+               AND part_id = ".$part;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 18 in res_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
 
-//     if ($row['type'] == 'pointer'){
-//         $sql1 = "SELECT src.gen_word_count - ".$row['src_to_word']." - 1 words_from_end
-//                   FROM a_res_parts src
-//                  WHERE src.research_id = ".$row['src_research']."
-//                    AND src.collection_id = ".$row['src_collection']."
-//                    AND src.position = ".$row['src_to_position'];
-//         $result1 = mysqli_query($con,$sql1);
-//         if (!$result1) {
-//             exit_error('Error 19 in res_func.php: ' . mysqli_error($con));
-//         }
-//         $row1 = mysqli_fetch_array($result1);
+    if ($row['type'] == 'pointer'){
+        $sql1 = "SELECT src.gen_word_count - ".$row['src_to_word']." - 1 words_from_end
+                  FROM a_res_parts src
+                 WHERE src.research_id = ".$row['src_research']."
+                   AND src.collection_id = ".$row['src_collection']."
+                   AND src.position = ".$row['src_to_position'];
+        $result1 = mysqli_query($con,$sql1);
+        if (!$result1) {
+            exit_error('Error 19 in res_func.php: ' . mysqli_error($con));
+        }
+        $row1 = mysqli_fetch_array($result1);
 
-//         $sql2 = "SELECT SUM(src.gen_word_count) - ".$row['src_from_word']." - ".$row1['words_from_end']." word_count
-//                   FROM a_res_parts src
-//                  WHERE src.research_id = ".$row['src_research']."
-//                    AND src.collection_id = ".$row['src_collection']."
-//                    AND src.position BETWEEN ".$row['src_from_position']." AND ".$row['src_to_position'];
-//         $result2 = mysqli_query($con,$sql2);
-//         if (!$result2) {
-//             exit_error('Error 20 in res_func.php: ' . mysqli_error($con));
-//         }
-//         $row2 = mysqli_fetch_array($result2);
+        $sql2 = "SELECT SUM(src.gen_word_count) - ".$row['src_from_word']." - ".$row1['words_from_end']." word_count
+                  FROM a_res_parts src
+                 WHERE src.research_id = ".$row['src_research']."
+                   AND src.collection_id = ".$row['src_collection']."
+                   AND src.position BETWEEN ".$row['src_from_position']." AND ".$row['src_to_position'];
+        $result2 = mysqli_query($con,$sql2);
+        if (!$result2) {
+            exit_error('Error 20 in res_func.php: ' . mysqli_error($con));
+        }
+        $row2 = mysqli_fetch_array($result2);
 
-//         $sql3 = "UPDATE a_res_parts 
-//                     SET gen_word_count = ".$row2['word_count']."
-//                  WHERE research_id = ".$res."
-//                    AND part_id = ".$part;
-//         $result3 = mysqli_query($con,$sql3);
-//         if (!$result3) {
-//             exit_error('Error 21 in res_func.php: ' . mysqli_error($con));
-//         }
-//     }
-// }
+        $sql3 = "UPDATE a_res_parts 
+                    SET gen_word_count = ".$row2['word_count']."
+                 WHERE research_id = ".$res."
+                   AND part_id = ".$part;
+        $result3 = mysqli_query($con,$sql3);
+        if (!$result3) {
+            exit_error('Error 21 in res_func.php: ' . mysqli_error($con));
+        }
+    }
+}
 
 // --------------------------------------------------------------------------------------
 // ---- get collection properties

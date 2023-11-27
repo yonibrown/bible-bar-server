@@ -202,7 +202,7 @@ function txt_get_segment($id){
             }
 
             $wordObj = array(
-                "word_no"=>$word_no,
+                "id"=>$word_no,
                 "word"=>$text_word,
                 "space"=>$text_space,
                 "word_linked"=>$word_linked,
