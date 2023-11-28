@@ -353,9 +353,9 @@ function res_new_part($id,$prop){
 
     res_update_generated_columns($res,$part);
 
-    return res_get_prt_list($id,array(
-        "part_id"=>$part
-    ))[0];
+    $partObj = res_get_prt_list($id,array("part_id"=>$part))[0];
+    // $objectsToReload = proj_objects_to_reload();
+    return $partObj;
 }
 
 // --------------------------------------------------------------------------------------

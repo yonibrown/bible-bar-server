@@ -433,6 +433,24 @@ function proj_get_lnk_list($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- delete project                                   
 // --------------------------------------------------------------------------------------
+// function proj_objects_to_reload($id,$prop){
+//     global $con;
+
+//     switch ($prop['object_type']){
+//         case 'res_part':
+//             $res = $prop['cat_data']['res'];
+//             $col = $prop['cat_data']['col'];
+//             switch($prop['action']){
+//                 case 'new':
+//                     $elm_list = 
+//             }
+//             break;
+//     }
+// }
+
+// --------------------------------------------------------------------------------------
+// ---- delete project                                   
+// --------------------------------------------------------------------------------------
 // function proj_delete($id){
 //     global $con;
 
