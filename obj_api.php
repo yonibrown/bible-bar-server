@@ -75,10 +75,10 @@ switch ($type){
 
     case "link":
         switch ($oper) {
-            // // create new link
-            // case "new":
-            //     $reply["id"] = lnk_create($prop);
-            //     break;
+            // create new link
+            case "new":
+                $reply["data"] = lnk_create($prop);
+                break;
 
             // // get categories in link            
             // case "get_categories":
@@ -182,6 +182,11 @@ switch ($type){
             // update point in research
             case "update_parts":
                 res_upd_parts($id,$prop);
+                break;
+
+            // delete point in research
+            case "delete_parts":
+                res_delete_parts($id,$prop);
                 break;
 
             // // update point in research

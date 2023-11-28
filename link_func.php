@@ -42,7 +42,43 @@ function lnk_create($prop){
     }
 
     $id = array('proj'=>$proj,'link'=>$link);
-    return $id;
+
+    $elmlist = array();
+    if (array_key_exists('main_element',$prop)){
+        lnk_add_element($id,array("elm"=>$prop['main_element']));
+        array_push($elmlist,$prop['main_element']);
+    }
+
+    $catlist = array();
+    // if (array_key_exists('linked_element',$prop)){
+    //     $elmObjId = array(
+    //         "proj"=>$proj,
+    //         "elm"=>$prop['linked_element']
+    //     );
+    //     $elmObj = elm_get($elmObjId);
+    //     if ($elmObj['type'] == 'parts'){
+    //         $res = $elmObj['attr']['res'];
+    //         $catlist = lnk_add_categories($id,array(
+    //             "type"=>"research",
+    //             "data"=>$res
+    //         ));
+    //     }
+    // }
+    if (array_key_exists('research_id',$prop)){
+        $catlist = lnk_add_categories($id,array(
+            "type"=>"research",
+            "data"=>$prop['research_id']
+        ));
+    }
+
+    return array(
+        "id"=>$link,
+        "proj"=>$proj,
+        "name"=>$name,
+        "desc"=>$desc,
+        "categories"=>$catlist,
+        "elements"=>$elmlist
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -63,48 +99,55 @@ function lnk_get_categories($id){
 
     $flatArray = array();
     while($row = mysqli_fetch_array($result)) {
-        if ($row['division_id'] != 0){
-            $sql = "SELECT name_heb name
-                      FROM a_res_idx_division
-                     WHERE research_id  = ".$row['research_id']."
-                       AND collection_id = ".$row['collection_id']."
-                       AND division_id = ".$row['division_id'];
-            $result1 = mysqli_query($con,$sql);
-            if (!$result1) {
-                exit_error('Error 1 in link_func.php: ' . mysqli_error($con));
-            }
-            $row1 = mysqli_fetch_array($result1);
-        } else {
-            if ($row['collection_id'] != 0){
-                $sql = "SELECT name_heb name
-                          FROM a_res_collections
-                         WHERE research_id  = ".$row['research_id']."
-                           AND collection_id = ".$row['collection_id'];
-                $result1 = mysqli_query($con,$sql);
-                if (!$result1) {
-                    exit_error('Error 1 in link_func.php: ' . mysqli_error($con));
-                }
-                $row1 = mysqli_fetch_array($result1);
-            } else {
-                $sql = "SELECT name_heb name
-                          FROM a_researches
-                         WHERE research_id  = ".$row['research_id'];
-                $result1 = mysqli_query($con,$sql);
-                if (!$result1) {
-                    exit_error('Error 1 in link_func.php: ' . mysqli_error($con));
-                }
-                $row1 = mysqli_fetch_array($result1);
-            }
-        }
         array_push($flatArray,array("color"=>$row['color'],
                                 "display"=>($row['hilight'] == 1),
                                 "res"=>(int)$row['research_id'],
                                 "col"=>(int)$row['collection_id'],
                                 "div"=>(int)$row['division_id'],
-                                "name"=>$row1['name']));
+                                "name"=>lnk_get_cat_name($row)));
     }
 
     return $flatArray;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_get_cat_name($prop){
+    global $con;
+
+    if ($prop['division_id'] != 0){
+        $sql = "SELECT name_heb name
+                  FROM a_res_idx_division
+                 WHERE research_id  = ".$prop['research_id']."
+                   AND collection_id = ".$prop['collection_id']."
+                   AND division_id = ".$prop['division_id'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 1 in link_func.php: ' . mysqli_error($con));
+        }
+        $row = mysqli_fetch_array($result);
+    } elseif ($prop['collection_id'] != 0){
+        $sql = "SELECT name_heb name
+                    FROM a_res_collections
+                    WHERE research_id  = ".$prop['research_id']."
+                    AND collection_id = ".$prop['collection_id'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 1 in link_func.php: ' . mysqli_error($con));
+        }
+        $row = mysqli_fetch_array($result);
+    } else {
+        $sql = "SELECT name_heb name
+                    FROM a_researches
+                    WHERE research_id  = ".$prop['research_id'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 1 in link_func.php: ' . mysqli_error($con));
+        }
+        $row = mysqli_fetch_array($result);
+    }
+    return $row['name'];
 }
 
 // --------------------------------------------------------------------------------------
@@ -180,66 +223,94 @@ function lnk_remove_element($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- add categories to a link
 // --------------------------------------------------------------------------------------
-// function lnk_add_categories($id,$prop){
-//     global $con;
+function lnk_add_categories($id,$prop){
+    global $con;
 
-//     $proj = $id['proj'];
-//     $link = $id['link'];
+    $proj = $id['proj'];
+    $link = $id['link'];
 
-//     if ($prop['type'] == 'list'){
-//         $list = $prop['data'];
-//     } else if ($prop['type'] == 'category'){
-//         $list = array($prop['data']);
-//     }
+    if ($prop['type'] == 'list'){
+        $list = $prop['data'];
+    } else if ($prop['type'] == 'category'){
+        $list = array($prop['data']);
+    } else if ($prop['type'] == 'research'){
+        $res = $prop['data'];
+        $colList = res_get_col_list(array("res"=>$res));
+        function catlist($col){
+            return array(
+                "res"=>$col['res'],
+                "col"=>$col['id']
+            );
+        }
+        $list = array_map("catlist",$colList);
+    }
 
-//     $catArray = array();
-//     foreach($list as $cat) {
-//         // get available color
-//         $sql = "SELECT c.color
-//                 FROM a_proj_link_collections c
-//                 WHERE c.color NOT IN (
-//                     SELECT t.color
-//                     FROM a_proj_link_collections t
-//                     WHERE t.project_id = ".$proj."
-//                         AND t.link_id = ".$link.")
-//                 LIMIT 1";
-//         $result = mysqli_query($con,$sql);
-//         if (!$result) {
-//             exit_error('Error 4 in link_func.php: ' . mysqli_error($con));
-//         }
-//         if ($row = mysqli_fetch_array($result)){
-//             $color = $row['color'];
-//         } else {
-//             $color = '#00d8ff';
-//         }
-//         // add the category to the link
-//         $sql = "INSERT INTO a_proj_link_collections
-//                     (project_id, link_id, position, research_id, collection_id, division_id, color, hilight) 
-//                 VALUES (".$proj.",
-//                         ".$link.",
-//                         0,
-//                         ".$cat['res'].",
-//                         ".$cat['col'].",
-//                         0,
-//                         '".$color."',
-//                         1)";
-//         $result = mysqli_query($con,$sql);
-//         if (!$result) {
-//             exit_error('Error 5 in link_func.php: ' . mysqli_error($con).$sql);
-//         }
+    $catArray = array();
+    foreach($list as $cat) {
+        // add the category to the returned array
+        array_push($catArray,lnk_add_category($id,array("cat"=>$cat)));
+    }
 
-//         // add the category to the returned array
-//         array_push($catArray,array("proj"=>$proj,
-//                                 "link"=>$link,
-//                                 "res"=>$cat['res'],
-//                                 "col"=>$cat['col'],
-//                                 "div"=>0,
-//                                 "color"=>$color,
-//                                 "hilight"=>true));
-//     }
+    return $catArray;
+}
 
-//     return $catArray;
-// }
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_add_category($id,$prop){
+    global $con;
+
+    $proj = $id['proj'];
+    $link = $id['link'];
+    $cat = $prop['cat'];
+
+    // get available color
+    $sql = "SELECT c.color
+            FROM a_proj_link_collections c
+            WHERE c.color NOT IN (
+                SELECT t.color
+                FROM a_proj_link_collections t
+                WHERE t.project_id = ".$proj."
+                    AND t.link_id = ".$link.")
+            LIMIT 1";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 4 in link_func.php: ' . mysqli_error($con));
+    }
+    if ($row = mysqli_fetch_array($result)){
+        $color = $row['color'];
+    } else {
+        $color = '#00d8ff';
+    }
+    // add the category to the link
+    $sql = "INSERT INTO a_proj_link_collections
+                (project_id, link_id, position, research_id, collection_id, division_id, color, hilight) 
+            VALUES (".$proj.",
+                    ".$link.",
+                    0,
+                    ".$cat['res'].",
+                    ".$cat['col'].",
+                    0,
+                    '".$color."',
+                    1)";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 5 in link_func.php: ' . mysqli_error($con).$sql);
+    }
+
+    return array(
+        "color"=>$color,
+        "display"=>true,
+        "res"=>$cat['res'],
+        "col"=>$cat['col'],
+        "div"=>0,
+        "name"=>lnk_get_cat_name(array(
+            "research_id"=>$cat['res'],
+            "collection_id"=>$cat['col'],
+            "division_id"=>0
+        ))
+    );
+}
 
 // --------------------------------------------------------------------------------------
 // ---- update category in a link
