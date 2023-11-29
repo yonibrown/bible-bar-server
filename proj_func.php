@@ -431,22 +431,59 @@ function proj_get_lnk_list($id,$prop){
 }
 
 // --------------------------------------------------------------------------------------
-// ---- delete project                                   
+// ----                           
 // --------------------------------------------------------------------------------------
-// function proj_objects_to_reload($id,$prop){
-//     global $con;
+function proj_objects_to_reload($id,$prop){
+    global $con;
+    
+    $elm_list = array();
 
-//     switch ($prop['object_type']){
-//         case 'res_part':
-//             $res = $prop['cat_data']['res'];
-//             $col = $prop['cat_data']['col'];
-//             switch($prop['action']){
-//                 case 'new':
-//                     $elm_list = 
-//             }
-//             break;
-//     }
-// }
+    switch ($prop['object_type']){
+        case 'res_part':
+            $cat = $prop['cat'];
+            switch($prop['action']){
+                case 'new':
+                case 'delete':
+                    $elm_list = proj_get_cat_elements($id,$cat);
+                    break;
+            }
+            break;
+    }
+    return $elm_list;
+}
+
+// --------------------------------------------------------------------------------------
+// ----                    
+// --------------------------------------------------------------------------------------
+function proj_get_cat_elements($id,$cat){
+    global $con;
+
+    $col_pred = '';
+    if (array_key_exists('col',$cat)){
+        $col_pred = " AND el.collection_id = ".$cat['col'];
+    }
+
+
+    $list = array();
+
+    $sql = "SELECT el.element_id
+              FROM view_proj_link_elm_col el
+             WHERE el.project_id = ".$id['proj']."
+               AND el.research_id = ".$cat['res']."
+               ".$col_pred."
+            ORDER BY el.element_id";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 33 in proj_func.php: ' . mysqli_error($con));
+    }
+    while($row = mysqli_fetch_array($result)) {
+        array_push($list,array(
+            "type"=>"element",
+            "id"=>(int)$row['element_id']
+        ));
+    }
+    return $list;
+}
 
 // --------------------------------------------------------------------------------------
 // ---- delete project                                   

@@ -354,8 +354,18 @@ function res_new_part($id,$prop){
     res_update_generated_columns($res,$part);
 
     $partObj = res_get_prt_list($id,array("part_id"=>$part))[0];
-    // $objectsToReload = proj_objects_to_reload();
-    return $partObj;
+    $rep = array("new_part"=>$partObj);
+    if (array_key_exists('project_id',$prop)){
+        $rep['objects_to_reload'] = proj_objects_to_reload($prop['project_id'],array(
+            "object_type"=>"res_part",
+            "action"=>"new",
+            "cat"=>array(
+                "res"=>$res,
+                "col"=>$prop['collection_id']
+            )
+        ));
+    }
+    return $rep;
 }
 
 // --------------------------------------------------------------------------------------
@@ -439,6 +449,18 @@ function res_delete_parts($id,$prop){
     if (!$result) {
         exit_error('Error 38 in res_func.php: ' . mysqli_error($con));
     }
+
+    $rep = array();
+    if (array_key_exists('project_id',$prop)){
+        $rep['objects_to_reload'] = proj_objects_to_reload($prop['project_id'],array(
+            "object_type"=>"res_part",
+            "action"=>"delete",
+            "cat"=>array(
+                "res"=>$res
+            )
+        ));
+    }
+    return $rep;
 }
 
 // --------------------------------------------------------------------------------------
