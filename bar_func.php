@@ -34,7 +34,8 @@ function bar_create($id,$prop){
     $sql = "INSERT INTO a_proj_elm_sequence
                 (project_id, element_id, 
                  research_id, collection_id, from_position, to_position, 
-                 seq_index, seq_level, color_level, points_generated,gen_total_words) 
+                 seq_index, seq_level, color_level, 
+                 segments_generated, points_generated,gen_total_words) 
             VALUES(".$id['proj'].", 
                 ".$id['elm'].", 
                 ".$res.", 
@@ -114,15 +115,7 @@ function bar_calc_segments($id,$dsp){
     $rep['segments'] = array();
 
     // get total verses in selection
-    $sql = "SELECT SUM(gen_word_count) total_words
-              FROM a_res_parts base
-             WHERE ".$base_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 6 in bar_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    $total_words = $row['total_words'];
+    $total_words = bar_get_selection_size($id,$prop,$base_table);
 
     $sql = "SET SQL_BIG_SELECTS=1";
     $result = mysqli_query($con,$sql);
@@ -130,7 +123,16 @@ function bar_calc_segments($id,$dsp){
         exit_error('Error 7 in bar_func.php: ' . mysqli_error($con));
     }
 
-    $sql = "SELECT d.division_id,d.name_heb name, SUM(base.gen_word_count) words, d.to_position to_pos
+    if ($prop['segments_generated'] == TRUE){
+        $sql = "SELECT d.division_id,d.name,d.width_pct, d.to_position to_pos
+              FROM g_proj_elm_segments d
+             WHERE d.project_id = ".$id['proj']."
+               AND d.element_id = ".$id['elm']."
+             ORDER BY d.to_position,d.division_id";
+    } else {
+        bar_init_gen_segments($id);
+        $sql = "SELECT d.division_id,d.name_heb name, SUM(base.gen_word_count) words, 
+                       d.to_position to_pos
               FROM a_res_parts base
               JOIN a_res_idx_division d
                 ON base.research_id = d.research_id
@@ -140,6 +142,7 @@ function bar_calc_segments($id,$dsp){
                AND d.index_id = ".$prop['seq_index']."
                AND d.level = ".$prop['seq_level']."
              GROUP BY d.to_position,d.division_id,d.name_heb";
+    }
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 8 in bar_func.php: ' . mysqli_error($con));
@@ -148,8 +151,11 @@ function bar_calc_segments($id,$dsp){
     $colorOrd = 1;
     $color = "";
     while($row = mysqli_fetch_array($result)) {
-        $pct = $row['words']/$total_words*100;
-
+        if ($prop['segments_generated'] == FALSE){
+            $sg_size = get_segment_size($id,$row,$total_words);
+        } else {
+            $sg_size = array("width_pct"=>$row['width_pct'].'%');
+        }
         if ($row['to_pos']>$colorMaxPos[$colorOrd]){
             $colorOrd++;
         }
@@ -161,12 +167,22 @@ function bar_calc_segments($id,$dsp){
         array_push($rep['segments'],array(
             "div"=>(int)$row['division_id'],
             "name"=>$row['name'],
-            "width"=>$pct.'%',
+            "width"=>$sg_size['width_pct'],
             "color"=>$color,
             "to_pos"=>(float)$row['to_pos'],
             "max_pos"=>(float)$colorMaxPos[$colorOrd]
         ));
     }
+
+    if ($prop['segments_generated'] == FALSE){
+        $prop['segments_generated'] = TRUE;
+        elmseq_set($id,array('segments_generated'=>TRUE));
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 16 in bar_func.php: ' . mysqli_error($con));
+        }
+    }
+
     return $rep;
 }
 
@@ -207,6 +223,33 @@ function bar_get_selection_size($id,$prop,$base_table){
     $prop['total_words'] = $row['total_words'];
 
     return $prop['total_words'];
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function get_segment_size($id,$row1,$total_words){
+    global $con;
+
+    $widthPct = $row1['words']/$total_words*100;
+
+    $sql = "INSERT INTO g_proj_elm_segments
+                (project_id, element_id, 
+                division_id, to_position, width_pct, name) 
+                VALUES (".$id['proj']."
+                ,".$id['elm']."
+                ,".$row1['division_id']."
+                ,".$row1['to_pos']."
+                ,".$widthPct."
+                ,'".$row1['name']."')";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 13 in bar_func.php: ' . mysqli_error($con));
+    }
+
+    return array(
+        'width_pct'=>$widthPct.'%'
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -341,8 +384,23 @@ function get_point_size($id,$base_table,$row1,$total_words,$big_part_ratio){
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
+function bar_init_gen_segments($id){
+    global $con;
+
+    $sql = "DELETE FROM g_proj_elm_segments 
+            WHERE project_id = ".$id['proj']."
+            AND element_id = ".$id['elm'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in bar_func.php: ' . mysqli_error($con));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
 function bar_init_gen_points($id){
-    global $con,$heb_num;
+    global $con;
 
     $sql = "DELETE FROM g_proj_elm_points 
             WHERE project_id = ".$id['proj']."
