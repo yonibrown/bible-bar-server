@@ -103,16 +103,15 @@ function csv_to_array($csv){
 }
 */
 
+function wrapString($str){
+    return "'".$str."'";
+}
 function inList($arr,$itemType='num'){
-    function wrapString($str){
-        return "'".$str."'";
-    }
     if (!is_null($itemType)){
         if ($itemType == 'string'){
             $arr = array_map("wrapString",$arr);
         } 
     }
-
     return " IN(".implode(",",$arr).") ";
 
     // function reduceFunc($carry,$item)

@@ -491,25 +491,45 @@ function elmprt_set($id,$prop){
 function elmlnk_set($id,$prop){
     global $con;
 
-    $sql_set = '';
-    $sep = '';
+    $sql1_set = '';
+    $sep1 = '';
+    $sql2_set = '';
+    $sep2 = '';
 
     foreach($prop as $attr => $val) {
         switch ($attr) {
             case "link_display":
-                $sql_set .= $sep.$attr." = '".$val."'";
-                $sep = ',';
+                $sql1_set .= $sep1.$attr." = '".$val."'";
+                $sep1 = ',';
                 break;
-        }   
+            case "name":
+                $sql2_set .= $sep2.$attr." = '".$val."'";
+                $sep2 = ',';
+                break;
+            }   
     }
 
-    if ($sql_set != ''){
-        $sql = "UPDATE a_proj_elm_link 
-                SET ".$sql_set."  
+    if ($sql1_set != ''){
+        $sql1 = "UPDATE a_proj_elm_link 
+                SET ".$sql1_set."  
                 WHERE project_id = ".$id['proj']."
                 AND element_id = ".$id['elm'];
-        $result = mysqli_query($con,$sql);
-        if (!$result) {
+        $result1 = mysqli_query($con,$sql1);
+        if (!$result1) {
+            exit_error('Error 19 in elm_func.php: ' . mysqli_error($con));
+        }
+    }
+
+    if ($sql2_set != ''){
+        $sql2 = "UPDATE a_proj_links l
+                SET ".$sql2_set."  
+                WHERE l.project_id = ".$id['proj']."
+                AND l.link_id = (SELECT e.link_id
+                                 FROM a_proj_elm_link e
+                                WHERE e.project_id = ".$id['proj']."
+                                  AND e.element_id = ".$id['elm'].")";
+        $result2 = mysqli_query($con,$sql2);
+        if (!$result2) {
             exit_error('Error 19 in elm_func.php: ' . mysqli_error($con));
         }
     }

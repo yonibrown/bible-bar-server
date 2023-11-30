@@ -437,6 +437,9 @@ function proj_objects_to_reload($id,$prop){
     global $con;
     
     $elm_list = array();
+    $in_list = '';
+    $points_reload = false;
+    $segments_reload = false;
 
     switch ($prop['object_type']){
         case 'res_part':
@@ -444,16 +447,43 @@ function proj_objects_to_reload($id,$prop){
             switch($prop['action']){
                 case 'new':
                 case 'delete':
-                    $elm_list = proj_get_cat_elements($id,$cat);
+                    $elmListObj = proj_get_cat_elements($id,$cat);
+                    $elm_list = $elmListObj['elm_list'];
+                    $in_list = $elmListObj['in_list'];
+                    $points_reload = true;
                     break;
             }
             break;
     }
+
+    if ($in_list != ''){
+        $sql_set = '';
+        $sep = '';
+        if ($points_reload){
+            $sql_set .= $sep."points_generated = ".($points_reload?"FALSE":"TRUE");
+            $sep = ',';
+        }
+        if ($segments_reload){
+            $sql_set .= $sep."segments_generated = ".($segments_reload?"FALSE":"TRUE");
+            $sep = ',';
+        }
+        if($sql_set != ''){
+            $sql = "UPDATE a_proj_elm_sequence 
+                    SET ".$sql_set."  
+                    WHERE project_id = ".$id['proj']."
+                    AND element_id ".$in_list;
+            $result = mysqli_query($con,$sql);
+            if (!$result) {
+                exit_error('Error 3 in proj_func.php: ' . mysqli_error($con));
+            }
+        }
+    }
+
     return $elm_list;
 }
 
 // --------------------------------------------------------------------------------------
-// ----                    
+// ---- get elements to reload                    
 // --------------------------------------------------------------------------------------
 function proj_get_cat_elements($id,$cat){
     global $con;
@@ -463,26 +493,35 @@ function proj_get_cat_elements($id,$cat){
         $col_pred = " AND el.collection_id = ".$cat['col'];
     }
 
-
-    $list = array();
+    $elm_list = array();
+    $in_list = array();
 
     $sql = "SELECT el.element_id
               FROM view_proj_link_elm_col el
              WHERE el.project_id = ".$id['proj']."
                AND el.research_id = ".$cat['res']."
                ".$col_pred."
-            ORDER BY el.element_id";
+               AND el.element_id IN(SELECT e.element_id
+                                      FROM a_proj_elements e
+                                     WHERE e.project_id = ".$id['proj']." 
+                                       AND e.position > 0) 
+            GROUP BY el.element_id";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 33 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        array_push($list,array(
+        array_push($elm_list,array(
             "type"=>"element",
             "id"=>(int)$row['element_id']
         ));
+        array_push($in_list,$row['element_id']);
     }
-    return $list;
+
+    return array(
+        "elm_list"=>$elm_list,
+        "in_list"=>inList($in_list)
+    );
 }
 
 // --------------------------------------------------------------------------------------
