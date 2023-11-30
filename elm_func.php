@@ -550,7 +550,8 @@ function elmseq_get($id){
     $sql = "SELECT e.research_id, e.collection_id,
                    e.from_position, e.to_position, 
                    e.seq_index index_id, e.seq_level, e.color_level, 
-                   e.anchor_position, e.anchor_word, e.points_generated, e.gen_total_words
+                   e.anchor_position, e.anchor_word, 
+                   e.segments_generated, e.points_generated, e.gen_total_words
             FROM a_proj_elm_sequence e
             WHERE e.project_id = ".$id['proj']." 
               AND e.element_id = ".$id['elm'];
@@ -584,6 +585,7 @@ function elmseq_get($id){
         'to_key'=>$toKey,
         'anchor_position'=>(float)$row['anchor_position'],
         'anchor_word'=>(int)$row['anchor_word'],
+        'segments_generated'=>($row['segments_generated']=='1'),
         'points_generated'=>($row['points_generated']=='1'),
         'total_words'=>(int)$row['gen_total_words']
     );
@@ -654,6 +656,7 @@ function elmseq_set($id,$prop){
                 $cancel_generated = TRUE;
                 break;
 
+            case "segments_generated":
             case "points_generated":
                 $sql_set .= $sep.$attr." = ".($val?"TRUE":"FALSE");
                 $sep = ',';
@@ -662,7 +665,8 @@ function elmseq_set($id,$prop){
     }
 
     if ($cancel_generated){
-        $sql_set .= ",points_generated = FALSE
+        $sql_set .= ",segments_generated = FALSE
+                     ,points_generated = FALSE
                      ,gen_total_words = 0";
     }
 

@@ -186,7 +186,7 @@ switch ($type){
 
             // delete point in research
             case "delete_parts":
-                res_delete_parts($id,$prop);
+                $reply["data"] = res_delete_parts($id,$prop);
                 break;
 
             // // update point in research
