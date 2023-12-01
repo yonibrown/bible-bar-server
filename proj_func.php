@@ -433,8 +433,8 @@ function proj_get_lnk_list($id,$prop){
 // --------------------------------------------------------------------------------------
 // ----                           
 // --------------------------------------------------------------------------------------
-function proj_objects_to_reload($id,$prop){
-    global $con,$objects_to_reload;
+function proj_objects_to_reload($prop){
+    global $con,$objects_to_reload,$reload;
     
     // $elm_list = array();
     $in_list = '';
@@ -447,7 +447,7 @@ function proj_objects_to_reload($id,$prop){
             switch($prop['action']){
                 case 'new':
                 case 'delete':
-                    $elmListObj = proj_get_cat_elements($id,$cat);
+                    $elmListObj = proj_get_cat_elements($cat);
                     // $elm_list = $elmListObj['elm_list'];
                     $in_list = $elmListObj['in_list'];
                     $points_reload = true;
@@ -492,7 +492,7 @@ function proj_objects_to_reload($id,$prop){
         if($sql_set != ''){
             $sql = "UPDATE a_proj_elm_sequence 
                     SET ".$sql_set."  
-                    WHERE project_id = ".$id['proj']."
+                    WHERE project_id = ".$reload['proj']."
                     AND element_id ".$in_list;
             $result = mysqli_query($con,$sql);
             if (!$result) {
@@ -505,8 +505,8 @@ function proj_objects_to_reload($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- get elements to reload                    
 // --------------------------------------------------------------------------------------
-function proj_get_cat_elements($id,$cat){
-    global $con,$objects_to_reload;
+function proj_get_cat_elements($cat){
+    global $con,$objects_to_reload,$reload;
 
     $col_pred = '';
     if (array_key_exists('col',$cat)){
@@ -518,12 +518,12 @@ function proj_get_cat_elements($id,$cat){
 
     $sql = "SELECT el.element_id
               FROM view_proj_link_elm_col el
-             WHERE el.project_id = ".$id['proj']."
+             WHERE el.project_id = ".$reload['proj']."
                AND el.research_id = ".$cat['res']."
                ".$col_pred."
                AND el.element_id IN(SELECT e.element_id
                                       FROM a_proj_elements e
-                                     WHERE e.project_id = ".$id['proj']." 
+                                     WHERE e.project_id = ".$reload['proj']." 
                                        AND e.position > 0) 
             GROUP BY el.element_id";
     $result = mysqli_query($con,$sql);

@@ -315,7 +315,7 @@ function res_update_collection($id,$prop){
 // ---- create new part in research
 // --------------------------------------------------------------------------------------
 function res_new_part($id,$prop){
-    global $con;
+    global $con,$reload;
 
     $res = $id['res'];
     $sql = "SELECT IFNULL(MAX(part_id),0) part,
@@ -355,8 +355,8 @@ function res_new_part($id,$prop){
 
     $partObj = res_get_prt_list($id,array("part_id"=>$part))[0];
     $rep = array("new_part"=>$partObj);
-    if (array_key_exists('project_id',$prop)){
-        proj_objects_to_reload($prop['project_id'],array(
+    if (array_key_exists('proj',$reload)){
+        proj_objects_to_reload(array(
             "object_type"=>"res_part",
             "action"=>"new",
             "cat"=>array(
@@ -436,7 +436,7 @@ function res_upd_parts($id,$prop){
 // ---- 
 // --------------------------------------------------------------------------------------
 function res_delete_parts($id,$prop){
-    global $con;
+    global $con,$reload;
 
     $res = $id['res'];
 
@@ -450,8 +450,8 @@ function res_delete_parts($id,$prop){
         exit_error('Error 38 in res_func.php: ' . mysqli_error($con));
     }
 
-    if (array_key_exists('project_id',$prop)){
-        proj_objects_to_reload($prop['project_id'],array(
+    if (array_key_exists('proj',$reload)){
+        proj_objects_to_reload(array(
             "object_type"=>"res_part",
             "action"=>"delete",
             "cat"=>array(

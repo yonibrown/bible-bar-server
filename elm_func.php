@@ -514,7 +514,7 @@ function elmlnk_set($id,$prop){
             case "name":
                 $sql2_set .= $sep2.$attr." = '".$val."'";
                 $sep2 = ',';
-                proj_objects_to_reload($id,array(
+                proj_objects_to_reload(array(
                     'object_type'=>'link_name',
                     "action"=>"update",
                     'link'=>$row['link_id'],

@@ -16,6 +16,11 @@ $type = $_POST['type'];
 $id = $_POST['id'];
 $oper = $_POST['oper'];
 $prop = $_POST['prop'];
+if (array_key_exists('reload',$_POST)){
+    $reload = $_POST['reload'];
+} else {
+    $reload = array();
+}
 
 $reply = array();
 $objects_to_reload = array(
