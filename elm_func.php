@@ -4,6 +4,13 @@
 // ---- get element                                     
 // --------------------------------------------------------------------------------------
 function elm_get($id){
+    return elm_prop($id,elm_get_basic($id));
+}
+
+// --------------------------------------------------------------------------------------
+// ---- get element                                     
+// --------------------------------------------------------------------------------------
+function elm_get_basic($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
@@ -18,7 +25,7 @@ function elm_get($id){
     $row = mysqli_fetch_array($result);
     $type = $row['type'];
 
-    return elm_prop($id,$row);
+    return $row;
 }
 
 // --------------------------------------------------------------------------------------
@@ -167,7 +174,7 @@ function elm_set($id,$prop){
         }
     }
 
-    $elm_prop = elm_get($id);
+    $elm_prop = elm_get_basic($id);
     switch($elm_prop['type']){
         case 'bar':
             elmseq_set($id,$prop);
@@ -491,6 +498,8 @@ function elmprt_set($id,$prop){
 function elmlnk_set($id,$prop){
     global $con;
 
+    $row = elmlnk_get($id);
+
     $sql1_set = '';
     $sep1 = '';
     $sql2_set = '';
@@ -505,6 +514,12 @@ function elmlnk_set($id,$prop){
             case "name":
                 $sql2_set .= $sep2.$attr." = '".$val."'";
                 $sep2 = ',';
+                proj_objects_to_reload($id,array(
+                    'object_type'=>'link_name',
+                    "action"=>"update",
+                    'link'=>$row['link_id'],
+                    'name'=>$val
+                ));
                 break;
             }   
     }
@@ -524,10 +539,7 @@ function elmlnk_set($id,$prop){
         $sql2 = "UPDATE a_proj_links l
                 SET ".$sql2_set."  
                 WHERE l.project_id = ".$id['proj']."
-                AND l.link_id = (SELECT e.link_id
-                                 FROM a_proj_elm_link e
-                                WHERE e.project_id = ".$id['proj']."
-                                  AND e.element_id = ".$id['elm'].")";
+                AND l.link_id = ".$row['link_id'];
         $result2 = mysqli_query($con,$sql2);
         if (!$result2) {
             exit_error('Error 19 in elm_func.php: ' . mysqli_error($con));

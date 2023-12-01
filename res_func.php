@@ -356,7 +356,7 @@ function res_new_part($id,$prop){
     $partObj = res_get_prt_list($id,array("part_id"=>$part))[0];
     $rep = array("new_part"=>$partObj);
     if (array_key_exists('project_id',$prop)){
-        $rep['objects_to_reload'] = proj_objects_to_reload($prop['project_id'],array(
+        proj_objects_to_reload($prop['project_id'],array(
             "object_type"=>"res_part",
             "action"=>"new",
             "cat"=>array(
@@ -450,9 +450,8 @@ function res_delete_parts($id,$prop){
         exit_error('Error 38 in res_func.php: ' . mysqli_error($con));
     }
 
-    $rep = array();
     if (array_key_exists('project_id',$prop)){
-        $rep['objects_to_reload'] = proj_objects_to_reload($prop['project_id'],array(
+        proj_objects_to_reload($prop['project_id'],array(
             "object_type"=>"res_part",
             "action"=>"delete",
             "cat"=>array(
@@ -460,7 +459,6 @@ function res_delete_parts($id,$prop){
             )
         ));
     }
-    return $rep;
 }
 
 // --------------------------------------------------------------------------------------

@@ -434,9 +434,9 @@ function proj_get_lnk_list($id,$prop){
 // ----                           
 // --------------------------------------------------------------------------------------
 function proj_objects_to_reload($id,$prop){
-    global $con;
+    global $con,$objects_to_reload;
     
-    $elm_list = array();
+    // $elm_list = array();
     $in_list = '';
     $points_reload = false;
     $segments_reload = false;
@@ -448,9 +448,31 @@ function proj_objects_to_reload($id,$prop){
                 case 'new':
                 case 'delete':
                     $elmListObj = proj_get_cat_elements($id,$cat);
-                    $elm_list = $elmListObj['elm_list'];
+                    // $elm_list = $elmListObj['elm_list'];
                     $in_list = $elmListObj['in_list'];
                     $points_reload = true;
+                    break;
+            }
+            break;
+
+        case 'link_name':
+            switch($prop['action']){
+                case 'update':
+                    $found = false;
+                    foreach($objects_to_reload['links'] as $link){
+                        if ($link['id'] == $prop['link']){
+                            $found = true;
+                            $link['actions']['name'] = $prop['name'];
+                        }
+                    }
+                    if (!$found){
+                        array_push($objects_to_reload['links'],array(
+                            "id"=>$prop['link'],
+                            "actions"=>array(
+                                "name"=>$prop['name']
+                            )
+                        ));
+                    }
                     break;
             }
             break;
@@ -478,22 +500,20 @@ function proj_objects_to_reload($id,$prop){
             }
         }
     }
-
-    return $elm_list;
 }
 
 // --------------------------------------------------------------------------------------
 // ---- get elements to reload                    
 // --------------------------------------------------------------------------------------
 function proj_get_cat_elements($id,$cat){
-    global $con;
+    global $con,$objects_to_reload;
 
     $col_pred = '';
     if (array_key_exists('col',$cat)){
         $col_pred = " AND el.collection_id = ".$cat['col'];
     }
 
-    $elm_list = array();
+    // $elm_list = array();
     $in_list = array();
 
     $sql = "SELECT el.element_id
@@ -511,15 +531,17 @@ function proj_get_cat_elements($id,$cat){
         exit_error('Error 33 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        array_push($elm_list,array(
-            "type"=>"element",
-            "id"=>(int)$row['element_id']
+        array_push($objects_to_reload['elements'],array(
+            "id"=>(int)$row['element_id'],
+            "actions"=>array(
+                "reload"=>true
+            )
         ));
         array_push($in_list,$row['element_id']);
     }
 
     return array(
-        "elm_list"=>$elm_list,
+        // "elm_list"=>$elm_list,
         "in_list"=>inList($in_list)
     );
 }

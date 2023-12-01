@@ -17,6 +17,13 @@ $id = $_POST['id'];
 $oper = $_POST['oper'];
 $prop = $_POST['prop'];
 
+$reply = array();
+$objects_to_reload = array(
+    'elements'=>array(),
+    "links"=>array(),
+    "researches"=>array()
+);
+
 switch ($type){
     case "element":
         switch ($oper) {
@@ -186,7 +193,7 @@ switch ($type){
 
             // delete point in research
             case "delete_parts":
-                $reply["data"] = res_delete_parts($id,$prop);
+                res_delete_parts($id,$prop);
                 break;
 
             // // update point in research
@@ -312,6 +319,8 @@ switch ($type){
     //     }
     //     break;    
 }
+$reply['objects_to_reload'] = $objects_to_reload;
 
+echo json_encode($reply);
 include 'disconnect_db.php';
 ?>
