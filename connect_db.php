@@ -23,8 +23,6 @@ $heb_num = array("0","א","ב","ג","ד","ה","ו","ז","ח","ט","י",
                "קסא","קסב","קסג","קסד","קסה","קסו","קסז","קסח","קסט","קע",
                "קעא","קעב","קעג","קעד","קעה","קעו");
 
-$reply = array();
-
 // connect to infinityfree MySql server
 // $host = "sql203.epizy.com";
 // $uname = "epiz_34309968";
@@ -103,16 +101,15 @@ function csv_to_array($csv){
 }
 */
 
+function wrapString($str){
+    return "'".$str."'";
+}
 function inList($arr,$itemType='num'){
-    function wrapString($str){
-        return "'".$str."'";
-    }
     if (!is_null($itemType)){
         if ($itemType == 'string'){
             $arr = array_map("wrapString",$arr);
         } 
     }
-
     return " IN(".implode(",",$arr).") ";
 
     // function reduceFunc($carry,$item)

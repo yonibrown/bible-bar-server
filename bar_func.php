@@ -332,12 +332,6 @@ function get_point_size($id,$base_table,$row1,$total_words,$big_part_ratio){
         $widthPct = $width/$total_words*100;
         $name = $row4['abs_name'];
 
-        // $sql = "UPDATE a_res_parts
-        //         SET gen_offset_pct = ".$offsetPct.",
-        //             gen_width_pct = ".$widthPct.",
-        //             gen_name = '".$name."'
-        //         WHERE research_id = ".$row1['research_id']." 
-        //         AND part_id = ".$row1['part_id'];
         $sql = "INSERT INTO g_proj_elm_points
                 (project_id, element_id, 
                 link_id, research_id, part_id, collection_id, 
