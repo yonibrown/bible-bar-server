@@ -476,6 +476,28 @@ function proj_objects_to_reload($prop){
                     break;
             }
             break;
+
+        case 'research_name':
+            switch($prop['action']){
+                case 'update':
+                    $found = false;
+                    foreach($objects_to_reload['researches'] as $res){
+                        if ($res['id'] == $prop['res']){
+                            $found = true;
+                            $res['actions']['name'] = $prop['name'];
+                        }
+                    }
+                    if (!$found){
+                        array_push($objects_to_reload['researches'],array(
+                            "id"=>$prop['res'],
+                            "actions"=>array(
+                                "name"=>$prop['name']
+                            )
+                        ));
+                    }
+                    break;
+            }
+            break;
     }
 
     if ($in_list != ''){
