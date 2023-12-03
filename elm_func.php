@@ -115,13 +115,13 @@ function elm_create($prop){
         }
     }
 
-    $res = null;
+    $resp = array();
     switch($type){
         case 'bar':
             bar_create($id,$prop);
             break;
         case 'text':
-            txt_create($id,$prop);
+            $resp = txt_create($id,$prop);
             break;
         case 'link':
             elmlnk_create($id,$prop);
@@ -130,14 +130,25 @@ function elm_create($prop){
             elmres_create($id,$prop);
             break;
         case 'parts':
-            $res = elmprt_create($id,$prop);
+            $resp = elmprt_create($id,$prop);
             break;
     }
 
+    $upd = array();
     $rep = array("elm"=>elm_prop($id,$prop));
-    if ($res != null){
-        $rep['res'] = $res;
+    foreach($resp as $attr => $val) {
+        switch ($attr) {
+            case "res":
+                $rep[$attr] = $res;
+                break;
+            case "name":
+                $upd[$attr] = $val;
+                $rep['elm'][$attr] = $val;
+                break;
+            }   
     }
+
+    elm_set_basic($id,$upd);
 
     return $rep;
 }
@@ -146,6 +157,34 @@ function elm_create($prop){
 // ---- set element's attributes
 // --------------------------------------------------------------------------------------
 function elm_set($id,$prop){
+    global $con;
+
+    elm_set_basic($id,$prop);
+
+    $elm_prop = elm_get_basic($id);
+    switch($elm_prop['type']){
+        case 'bar':
+            elmseq_set($id,$prop);
+            break;
+        case 'text':
+            elmseq_set($id,$prop);
+            // txt_set($id,$prop);
+            break;
+        case 'parts':
+            elmprt_set($id,$prop);
+            break;
+        case 'link':
+            elmlnk_set($id,$prop);
+            break;
+    }
+
+    return elm_get($id);
+}
+
+// --------------------------------------------------------------------------------------
+// ---- set element's attributes
+// --------------------------------------------------------------------------------------
+function elm_set_basic($id,$prop){
     global $con;
 
     $sql_set = '';
@@ -173,25 +212,6 @@ function elm_set($id,$prop){
             exit_error('Error 4 in elm_func.php: ' . mysqli_error($con));
         }
     }
-
-    $elm_prop = elm_get_basic($id);
-    switch($elm_prop['type']){
-        case 'bar':
-            elmseq_set($id,$prop);
-            break;
-        case 'text':
-            elmseq_set($id,$prop);
-            // txt_set($id,$prop);
-            break;
-        case 'parts':
-            elmprt_set($id,$prop);
-            break;
-        case 'link':
-            elmlnk_set($id,$prop);
-            break;
-    }
-
-    return elm_get($id);
 }
 
 // --------------------------------------------------------------------------------------
@@ -624,10 +644,10 @@ function elmseq_get($id){
     );
 
     $fromPos = $row['from_position'];
-    $fromKey = residx_position_to_key($indexId,array('position'=>$fromPos))['list'];
+    $fromKey = residx_position_to_key($indexId,array('position'=>$fromPos));
 
     $toPos = $row['to_position'];
-    $toKey = residx_position_to_key($indexId,array('position'=>$toPos))['list'];
+    $toKey = residx_position_to_key($indexId,array('position'=>$toPos));
 
     $attr = array(
         'research_id'=>(int)$row['research_id'],

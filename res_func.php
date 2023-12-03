@@ -905,7 +905,7 @@ function residx_position_to_key($id,$prop){
 
     $list = array();
     if ($prop['position'] > 0){
-        $sql = "SELECT d.level,d.division_id
+        $sql = "SELECT d.level,d.division_id,d.name_heb name
                   FROM a_res_idx_division d
                   JOIN a_res_idx_levels l
                     ON l.research_id = d.research_id
@@ -924,7 +924,7 @@ function residx_position_to_key($id,$prop){
         } else {
             $group_func = 'MAX';
         }
-        $sql = "SELECT d.level,".$group_func."(d.division_id) division_id
+        $sql = "SELECT d.level,".$group_func."(d.division_id) division_id,d.name_heb name
                   FROM a_res_idx_division d
                   JOIN a_res_idx_levels l
                     ON l.research_id = d.research_id
@@ -947,10 +947,11 @@ function residx_position_to_key($id,$prop){
         // array_push($list,$row['division_id']);
         array_push($list,array(
             "level"=>(int)$row['level'],
-            "division_id"=>(int)$row['division_id']
+            "division_id"=>(int)$row['division_id'],
+            "name"=>$row['name']
         ));
     }
-    return array('list'=>$list);
+    return $list;
 }
 
 // --------------------------------------------------------------------------------------
