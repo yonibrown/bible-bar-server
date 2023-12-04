@@ -20,12 +20,31 @@ function txt_create($id,$prop){
         exit_error('Error 2 in text_func.php: ' . mysqli_error($con));
     }
 
+    $indexId = array(
+        'res'=>$attr['src_research'],
+        'col'=>$attr['src_collection'],
+        'idx'=>1 // default index
+    );
+
+    $anchorKey = residx_position_to_key($indexId,array('position'=>$attr['anchor_position']));
+    
+    $keyName = array_map("indexKeyName",$anchorKey);
+    
+    array_pop($keyName); // pop the verse from the key leaving the chapter and the book
+    
+    $chapterName = implode(" ",$keyName);
+
+    return array("name"=>$chapterName);
+
     // if ($attr['prt_research'] != $attr['src_research']){
     //     // create link between prt_research and text element
     //     elm_link_to_cat($id,array("res"=>$attr['prt_research'],"col"=>$attr['prt_collection']));
     // }
 }
 
+function indexKeyName($key) {
+    return $key['name'];
+}
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------

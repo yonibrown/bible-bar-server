@@ -18,6 +18,7 @@ $oper = $_POST['oper'];
 $prop = $_POST['prop'];
 if (array_key_exists('reload',$_POST)){
     $reload = $_POST['reload'];
+// if (empty($reload)){
 } else {
     $reload = array();
 }

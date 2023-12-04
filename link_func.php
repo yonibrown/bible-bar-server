@@ -20,6 +20,13 @@ function lnk_create($prop){
         }   
     }
 
+    if (array_key_exists('research_id',$prop)){
+        if ($name == ''){
+            $res_attr = res_get(array("res"=>$prop['research_id']));
+            $name = $res_attr['name'];
+        }
+    }
+
     $sql = "SELECT MAX(link_id) link_id
               FROM a_proj_links
              WHERE project_id = ".$proj;
