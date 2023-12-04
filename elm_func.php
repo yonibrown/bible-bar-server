@@ -491,8 +491,6 @@ function elmprt_set($id,$prop){
 
     $sql_set = '';
     $sep = '';
-    $sql2_set = '';
-    $sep2 = '';
 
     foreach($prop as $attr => $val) {
         switch ($attr) {
@@ -502,8 +500,7 @@ function elmprt_set($id,$prop){
                 $sep = ',';
                 break;
             case "name":
-                $sql2_set .= $sep2."name_heb = '".$val."'";
-                $sep2 = ',';
+                res_set(array("res"=>$row['res']),array($attr=>$val));
                 proj_objects_to_reload(array(
                     'object_type'=>'research_name',
                     "action"=>"update",
@@ -522,16 +519,6 @@ function elmprt_set($id,$prop){
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
-        }
-    }
-
-    if ($sql2_set != ''){
-        $sql2 = "UPDATE a_researches r
-                SET ".$sql2_set."  
-                WHERE r.research_id = ".$row['res'];
-        $result2 = mysqli_query($con,$sql2);
-        if (!$result2) {
-            exit_error('Error 19 in elm_func.php: ' . mysqli_error($con));
         }
     }
 }
