@@ -20,9 +20,11 @@ function lnk_create($prop){
         }   
     }
 
+    $res = 0;
     if (array_key_exists('research_id',$prop)){
+        $res = $prop['research_id'];
         if ($name == ''){
-            $res_attr = res_get(array("res"=>$prop['research_id']));
+            $res_attr = res_get(array("res"=>$res));
             $name = $res_attr['name'];
         }
     }
@@ -38,11 +40,12 @@ function lnk_create($prop){
     $link = $row['link_id']+1;
 
     $sql = "INSERT INTO a_proj_links
-                (project_id, link_id, name, description)
+                (project_id, link_id, name, description,research_id)
             VALUES(".$proj.", 
                 ".$link.", 
                 '".$name."',
-                '".$desc."')";
+                '".$desc."',
+                ".$res.")";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 8 in lnk_func.php: ' . mysqli_error($con));
@@ -57,35 +60,38 @@ function lnk_create($prop){
     }
 
     $catlist = array();
-    // if (array_key_exists('linked_element',$prop)){
-    //     $elmObjId = array(
-    //         "proj"=>$proj,
-    //         "elm"=>$prop['linked_element']
-    //     );
-    //     $elmObj = elm_get($elmObjId);
-    //     if ($elmObj['type'] == 'parts'){
-    //         $res = $elmObj['attr']['res'];
-    //         $catlist = lnk_add_categories($id,array(
-    //             "type"=>"research",
-    //             "data"=>$res
-    //         ));
-    //     }
-    // }
-    if (array_key_exists('research_id',$prop)){
+    if ($res != 0){
         $catlist = lnk_add_categories($id,array(
             "type"=>"research",
-            "data"=>$prop['research_id']
+            "data"=>$res
         ));
     }
 
-    return array(
+    return lnk_link_obj(array(
         "id"=>$link,
         "proj"=>$proj,
         "name"=>$name,
         "desc"=>$desc,
         "categories"=>$catlist,
-        "elements"=>$elmlist
+        "elements"=>$elmlist,
+        "research_id"=>$res
+    ));
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_link_obj($prop){
+    $struct = array(
+        "id"=>"int,key",
+        "proj"=>"int,key",
+        "name"=>"string",
+        "desc"=>"string",
+        "categories"=>"array",
+        "elements"=>"array",
+        "research_default"=>"int"
     );
+    return build_object($prop,$struct);
 }
 
 // --------------------------------------------------------------------------------------

@@ -122,4 +122,48 @@ function inList($arr,$itemType='num'){
     // }
     // return " IN(".array_reduce($arr,"reduceFunc").") ";
 }
+
+
+function build_object($prop,$struct){
+    foreach($struct as $attr => $val){
+        $valArr = explode(",",$val);
+        $key = false;
+        $type = '';
+        foreach($valArr as $valItem){
+            switch ($valItem){
+                case "int":
+                case "string":
+                case "array":
+                    $type = $valItem;
+                    break;
+                case "key":
+                    $key = true;
+            }
+        }
+        if (!array_key_exists($attr,$prop)){
+            if ($key){
+                return null;
+            }
+            switch ($type){
+                case "int":
+                    $prop[$attr] = 0;
+                    break;
+                case "string":
+                    $prop[$attr] = '';
+                    break;
+                case "array":
+                    $prop[$attr] = array();
+                    break;
+            }
+        } else {
+            switch ($type){
+                case "int":
+                    $prop[$attr] = (int)$prop[$attr];
+                    break;
+            }
+        }
+    }
+    return $prop;
+}
+
 ?>

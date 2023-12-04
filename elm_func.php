@@ -502,7 +502,7 @@ function elmprt_set($id,$prop){
                 $sep = ',';
                 break;
             case "name":
-                $sql2_set .= $sep2.$attr." = '".$val."'";
+                $sql2_set .= $sep2."name_heb = '".$val."'";
                 $sep2 = ',';
                 proj_objects_to_reload(array(
                     'object_type'=>'research_name',
