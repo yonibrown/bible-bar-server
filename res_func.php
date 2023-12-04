@@ -58,10 +58,8 @@ function res_set($id,$prop){
     $sep = '';
     foreach($prop as $attr => $val) {
         switch ($attr) {
-            default:
-                $name = $val;
-
-                $sql_set = $sql_set.$sep.$attr." = ".$name;
+            case "name":
+                $sql_set = $sql_set.$sep."name_heb = '".$val."'";
                 $sep = ',';
                 break;
         }   

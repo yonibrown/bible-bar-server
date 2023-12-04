@@ -32,6 +32,7 @@ function elm_get_basic($id){
 // ---- 
 // --------------------------------------------------------------------------------------
 function elm_prop($id,$prop){
+    $name = $prop['name'];
     switch($prop['type']){
         case 'bar':
         case 'text':
@@ -50,11 +51,15 @@ function elm_prop($id,$prop){
             $spc_attr = array();
     }
 
+    if (array_key_exists('name',$spc_attr)){
+        $name = $spc_attr['name'];
+    }
+
     return array(
         "id"=>(int)$id['elm'],
         "proj"=>(int)$id['proj'],
         "type"=>$prop['type'],
-        "name"=>$prop['name'],
+        "name"=>$name,
         "position"=>(float)$prop['position'],
         "attr"=>$spc_attr
     );
@@ -126,9 +131,9 @@ function elm_create($prop){
         case 'link':
             elmlnk_create($id,$prop);
             break;
-        case 'research':
-            elmres_create($id,$prop);
-            break;
+        // case 'research':
+        //     elmres_create($id,$prop);
+        //     break;
         case 'parts':
             $resp = elmprt_create($id,$prop);
             break;
@@ -362,6 +367,12 @@ function elmlnk_get($id){
         'link_display'=>$row['link_display']
     );
 
+    $lnkProp = lnk_get(array(
+        "proj"=>$id['proj'],
+        "link"=>$row['link_id']
+    ));
+    $attr['name'] = $lnkProp['name'];
+
     return $attr;
 }
 
@@ -447,6 +458,12 @@ function elmprt_get($id){
         'sort'=>$row['sort'],
         'ordering'=>$row['ordering']
     );
+
+    $resProp = res_get(array(
+        "res"=>$row['research_id']
+    ));
+    $attr['name'] = $resProp['name'];
+
     return $attr;
 }
 

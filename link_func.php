@@ -79,6 +79,30 @@ function lnk_create($prop){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- get link element                                     
+// --------------------------------------------------------------------------------------
+function lnk_get($id){
+    global $con;
+
+    $sql = "SELECT name, description,research_id
+            FROM a_proj_links
+            WHERE project_id = ".$id['proj']."
+              AND link_id = ".$id['link'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 6 in elm_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+    $attr = array(
+        'name'=>$row['name'],
+        'description'=>$row['description'],
+        'research_id'=>(int)$row['research_id']
+    );
+
+    return $attr;
+}
+
+// --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
 function lnk_link_obj($prop){
