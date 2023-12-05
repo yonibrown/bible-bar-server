@@ -32,6 +32,7 @@ function elm_get_basic($id){
 // ---- 
 // --------------------------------------------------------------------------------------
 function elm_prop($id,$prop){
+    $name = $prop['name'];
     switch($prop['type']){
         case 'bar':
         case 'text':
@@ -50,11 +51,15 @@ function elm_prop($id,$prop){
             $spc_attr = array();
     }
 
+    if (array_key_exists('name',$spc_attr)){
+        $name = $spc_attr['name'];
+    }
+
     return array(
         "id"=>(int)$id['elm'],
         "proj"=>(int)$id['proj'],
         "type"=>$prop['type'],
-        "name"=>$prop['name'],
+        "name"=>$name,
         "position"=>(float)$prop['position'],
         "attr"=>$spc_attr
     );
@@ -126,9 +131,9 @@ function elm_create($prop){
         case 'link':
             elmlnk_create($id,$prop);
             break;
-        case 'research':
-            elmres_create($id,$prop);
-            break;
+        // case 'research':
+        //     elmres_create($id,$prop);
+        //     break;
         case 'parts':
             $resp = elmprt_create($id,$prop);
             break;
@@ -362,6 +367,12 @@ function elmlnk_get($id){
         'link_display'=>$row['link_display']
     );
 
+    $lnkProp = lnk_get(array(
+        "proj"=>$id['proj'],
+        "link"=>$row['link_id']
+    ));
+    $attr['name'] = $lnkProp['name'];
+
     return $attr;
 }
 
@@ -447,6 +458,12 @@ function elmprt_get($id){
         'sort'=>$row['sort'],
         'ordering'=>$row['ordering']
     );
+
+    $resProp = res_get(array(
+        "res"=>$row['research_id']
+    ));
+    $attr['name'] = $resProp['name'];
+
     return $attr;
 }
 
@@ -491,8 +508,6 @@ function elmprt_set($id,$prop){
 
     $sql_set = '';
     $sep = '';
-    $sql2_set = '';
-    $sep2 = '';
 
     foreach($prop as $attr => $val) {
         switch ($attr) {
@@ -502,8 +517,7 @@ function elmprt_set($id,$prop){
                 $sep = ',';
                 break;
             case "name":
-                $sql2_set .= $sep2.$attr." = '".$val."'";
-                $sep2 = ',';
+                res_set(array("res"=>$row['res']),array($attr=>$val));
                 proj_objects_to_reload(array(
                     'object_type'=>'research_name',
                     "action"=>"update",
@@ -522,16 +536,6 @@ function elmprt_set($id,$prop){
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
-        }
-    }
-
-    if ($sql2_set != ''){
-        $sql2 = "UPDATE a_researches r
-                SET ".$sql2_set."  
-                WHERE r.research_id = ".$row['res'];
-        $result2 = mysqli_query($con,$sql2);
-        if (!$result2) {
-            exit_error('Error 19 in elm_func.php: ' . mysqli_error($con));
         }
     }
 }

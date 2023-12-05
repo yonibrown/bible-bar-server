@@ -50,31 +50,29 @@ function res_get($id){
 // --------------------------------------------------------------------------------------
 // ---- set research attributes
 // --------------------------------------------------------------------------------------
-// function res_set($id,$prop){
-//     global $con;
+function res_set($id,$prop){
+    global $con;
 
-//     $res = $id['res'];
-//     $sql_set = '';
-//     $sep = '';
-//     foreach($prop as $attr => $val) {
-//         switch ($attr) {
-//             default:
-//                 $name = $val;
+    $res = $id['res'];
+    $sql_set = '';
+    $sep = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "name":
+                $sql_set = $sql_set.$sep."name_heb = '".$val."'";
+                $sep = ',';
+                break;
+        }   
+    }
 
-//                 $sql_set = $sql_set.$sep.$attr." = ".$name;
-//                 $sep = ',';
-//                 break;
-//         }   
-//     }
-
-//     $sql = "UPDATE a_researches 
-//             SET ".$sql_set."  
-//             WHERE research_id = ".$res;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 3 in res_func.php: ' . mysqli_error($con));
-//     }
-// }
+    $sql = "UPDATE a_researches 
+            SET ".$sql_set."  
+            WHERE research_id = ".$res;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 3 in res_func.php: ' . mysqli_error($con));
+    }
+}
 
 // --------------------------------------------------------------------------------------
 // ---- create new research

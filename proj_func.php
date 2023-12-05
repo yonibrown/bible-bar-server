@@ -400,7 +400,7 @@ function proj_get_lnk_list($id,$prop){
 
     $list = array();
 
-    $sql = "SELECT l.link_id, l.name, l.description
+    $sql = "SELECT l.link_id, l.name, l.description,l.research_id
               FROM a_proj_links l
              WHERE l.project_id = ".$proj."
             ".$filter."
@@ -418,14 +418,15 @@ function proj_get_lnk_list($id,$prop){
             "proj"=>$proj,
             "link"=>$row['link_id']
         ));
-        array_push($list,array(
-            "id"=>(int)$row['link_id'],
-            "proj"=>(int)$proj,
+        array_push($list,lnk_link_obj(array(
+            "id"=>$row['link_id'],
+            "proj"=>$proj,
             "name"=>$row['name'],
             "desc"=>$row['description'],
             "categories"=>$catlist,
-            "elements"=>$elmlist
-        ));
+            "elements"=>$elmlist,
+            "research_id"=>$row['research_id']
+        )));
     }
     return $list;
 }
