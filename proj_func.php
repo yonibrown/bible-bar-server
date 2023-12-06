@@ -413,6 +413,8 @@ function proj_get_lnk_list($id,$prop){
         $catlist = lnk_get_categories(array(
             "proj"=>$proj,
             "link"=>$row['link_id']
+        ),array(
+            "research_id"=>(int)$row['research_id']
         ));
         $elmlist = lnk_get_elements(array(
             "proj"=>$proj,

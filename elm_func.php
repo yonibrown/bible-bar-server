@@ -444,7 +444,7 @@ function elmres_create($id,$prop){
 function elmprt_get($id){
     global $con;
 
-    $sql = "SELECT research_id, sort,ordering
+    $sql = "SELECT research_id, tab,sort,ordering
             FROM a_proj_elm_parts
             WHERE project_id = ".$id['proj']."
               AND element_id = ".$id['elm'];
@@ -455,6 +455,7 @@ function elmprt_get($id){
     $row = mysqli_fetch_array($result);
     $attr = array(
         'res'=>(int)$row['research_id'],
+        'tab'=>$row['tab'],
         'sort'=>$row['sort'],
         'ordering'=>$row['ordering']
     );
@@ -486,11 +487,11 @@ function elmprt_create($id,$prop){
     }
 
     $sql = "INSERT INTO a_proj_elm_parts
-                (project_id, element_id, research_id, sort, ordering)
+                (project_id, element_id, research_id, tab,sort, ordering)
             VALUES(".$id['proj'].", 
                    ".$id['elm'].", 
                    ".$res.", 
-                   'src','ASC')";
+                   'parts','src','ASC')";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 11 in elm_func.php: ' . mysqli_error($con));
@@ -513,6 +514,7 @@ function elmprt_set($id,$prop){
         switch ($attr) {
             case "sort":
             case "ordering":
+            case "tab":
                 $sql_set .= $sep.$attr." = '".$val."'";
                 $sep = ',';
                 break;
