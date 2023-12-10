@@ -518,15 +518,6 @@ function elmprt_set($id,$prop){
                 $sql_set .= $sep.$attr." = '".$val."'";
                 $sep = ',';
                 break;
-            case "name":
-                res_set(array("res"=>$row['res']),array($attr=>$val));
-                proj_objects_to_reload(array(
-                    'object_type'=>'research_name',
-                    "action"=>"update",
-                    'res'=>$row['res'],
-                    'name'=>$val
-                ));
-                break;
         }   
     }
 

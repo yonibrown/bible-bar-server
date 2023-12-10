@@ -93,6 +93,11 @@ switch ($type){
                 $reply["data"] = lnk_create($prop);
                 break;
 
+            // // set link attributes
+            case "set":
+                lnk_set($id,$prop);
+                break;
+
             // // get categories in link            
             // case "get_categories":
             //     $reply['data'] = lnk_get_categories($id);
@@ -127,11 +132,6 @@ switch ($type){
             case "remove_elm":
                 $reply['data'] = lnk_remove_element($id,$prop);
                 break;
-                
-            // // create new link
-            // // case "new":
-            // //     $reply["id"] = lnk_create($prop);
-            // //     break;
         }
         break;    
 
@@ -148,9 +148,9 @@ switch ($type){
             //     break;
 
             // // set research attributes
-            // case "set":
-            //     res_set($id,$prop);
-            //     break;
+            case "set":
+                res_set($id,$prop);
+                break;
 
             // // create new research
             // case "new":
