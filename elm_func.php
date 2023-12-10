@@ -144,7 +144,7 @@ function elm_create($prop){
     foreach($resp as $attr => $val) {
         switch ($attr) {
             case "res":
-                $rep[$attr] = $res;
+                $rep[$attr] = $val;
                 break;
             case "name":
                 $upd[$attr] = $val;
@@ -496,7 +496,7 @@ function elmprt_create($id,$prop){
     if (!$result) {
         exit_error('Error 11 in elm_func.php: ' . mysqli_error($con));
     }
-    return $resObj;
+    return array("res"=>$resObj);
 }
 
 // --------------------------------------------------------------------------------------
