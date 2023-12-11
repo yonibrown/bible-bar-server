@@ -144,7 +144,7 @@ function elm_create($prop){
     foreach($resp as $attr => $val) {
         switch ($attr) {
             case "res":
-                $rep[$attr] = $res;
+                $rep[$attr] = $val;
                 break;
             case "name":
                 $upd[$attr] = $val;
@@ -496,7 +496,7 @@ function elmprt_create($id,$prop){
     if (!$result) {
         exit_error('Error 11 in elm_func.php: ' . mysqli_error($con));
     }
-    return $resObj;
+    return array("res"=>$resObj);
 }
 
 // --------------------------------------------------------------------------------------
@@ -517,15 +517,6 @@ function elmprt_set($id,$prop){
             case "tab":
                 $sql_set .= $sep.$attr." = '".$val."'";
                 $sep = ',';
-                break;
-            case "name":
-                res_set(array("res"=>$row['res']),array($attr=>$val));
-                proj_objects_to_reload(array(
-                    'object_type'=>'research_name',
-                    "action"=>"update",
-                    'res'=>$row['res'],
-                    'name'=>$val
-                ));
                 break;
         }   
     }
@@ -560,16 +551,6 @@ function elmlnk_set($id,$prop){
             case "link_display":
                 $sql1_set .= $sep1.$attr." = '".$val."'";
                 $sep1 = ',';
-                break;
-            case "name":
-                $sql2_set .= $sep2.$attr." = '".$val."'";
-                $sep2 = ',';
-                proj_objects_to_reload(array(
-                    'object_type'=>'link_name',
-                    "action"=>"update",
-                    'link'=>$row['link_id'],
-                    'name'=>$val
-                ));
                 break;
             }   
     }

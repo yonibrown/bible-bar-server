@@ -105,6 +105,33 @@ function lnk_get($id){
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
+function lnk_set($id,$prop){
+    global $con;
+
+    $sql_set = '';
+    $sep = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "name":
+                $sql_set = $sql_set.$sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+        }   
+    }
+
+    $sql = "UPDATE a_proj_links 
+            SET ".$sql_set."  
+            WHERE project_id = ".$id['proj']."
+              AND link_id = ".$id['link'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 3 in link_func.php: ' . mysqli_error($con));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
 function lnk_link_obj($prop){
     $struct = array(
         "id"=>"int,key",
