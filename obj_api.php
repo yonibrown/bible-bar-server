@@ -269,9 +269,9 @@ switch ($type){
                 break;
 
             // // set project attributes
-            // case "set":
-            //     proj_set($id,$prop);
-            //     break;
+            case "set":
+                proj_set($id,$prop);
+                break;
 
             // // create new project
             // case "new":

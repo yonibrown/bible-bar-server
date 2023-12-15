@@ -56,29 +56,29 @@ function proj_get($id){
 // --------------------------------------------------------------------------------------
 // ---- set project attributes
 // --------------------------------------------------------------------------------------
-// function proj_set($id,$prop){
-//     global $con;
+function proj_set($id,$prop){
+    global $con;
 
-//     $proj = $id['proj'];
-//     $sql_set = '';
-//     $sep = '';
-//     foreach($prop as $attr => $val) {
-//         switch ($attr) {
-//             default:
-//                 $sql_set = $sql_set.$sep.$attr." = ".$val;
-//                 $sep = ',';
-//                 break;
-//         }   
-//     }
+    $proj = $id['proj'];
+    $sql_set = '';
+    $sep = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "name":
+                $sql_set = $sql_set.$sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+        }   
+    }
 
-//     $sql = "UPDATE a_projects 
-//             SET ".$sql_set."  
-//             WHERE project_id = ".$proj;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 3 in proj_func.php: ' . mysqli_error($con));
-//     }
-// }
+    $sql = "UPDATE a_projects 
+            SET ".$sql_set."  
+            WHERE project_id = ".$proj;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 3 in proj_func.php: ' . mysqli_error($con));
+    }
+}
 
 // --------------------------------------------------------------------------------------
 // ---- create new project
