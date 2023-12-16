@@ -34,9 +34,9 @@ switch ($type){
     case "element":
         switch ($oper) {
             // get element                       
-            case "get":
-                $reply['data'] = elm_get($id);
-                break;
+            // case "get":
+            //     $reply['data'] = elm_get($id);
+            //     break;
 
             // create new element
             case "new":

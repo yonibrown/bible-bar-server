@@ -354,7 +354,8 @@ function proj_get_elm_list($id){
     $sql = "SELECT pe.element_id id,type,name,
                    opening_element,
                    pe.position,
-                   show_props
+                   show_props,
+                   open_text_element
             FROM a_proj_elements pe
             WHERE pe.project_id = ".$proj."
               AND position > 0
