@@ -48,28 +48,31 @@ function indexKeyName($key) {
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------
-// function txt_set($id,$prop){
-//     global $con;
+function txt_set($id,$prop){
+    global $con;
 
-//     $attr = txt_gen_attr($id,$prop);
+    $attr = txt_gen_attr($id,$prop);
+    if ($attr == null){
+        return;
+    }
 
-//     $sql = "UPDATE a_proj_elm_sequence
-//                SET research_id = ".$attr['src_research'].", 
-//                    collection_id = ".$attr['src_collection'].", 
-//                    from_position = ".$attr['from_position'].", 
-//                    to_position = ".$attr['to_position'].", 
-//                    seq_index = 1, 
-//                    seq_level = 0, 
-//                    color_level = 0, 
-//                    anchor_position = ".$attr['anchor_position'].", 
-//                    anchor_word = 0
-//              WHERE project_id = ".$id['proj']."
-//                AND element_id = ".$id['elm'];
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 12 in text_func.php: ' . mysqli_error($con));
-//     }
-// }
+    $sql = "UPDATE a_proj_elm_sequence
+               SET research_id = ".$attr['src_research'].", 
+                   collection_id = ".$attr['src_collection'].", 
+                   from_position = ".$attr['from_position'].", 
+                   to_position = ".$attr['to_position'].", 
+                   seq_index = 1, 
+                   seq_level = 0, 
+                   color_level = 0, 
+                   anchor_position = ".$attr['anchor_position'].", 
+                   anchor_word = 0
+             WHERE project_id = ".$id['proj']."
+               AND element_id = ".$id['elm'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 12 in text_func.php: ' . mysqli_error($con));
+    }
+}
 
 // --------------------------------------------------------------------------------------
 // ----                                     
@@ -77,10 +80,10 @@ function indexKeyName($key) {
 function txt_gen_attr($id,$prop){
     global $con;
 
-    if (!array_key_exists('research_id',$prop)){
-        $prop['research_id'] = 1;
-        $prop['part_id'] = 1;
-    }
+    // if (!array_key_exists('research_id',$prop)){
+    //     $prop['point_research_id'] = 1;
+    //     $prop['point_part_id'] = 1;
+    // }
 
     if (array_key_exists('division_id',$prop)){
         // get parameters by division_id
@@ -97,7 +100,15 @@ function txt_gen_attr($id,$prop){
                  WHERE src.research_id = ".$prop['research_id']."
                    AND src.collection_id = ".$prop['collection_id']."
                    AND src.division_id = ".$prop['division_id'];
-    } else {
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 1 in text_func.php: ' . mysqli_error($con));
+        }
+        $row = mysqli_fetch_array($result);
+        return $row;
+    } 
+    
+    if (array_key_exists('point_research_id',$prop)){
         // get parameters by part_id
         $sql = "SELECT prt.src_research,prt.src_collection,
                        src.from_position,src.to_position,
@@ -110,15 +121,17 @@ function txt_gen_attr($id,$prop){
                    AND prt.src_from_position BETWEEN src.from_position AND src.to_position
                    AND src.index_id = 1
                    AND src.level = 1
-                 WHERE prt.research_id = ".$prop['research_id']."
-                   AND prt.part_id = ".$prop['part_id'];
+                 WHERE prt.research_id = ".$prop['point_research_id']."
+                   AND prt.part_id = ".$prop['point_part_id'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 1 in text_func.php: ' . mysqli_error($con));
+        }
+        $row = mysqli_fetch_array($result);
+        return $row;
     }
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 1 in text_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
-    return $row;
+
+    return null;
 }
 
 // --------------------------------------------------------------------------------------

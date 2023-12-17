@@ -56,29 +56,29 @@ function proj_get($id){
 // --------------------------------------------------------------------------------------
 // ---- set project attributes
 // --------------------------------------------------------------------------------------
-// function proj_set($id,$prop){
-//     global $con;
+function proj_set($id,$prop){
+    global $con;
 
-//     $proj = $id['proj'];
-//     $sql_set = '';
-//     $sep = '';
-//     foreach($prop as $attr => $val) {
-//         switch ($attr) {
-//             default:
-//                 $sql_set = $sql_set.$sep.$attr." = ".$val;
-//                 $sep = ',';
-//                 break;
-//         }   
-//     }
+    $proj = $id['proj'];
+    $sql_set = '';
+    $sep = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "name":
+                $sql_set = $sql_set.$sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+        }   
+    }
 
-//     $sql = "UPDATE a_projects 
-//             SET ".$sql_set."  
-//             WHERE project_id = ".$proj;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 3 in proj_func.php: ' . mysqli_error($con));
-//     }
-// }
+    $sql = "UPDATE a_projects 
+            SET ".$sql_set."  
+            WHERE project_id = ".$proj;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 3 in proj_func.php: ' . mysqli_error($con));
+    }
+}
 
 // --------------------------------------------------------------------------------------
 // ---- create new project
@@ -354,7 +354,8 @@ function proj_get_elm_list($id){
     $sql = "SELECT pe.element_id id,type,name,
                    opening_element,
                    pe.position,
-                   show_props
+                   show_props,
+                   open_text_element
             FROM a_proj_elements pe
             WHERE pe.project_id = ".$proj."
               AND position > 0

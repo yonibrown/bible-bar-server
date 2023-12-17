@@ -14,7 +14,7 @@ function elm_get_basic($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
-                   position
+                   position, open_text_element
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
               AND e.element_id = ".$id['elm'];
@@ -55,13 +55,19 @@ function elm_prop($id,$prop){
         $name = $spc_attr['name'];
     }
 
+    $openTextElm = 0;
+    if (array_key_exists('open_text_element',$prop)){
+        $openTextElm = $prop['open_text_element'];
+    }
+
     return array(
         "id"=>(int)$id['elm'],
         "proj"=>(int)$id['proj'],
         "type"=>$prop['type'],
         "name"=>$name,
         "position"=>(float)$prop['position'],
-        "attr"=>$spc_attr
+        "attr"=>$spc_attr,
+        "open_text_element"=>(int)$openTextElm
     );
 }
 
@@ -84,6 +90,11 @@ function elm_create($prop){
     $row = mysqli_fetch_array($result);
     $elm = $row['element_id']+1;
 
+    $openingElm = 0;
+    if (array_key_exists('opening_element',$prop)){
+        $openingElm = $prop['opening_element'];
+    }
+
     $sql = "INSERT INTO a_proj_elements
                 (project_id, element_id, type, 
                  name, description, position, 
@@ -93,7 +104,8 @@ function elm_create($prop){
                 '".$type."',
                 '".$prop['name']."',' ',
                 ".$prop['position'].", 
-                0,0)";
+                0,
+                ".$openingElm.")";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));
@@ -101,16 +113,25 @@ function elm_create($prop){
 
     $id = array('proj'=>$proj,'elm'=>$elm);
 
-    if (array_key_exists('opening_element',$prop)){
+    if ($openingElm != 0){
         $sql = "INSERT INTO a_proj_link_elements
                     (project_id, link_id, element_id) 
                 SELECT project_id, link_id, $elm
                   FROM a_proj_link_elements
                  WHERE project_id = ".$proj."
-                   AND element_id = ".$prop['opening_element'];
+                   AND element_id = ".$openingElm;
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 21 in elm_func.php: ' . mysqli_error($con));
+        }
+
+        if ($type == "text"){
+            elm_set_basic(array(
+                "proj"=>$proj,
+                "elm"=>$openingElm
+            ),array(
+                "open_text_element"=>$elm
+            ));
         }
     }
 
@@ -172,8 +193,8 @@ function elm_set($id,$prop){
             elmseq_set($id,$prop);
             break;
         case 'text':
+            txt_set($id,$prop);
             elmseq_set($id,$prop);
-            // txt_set($id,$prop);
             break;
         case 'parts':
             elmprt_set($id,$prop);
@@ -200,11 +221,16 @@ function elm_set_basic($id,$prop){
                 $sql_set .= $sep.$attr." = ".($val=='true'?1:0);
                 $sep = ',';
                 break;
-                case "name":
-                    $sql_set .= $sep.$attr." = '".$val."'";
-                    $sep = ',';
-                    break;
-            }   
+            case "open_text_element":
+            case "position":
+                $sql_set .= $sep.$attr." = ".$val;
+                $sep = ',';
+                break;
+            case "name":
+                $sql_set .= $sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+        }   
     }
 
     if ($sql_set != ''){
