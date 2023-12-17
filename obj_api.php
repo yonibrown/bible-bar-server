@@ -274,9 +274,9 @@ switch ($type){
                 break;
 
             // // create new project
-            // case "new":
-            //     $reply["id"] = proj_create($prop);
-            //     break;
+            case "new":
+                $reply["id"] = proj_create($prop);
+                break;
 
             // // delete project
             // case "delete":

@@ -83,36 +83,36 @@ function proj_set($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- create new project
 // --------------------------------------------------------------------------------------
-// function proj_create($prop){
-//     global $con;
-//     $sql = "SELECT MAX(project_id) project_id
-//                 FROM a_projects";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 4 in proj_func.php: ' . mysqli_error($con));
-//     }
-//     $row = mysqli_fetch_array($result);
-//     $proj = $row['project_id']+1;
+function proj_create($prop){
+    global $con;
+    $sql = "SELECT MAX(project_id) project_id
+                FROM a_projects";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 4 in proj_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+    $proj = $row['project_id']+1;
 
-//     $sql = "INSERT INTO a_projects
-//                 (project_id, 
-//                 name, 
-//                 description) 
-//             VALUES(".$proj.", 
-//                 '".$prop['name']."', 
-//                 '".$prop['desc']."')";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 5 in proj_func.php: ' . mysqli_error($con));
-//     }
+    $sql = "INSERT INTO a_projects
+                (project_id, 
+                name, 
+                description) 
+            VALUES(".$proj.", 
+                '".$prop['name']."', 
+                '".$prop['desc']."')";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 5 in proj_func.php: ' . mysqli_error($con));
+    }
 
-//     // create default research for project
-//     $res_prop = array("name"=>"project","desc"=>"project default research","proj"=>$proj);
-//     $res = res_create($res_prop);
-//     res_new_collection($res,array("name"=>"default","desc"=>"default collection"));
+    // create default research for project
+    // $res_prop = array("name"=>"project","desc"=>"project default research","proj"=>$proj);
+    // $res = res_create($res_prop);
+    // res_new_collection($res,array("name"=>"default","desc"=>"default collection"));
 
-//     return array("proj"=>$proj);
-// }
+    return array("proj"=>$proj);
+}
 
 // --------------------------------------------------------------------------------------
 // ---- get default research of project
