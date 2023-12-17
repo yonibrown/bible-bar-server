@@ -428,6 +428,16 @@ function res_upd_parts($id,$prop){
             exit_error('Error 33 in res_func.php: ' . mysqli_error($con));
         }
     }
+
+    if (array_key_exists('proj',$reload)){
+        proj_objects_to_reload(array(
+            "object_type"=>"res_part",
+            "action"=>"update",
+            "cat"=>array(
+                "res"=>$res
+            )
+        ));
+    }
 }
 
 // --------------------------------------------------------------------------------------

@@ -450,6 +450,7 @@ function proj_objects_to_reload($prop){
             $cat = $prop['cat'];
             switch($prop['action']){
                 case 'new':
+                case 'update':
                 case 'delete':
                     $elmListObj = proj_get_cat_elements($cat);
                     // $elm_list = $elmListObj['elm_list'];
