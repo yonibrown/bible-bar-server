@@ -259,9 +259,9 @@ switch ($type){
     case "project":
         switch ($oper) {
             // // get list of projects in the system
-            // case "get_list":
-            //     $reply['list'] = proj_get_list();
-            //     break;
+            case "get_list":
+                $reply['list'] = proj_get_list();
+                break;
 
             // get project                                     
             case "get":

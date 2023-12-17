@@ -2,26 +2,26 @@
 // --------------------------------------------------------------------------------------
 // ---- get list of projects in the system
 // --------------------------------------------------------------------------------------
-// function proj_get_list(){
-//     global $con;
-//     $list = array();
+function proj_get_list(){
+    global $con;
+    $list = array();
 
-//     $sql = "SELECT project_id id,name,description
-//                 FROM a_projects
-//                 ORDER BY project_id";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 1 in proj_func.php: ' . mysqli_error($con));
-//     }
-//     while($row = mysqli_fetch_array($result)) {
-//         array_push($list,array(
-//             "id"=>$row['id'],
-//             "name"=>$row['name'],
-//             "desc"=>$row['description']
-//         ));
-//     }
-//     return $list;
-// }
+    $sql = "SELECT project_id id,name,description
+                FROM a_projects
+                ORDER BY project_id";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 1 in proj_func.php: ' . mysqli_error($con));
+    }
+    while($row = mysqli_fetch_array($result)) {
+        array_push($list,array(
+            "id"=>$row['id'],
+            "name"=>$row['name'],
+            "desc"=>$row['description']
+        ));
+    }
+    return $list;
+}
 
 // --------------------------------------------------------------------------------------
 // ---- get project                                     
