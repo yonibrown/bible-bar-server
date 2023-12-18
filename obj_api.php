@@ -259,9 +259,9 @@ switch ($type){
     case "project":
         switch ($oper) {
             // // get list of projects in the system
-            // case "get_list":
-            //     $reply['list'] = proj_get_list();
-            //     break;
+            case "get_list":
+                $reply['list'] = proj_get_list();
+                break;
 
             // get project                                     
             case "get":
@@ -274,9 +274,9 @@ switch ($type){
                 break;
 
             // // create new project
-            // case "new":
-            //     $reply["id"] = proj_create($prop);
-            //     break;
+            case "new":
+                $reply["id"] = proj_create($prop);
+                break;
 
             // // delete project
             // case "delete":
