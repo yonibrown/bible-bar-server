@@ -110,6 +110,11 @@ function inList($arr,$itemType='num'){
             $arr = array_map("wrapString",$arr);
         } 
     }
+
+    if (count($arr) == 0){
+        return null;
+    }
+
     return " IN(".implode(",",$arr).") ";
 
     // function reduceFunc($carry,$item)
