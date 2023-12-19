@@ -1,6 +1,8 @@
 <?php
 include 'connect_db.php';
 
+exit_error($_POST['oper']);
+
 $sql = "DELETE FROM research_points
         WHERE research_id =  ".$_POST['res']."
           AND category_id =  ".$_POST['cat'];
