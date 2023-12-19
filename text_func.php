@@ -4,6 +4,12 @@
 // --------------------------------------------------------------------------------------
 function txt_create($id,$prop){
     global $con;
+
+    if (!array_key_exists('point_research_id',$prop) && !array_key_exists('division_id',$prop)){
+        $prop['point_research_id'] = 1;
+        $prop['point_part_id'] = 1;
+    }
+
     $attr = txt_gen_attr($id,$prop);
 
     $sql = "INSERT INTO a_proj_elm_sequence
@@ -79,11 +85,6 @@ function txt_set($id,$prop){
 // --------------------------------------------------------------------------------------
 function txt_gen_attr($id,$prop){
     global $con;
-
-    // if (!array_key_exists('research_id',$prop)){
-    //     $prop['point_research_id'] = 1;
-    //     $prop['point_part_id'] = 1;
-    // }
 
     if (array_key_exists('division_id',$prop)){
         // get parameters by division_id

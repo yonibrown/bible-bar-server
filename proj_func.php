@@ -505,7 +505,7 @@ function proj_objects_to_reload($prop){
     //         break;
     }
 
-    if ($in_list != ''){
+    if ($in_list != null){
         $sql_set = '';
         $sep = '';
         if ($points_reload){
