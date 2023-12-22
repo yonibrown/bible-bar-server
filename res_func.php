@@ -979,6 +979,34 @@ function residx_position_to_key($id,$prop){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function residx_get_level_range($id,$name,$level,$initialRange){
+    global $con;
+    $sql = "SELECT division_id,from_position,to_position
+            FROM a_res_idx_division
+            WHERE research_id = ".$id['res']." 
+                AND collection_id = ".$id['col']." 
+                AND index_id = ".$id['idx']." 
+                AND level = ".$level."
+                AND from_position >= ".$initialRange['from']."
+                AND to_position <= ".$initialRange['to']."
+                AND name_heb = '".$name."'";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error description2: ' . mysqli_error($con));
+    }
+    if($row = mysqli_fetch_array($result)){
+        return array(
+            "from"=>$row['from_position'],
+            "to"=>$row['to_position']
+        );
+    }
+
+    return null;
+}
+
+// --------------------------------------------------------------------------------------
 // ---- get list of collections of type 'sequence' in all researches
 // --------------------------------------------------------------------------------------
 // function res_get_sequences_list(){
