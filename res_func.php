@@ -601,11 +601,27 @@ function res_duplicate($id,$prop){
 function res_del_collections($id,$prop){
     global $con;
 
-    $res = $id['res'];
-    $colList = $prop['colList'];
-    $delete_where = "WHERE research_id = ".$res." AND collection_id ".inList($colList);
+    $delete_where = "WHERE research_id = ".$id['res']." AND collection_id ".inList($prop['colList']);
 
     $sql = "DELETE FROM a_res_collections ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_indexes ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_idx_division ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_idx_levels ".$delete_where;
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 15 in res_func.php: ' . mysqli_error($con));

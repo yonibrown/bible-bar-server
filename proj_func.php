@@ -30,6 +30,7 @@ function proj_get($id){
     global $con;
 
     $proj = $id['proj'];
+    
     $sql = "SELECT name,description
             FROM a_projects
             WHERE project_id = ".$proj;

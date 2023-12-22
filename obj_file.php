@@ -37,11 +37,16 @@ function res_DICTA_upload($id,$file){
     $colObj = res_new_collection($id,array("name"=>"מקובץ"));
 
     $part_id = 0;
-    $fileArr = explode('תנך/',$file);
+    // $fileArr = explode('תנך/',$file);
+    $fileArr = preg_split("/\n/", $file);
     for ($file_i=0;$file_i<count($fileArr);$file_i++){
-        $lineArr = preg_split("/\n|\/|\)|\,/", $fileArr[$file_i]);
+        // $lineArr = preg_split("/\n|\/|\)|\,/", $fileArr[$file_i]);
+        $lineArr = preg_split("/\/|\,/", $fileArr[$file_i]);
         if (count($lineArr) >= 4){
             $bibleRange = array("from"=>0,"to"=>999999999);
+
+            //source
+            $tanah = array_shift($lineArr);
 
             //division
             $division_heb = array_shift($lineArr);
@@ -63,22 +68,36 @@ function res_DICTA_upload($id,$file){
                     if ($verse_heb != ''){
                         // $verse = array_search($verse_heb,$heb_num);
                         $verseRange = res_DICTA_get_range($verse_heb,0,$chapterRange);
-                        // $text = array_shift($lineArr);
-                        // add_verse($book,$chapter,$verse,$text,$part_id);
-
-                        if(is_null($verseRange)){
-                            exit_error($verse_heb);
+                        $text = array_shift($lineArr);
+                        $text = str_replace('־',' ',$text);
+                        $text = str_replace('׀',' ',$text);
+                        $text = str_replace('* *',' ',$text);
+                        $textArr = explode('*',$text);
+        
+                        $toWord = 0;
+                        while(count($textArr)>0){
+                            $wordsBefore = preg_split("/\s+/", array_shift($textArr));
+                            // $wordsBefore = explode(' ',array_shift($textArr));
+                            // exit_error(count($wordsBefore));
+                            $fromWord = $toWord + count($wordsBefore) - 1;
+    
+                            if (count($textArr)>0){
+                                $wordsPart = explode(' ',array_shift($textArr));
+                                $toWord = $fromWord + count($wordsPart) - 1;
+        
+                                // add_verse($book,$chapter,$verse,$text,$part_id);
+        
+                                res_new_part($id,array(
+                                    "collection_id"=>$colObj['id'],
+                                    "src_research"=>1,
+                                    "src_collection"=>1,
+                                    "src_from_position"=>$verseRange['from'],
+                                    "src_from_word"=>$fromWord,
+                                    "src_to_position"=>$verseRange['to'],
+                                    "src_to_word"=>$toWord
+                                ));
+                            }
                         }
-
-                        res_new_part($id,array(
-                            "collection_id"=>$colObj['id'],
-                            "src_research"=>1,
-                            "src_collection"=>1,
-                            "src_from_position"=>$verseRange['from'],
-                            "src_from_word"=>0,
-                            "src_to_position"=>$verseRange['to'],
-                            "src_to_word"=>999
-                        ));
                     }
                 }
             }
