@@ -22,7 +22,7 @@ switch ($type){
         switch ($oper) {
             // // set research attributes
             case "upload_parts":
-                res_DICTA_upload($id,$file);
+                $reply['data'] = res_DICTA_upload($id,$file);
                 break;
         }
         break;    
@@ -108,6 +108,8 @@ function res_DICTA_upload($id,$file){
             }
         }
     }
+
+    return $colObj;
 }
 
 // function add_verse($book,$chapter,$verse,$text,$part_id){
