@@ -412,25 +412,10 @@ function proj_get_lnk_list($id,$prop){
         exit_error('Error 17 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        $catlist = lnk_get_categories(array(
+        array_push($list,lnk_prop(array(
             "proj"=>$proj,
             "link"=>$row['link_id']
-        ),array(
-            "research_id"=>(int)$row['research_id']
-        ));
-        $elmlist = lnk_get_elements(array(
-            "proj"=>$proj,
-            "link"=>$row['link_id']
-        ));
-        array_push($list,lnk_link_obj(array(
-            "id"=>$row['link_id'],
-            "proj"=>$proj,
-            "name"=>$row['name'],
-            "desc"=>$row['description'],
-            "categories"=>$catlist,
-            "elements"=>$elmlist,
-            "research_id"=>$row['research_id']
-        )));
+        ),$row));
     }
     return $list;
 }

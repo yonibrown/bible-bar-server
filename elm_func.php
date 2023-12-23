@@ -393,7 +393,7 @@ function elmlnk_get($id){
         'link_display'=>$row['link_display']
     );
 
-    $lnkProp = lnk_get(array(
+    $lnkProp = lnk_get_basic(array(
         "proj"=>$id['proj'],
         "link"=>$row['link_id']
     ));

@@ -248,7 +248,6 @@ function res_new_collection($id,$prop){
         $desc = $prop['description'];
     }
     
-
     $sql = "INSERT INTO a_res_collections
                 (research_id, collection_id, type, position, name_eng, name_heb, description)
             VALUES (
@@ -265,12 +264,15 @@ function res_new_collection($id,$prop){
         exit_error('Error 9 in res_func.php: ' . mysqli_error($con));
     }
 
-    return array(
+    $catObj = array(
         "res"=>(int)$res,
         "id"=>(int)$col,
         "name"=>$prop['name'],
         "description"=>$desc
     );
+    lnk_new_collection($catObj);
+
+    return $catObj;
 }
 
 
