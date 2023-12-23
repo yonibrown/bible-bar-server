@@ -270,7 +270,7 @@ function res_new_collection($id,$prop){
         "name"=>$prop['name'],
         "description"=>$desc
     );
-    lnk_new_collection($catObj);
+    lnk_new_collection($catObj); // add collection to links
 
     return $catObj;
 }
@@ -308,6 +308,51 @@ function res_update_collection($id,$prop){
         if (!$result) {
             exit_error('Error 37 in res_func.php: ' . mysqli_error($con));
         }
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- remove categories from research inlist
+// --------------------------------------------------------------------------------------
+function res_del_collections($id,$prop){
+    global $con;
+
+    $delete_where = "WHERE research_id = ".$id['res']." AND collection_id ".inList($prop['colList']);
+
+    $sql = "DELETE FROM a_res_collections ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_indexes ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_idx_division ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_idx_levels ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_res_parts ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 16 in res_func.php: ' . mysqli_error($con));
+    }
+
+    $sql = "DELETE FROM a_proj_link_collections ".$delete_where;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 17 in res_func.php: ' . mysqli_error($con));
     }
 }
 
@@ -596,51 +641,6 @@ function res_duplicate($id,$prop){
 //         exit_error('Error 14 in res_func.php: ' . mysqli_error($con));
 //     }
 // }
-
-// --------------------------------------------------------------------------------------
-// ---- remove categories from research inlist
-// --------------------------------------------------------------------------------------
-function res_del_collections($id,$prop){
-    global $con;
-
-    $delete_where = "WHERE research_id = ".$id['res']." AND collection_id ".inList($prop['colList']);
-
-    $sql = "DELETE FROM a_res_collections ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
-    }
-
-    $sql = "DELETE FROM a_res_indexes ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
-    }
-
-    $sql = "DELETE FROM a_res_idx_division ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
-    }
-
-    $sql = "DELETE FROM a_res_idx_levels ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 15 in res_func.php: ' . mysqli_error($con));
-    }
-
-    $sql = "DELETE FROM a_res_parts ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 16 in res_func.php: ' . mysqli_error($con));
-    }
-
-    $sql = "DELETE FROM a_proj_link_collections ".$delete_where;
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 17 in res_func.php: ' . mysqli_error($con));
-    }
-}
 
 // --------------------------------------------------------------------------------------
 // ---- update the automatic generated columns of a part (and its related parts)
