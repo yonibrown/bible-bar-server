@@ -166,14 +166,18 @@ function res_get_prt_list($id,$prop){
     $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order;
     if (array_key_exists('sort', $prop)){
         if ($prop['sort'] == 'col'){
-            $order_by = "prt.collection_id ".$order.",".$order_by;
+            $order_by = " prt.collection_id ".$order.",".$order_by;
         }
     }
     
     $filter = '';
 
     if (array_key_exists('part_id', $prop)){
-        $filter .= 'AND prt.part_id = '.$prop['part_id'];
+        $filter .= ' AND prt.part_id = '.$prop['part_id'];
+    }
+
+    if (array_key_exists('collection_id', $prop)){
+        $filter .= ' AND prt.collection_id = '.$prop['collection_id'];
     }
 
     $sql = "SET SQL_BIG_SELECTS=1";
@@ -398,19 +402,47 @@ function res_new_part($id,$prop){
 
     res_update_generated_columns($res,$part);
 
-    $partObj = res_get_prt_list($id,array("part_id"=>$part))[0];
-    $rep = array("new_part"=>$partObj);
+    $newParts = res_parts_prop($id,array(
+        "part_id"=>$part,
+        "collection_id"=>$prop['collection_id']
+    ));
+
+    return array(
+        "new_parts"=>$newParts
+    );
+    // $partObj = res_get_prt_list($id,array("part_id"=>$part));
+    // $rep = array("new_parts"=>$partObj);
+    // if (array_key_exists('proj',$reload)){
+    //     proj_objects_to_reload(array(
+    //         "object_type"=>"res_part",
+    //         "action"=>"new",
+    //         "cat"=>array(
+    //             "res"=>$res,
+    //             "col"=>$prop['collection_id']
+    //         )
+    //     ));
+    // }
+    // return $rep;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_parts_prop($id,$prop){
+    global $reload;
+
     if (array_key_exists('proj',$reload)){
         proj_objects_to_reload(array(
             "object_type"=>"res_part",
             "action"=>"new",
             "cat"=>array(
-                "res"=>$res,
+                "res"=>$id['res'],
                 "col"=>$prop['collection_id']
             )
         ));
     }
-    return $rep;
+
+    return res_get_prt_list($id,$prop);
 }
 
 // --------------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 include 'connect_db.php';
 include 'res_func.php';
+include 'link_func.php';
 
 $type = $_POST['type'];
 $id = json_decode($_POST['id'],true);
@@ -109,7 +110,14 @@ function res_DICTA_upload($id,$file){
         }
     }
 
-    return $colObj;
+    $newParts = res_parts_prop($id,array(
+        "collection_id"=>$colObj['id']
+    ));
+
+    return array(
+        "new_collection"=>$colObj,
+        "new_parts"=>$newParts
+    );
 }
 
 // function add_verse($book,$chapter,$verse,$text,$part_id){
