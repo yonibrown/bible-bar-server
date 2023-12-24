@@ -13,17 +13,31 @@ if (empty($_POST)){
 }
 
 $type = $_POST['type'];
-$id = $_POST['id'];
 $oper = $_POST['oper'];
-$prop = $_POST['prop'];
+
+$id = json_decode($_POST['id'],true);
+$prop =  json_decode($_POST['prop'],true);
+// $id = $_POST['id'];
+// $prop = $_POST['prop'];
+
 if (array_key_exists('reload',$_POST)){
-    $reload = $_POST['reload'];
+    $reload = json_decode($_POST['reload'],true);
+    // $reload = $_POST['reload'];
 // if (empty($reload)){
 } else {
     $reload = array();
 }
 
+if (array_key_exists('file',$_FILES)){
+    $file = file_get_contents($_FILES['file']['tmp_name']);
+    $file = str_replace(array('"','('),'',$file);
+// if (empty($file)){
+} else {
+    $file = "";
+}
+
 $reply = array();
+
 $objects_to_reload = array(
     'elements'=>array(),
     "links"=>array(),
@@ -220,6 +234,11 @@ switch ($type){
             // update point in research
             case "duplicate":
                 $reply['data'] = res_duplicate($id,$prop);
+                break;
+
+            // set research attributes
+            case "upload_parts":
+                $reply['data'] = res_DICTA_upload($id,$file);
                 break;
         }
         break;    
