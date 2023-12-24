@@ -98,6 +98,11 @@ switch ($type){
                 lnk_set($id,$prop);
                 break;
 
+            // get link attributes
+            case "get":
+                $reply['data'] = lnk_get($id);
+                break;
+
             // // get categories in link            
             // case "get_categories":
             //     $reply['data'] = lnk_get_categories($id);

@@ -81,10 +81,10 @@ function lnk_create($prop){
 // --------------------------------------------------------------------------------------
 // ---- get link element                                     
 // --------------------------------------------------------------------------------------
-function lnk_get($id){
+function lnk_get_basic($id){
     global $con;
 
-    $sql = "SELECT name, description,research_id
+    $sql = "SELECT link_id,name, description,research_id
             FROM a_proj_links
             WHERE project_id = ".$id['proj']."
               AND link_id = ".$id['link'];
@@ -100,6 +100,14 @@ function lnk_get($id){
     );
 
     return $attr;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_get($id){
+    $row = lnk_get_basic($id);
+    return lnk_prop($id,$row);
 }
 
 // --------------------------------------------------------------------------------------
@@ -143,6 +151,23 @@ function lnk_link_obj($prop){
         "research_default"=>"int"
     );
     return build_object($prop,$struct);
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_prop($id,$prop){
+    return lnk_link_obj(array(
+        "proj"=>$id['proj'],
+        "id"=>$id['link'],
+        "name"=>$prop['name'],
+        "desc"=>$prop['description'],
+        "categories"=>lnk_get_categories($id,array(
+            "research_id"=>(int)$prop['research_id']
+        )),
+        "elements"=>lnk_get_elements($id),
+        "research_id"=>$prop['research_id']
+    ));
 }
 
 // --------------------------------------------------------------------------------------
@@ -341,6 +366,44 @@ function lnk_add_categories($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
+function lnk_get_res_links($prop){
+    global $con;
+
+    $list = array();
+    $sql = "SELECT ln.project_id, ln.link_id
+              FROM a_proj_links ln
+             WHERE ln.research_id = ".$prop['res'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 1 in lnk_func.php: ' . mysqli_error($con));
+    }
+    while($row = mysqli_fetch_array($result)) {
+        array_push($list,array(
+            "proj"=>$row['project_id'],
+            "link"=>$row['link_id']
+        ));
+    }
+    return $list;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function lnk_new_collection($prop){
+    global $con;
+
+    $list = lnk_get_res_links($prop);
+    foreach ($list as $lnkId){
+        lnk_add_category($lnkId,array("cat_id"=>array(
+            "res"=>$prop['res'],
+            "col"=>$prop['id']
+        )));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
 function lnk_add_category($id,$prop){
     global $con;
 
@@ -379,10 +442,13 @@ function lnk_add_category($id,$prop){
                     0,
                     '".$color."',
                     1)";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 5 in link_func.php: ' . mysqli_error($con).$sql);
+    try {
+        $result = mysqli_query($con,$sql);
     }
+    catch (mysqli_sql_exception $e) {
+        // throw $e;
+        exit_error('Error 5 in link_func.php: ' . mysqli_error($con).$sql);
+    }               
 
     return array(
         "color"=>$color,

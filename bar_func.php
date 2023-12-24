@@ -43,7 +43,7 @@ function bar_create($id,$prop){
                 ".$fromPos.", 
                 ".$toPos.", 
                 1,".$max_level.",".$max_level.",
-                FALSE,0)"; 
+                FALSE,FALSE,0)"; 
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 4 in bar_func.php: ' . mysqli_error($con));

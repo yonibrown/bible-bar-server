@@ -22,7 +22,7 @@ switch ($type){
         switch ($oper) {
             // // set research attributes
             case "upload_parts":
-                res_DICTA_upload($id,$file);
+                $reply['data'] = res_DICTA_upload($id,$file);
                 break;
         }
         break;    
@@ -34,25 +34,35 @@ switch ($type){
 function res_DICTA_upload($id,$file){
     global $con;
 
+    $residx_id = array(
+        "res"=>1,
+        "col"=>1,
+        "idx"=>1
+    );
     $colObj = res_new_collection($id,array("name"=>"מקובץ"));
 
     $part_id = 0;
-    $fileArr = explode('תנך/',$file);
+    // $fileArr = explode('תנך/',$file);
+    $fileArr = preg_split("/\n/", $file);
     for ($file_i=0;$file_i<count($fileArr);$file_i++){
-        $lineArr = preg_split("/\n|\/|\)|\,/", $fileArr[$file_i]);
+        // $lineArr = preg_split("/\n|\/|\)|\,/", $fileArr[$file_i]);
+        $lineArr = preg_split("/\/|\,/", $fileArr[$file_i]);
         if (count($lineArr) >= 4){
             $bibleRange = array("from"=>0,"to"=>999999999);
+
+            //source
+            $tanah = array_shift($lineArr);
 
             //division
             $division_heb = array_shift($lineArr);
 
             //book
             $book_heb = str_replace('ספר ','',array_shift($lineArr));
-            $bookRange = res_DICTA_get_range($book_heb,2,$bibleRange);
+            $bookRange = residx_get_level_range($residx_id,$book_heb,2,$bibleRange);
 
             //chapter
             $chapter_heb = str_replace('פרק ','',array_shift($lineArr));
-            $chapterRange = res_DICTA_get_range($chapter_heb,1,$bookRange);
+            $chapterRange = residx_get_level_range($residx_id,$chapter_heb,1,$bookRange);
             // $chapter = array_search($chapter_heb,$heb_num);
 
             //verses
@@ -62,53 +72,44 @@ function res_DICTA_upload($id,$file){
                     $verse_heb = str_replace('פסוק ','',$nxt);
                     if ($verse_heb != ''){
                         // $verse = array_search($verse_heb,$heb_num);
-                        $verseRange = res_DICTA_get_range($verse_heb,0,$chapterRange);
-                        // $text = array_shift($lineArr);
-                        // add_verse($book,$chapter,$verse,$text,$part_id);
-
-                        if(is_null($verseRange)){
-                            exit_error($verse_heb);
+                        $verseRange = residx_get_level_range($residx_id,$verse_heb,0,$chapterRange);
+                        $text = array_shift($lineArr);
+                        $text = str_replace('־',' ',$text);
+                        $text = str_replace('׀',' ',$text);
+                        $text = str_replace('* *',' ',$text);
+                        $textArr = explode('*',$text);
+        
+                        $toWord = 0;
+                        while(count($textArr)>0){
+                            $wordsBefore = preg_split("/\s+/", array_shift($textArr));
+                            // $wordsBefore = explode(' ',array_shift($textArr));
+                            // exit_error(count($wordsBefore));
+                            $fromWord = $toWord + count($wordsBefore) - 1;
+    
+                            if (count($textArr)>0){
+                                $wordsPart = explode(' ',array_shift($textArr));
+                                $toWord = $fromWord + count($wordsPart) - 1;
+        
+                                // add_verse($book,$chapter,$verse,$text,$part_id);
+        
+                                res_new_part($id,array(
+                                    "collection_id"=>$colObj['id'],
+                                    "src_research"=>1,
+                                    "src_collection"=>1,
+                                    "src_from_position"=>$verseRange['from'],
+                                    "src_from_word"=>$fromWord,
+                                    "src_to_position"=>$verseRange['to'],
+                                    "src_to_word"=>$toWord
+                                ));
+                            }
                         }
-
-                        res_new_part($id,array(
-                            "collection_id"=>$colObj['id'],
-                            "src_research"=>1,
-                            "src_collection"=>1,
-                            "src_from_position"=>$verseRange['from'],
-                            "src_from_word"=>0,
-                            "src_to_position"=>$verseRange['to'],
-                            "src_to_word"=>999
-                        ));
                     }
                 }
             }
         }
     }
-}
 
-function res_DICTA_get_range($name,$level,$posRange){
-    global $con;
-    $sql = "SELECT division_id,from_position,to_position
-            FROM a_res_idx_division
-            WHERE research_id = 1
-                AND collection_id = 1
-                AND index_id = 1
-                AND level = ".$level."
-                AND from_position >= ".$posRange['from']."
-                AND to_position <= ".$posRange['to']."
-                AND name_heb = '".$name."'";
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error description2: ' . mysqli_error($con));
-    }
-    if($row = mysqli_fetch_array($result)){
-        return array(
-            "from"=>$row['from_position'],
-            "to"=>$row['to_position']
-        );
-    }
-
-    return null;
+    return $colObj;
 }
 
 // function add_verse($book,$chapter,$verse,$text,$part_id){
