@@ -349,7 +349,8 @@ switch ($type){
     //     }
     //     break;    
 }
-$reply['objects_to_reload'] = $objects_to_reload;
+
+$reply['objects_to_reload']['elements'] = array_unique($objects_to_reload['elements']);
 
 echo json_encode($reply);
 include 'disconnect_db.php';
