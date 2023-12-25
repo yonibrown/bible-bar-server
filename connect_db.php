@@ -112,7 +112,8 @@ function inList($arr,$itemType='num'){
     }
 
     if (count($arr) == 0){
-        return null;
+        exit_error("EMPTY IN-LIST");
+        // return "--- EMPTY IN LIST ---";
     }
 
     return " IN(".implode(",",$arr).") ";
