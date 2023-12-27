@@ -261,14 +261,15 @@ switch ($type){
     case "res_index":
         switch ($oper) {
             // get research index
-            case "get":
-                $reply['data'] = residx_get($id);
+            // case "get":
+            //     $reply['data'] = residx_get($id);
+            //     break;
+
+            // get research index levels list
+            case "get_levels":
+                $reply['data'] = residx_get_levels($id,$prop);
                 break;
 
-            // // get research index levels list
-            // case "get_levels":
-            //     $reply['data'] = residx_get_levels($id,$prop);
-            //     break;
             // // get research index level's divisions list
             // case "get_level_divisions":
             //     $reply['data'] = residx_get_level_divisions($id,$prop);

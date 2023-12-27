@@ -17,20 +17,6 @@ function residx_get($id){
     $row = mysqli_fetch_array($result);
     $name = $row['name'];
 
-    // $sql = "SELECT COUNT(*) key_levels
-    //           FROM a_res_idx_levels
-    //          WHERE research_id = ".$id['res']."
-    //            AND collection_id = ".$id['col']."
-    //            AND index_id = ".$id['idx']."
-    //            AND part_of_key = TRUE";
-    // $result = mysqli_query($con,$sql);
-    // if (!$result) {
-    //     exit_error('Error 22 in res_func.php: ' . mysqli_error($con));
-    // }
-    // $row = mysqli_fetch_array($result);
-    // $key_levels = $row['key_levels'];
-
-
     $level_list = residx_get_levels($id,array('dummy'=>''));
 
     $attr = array(
@@ -47,11 +33,15 @@ function residx_get($id){
 function residx_get_levels($id,$prop){
     global $con;
 
-    $key_pred = '';
-    if (array_key_exists('levels',$prop)){
-        if ($prop['levels'] == 'key'){
-            $key_pred = 'AND part_of_key = TRUE';
-        }
+    $filter = '';
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "levels":
+                if ($val == 'key'){
+                    $filter .= " AND part_of_key = TRUE";
+                }
+                break;
+        }   
     }
 
     $list = array();
@@ -60,7 +50,7 @@ function residx_get_levels($id,$prop){
              WHERE research_id = ".$id['res']."
                AND collection_id = ".$id['col']."
                AND index_id = ".$id['idx']."
-               ".$key_pred."
+               ".$filter."
              ORDER BY level desc";
     $result = mysqli_query($con,$sql);
     if (!$result) {
