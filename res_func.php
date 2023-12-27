@@ -166,14 +166,18 @@ function res_get_prt_list($id,$prop){
     $order_by = "prt.src_from_position ".$order.",prt.src_from_word ".$order;
     if (array_key_exists('sort', $prop)){
         if ($prop['sort'] == 'col'){
-            $order_by = "prt.collection_id ".$order.",".$order_by;
+            $order_by = " prt.collection_id ".$order.",".$order_by;
         }
     }
     
     $filter = '';
 
     if (array_key_exists('part_id', $prop)){
-        $filter .= 'AND prt.part_id = '.$prop['part_id'];
+        $filter .= ' AND prt.part_id = '.$prop['part_id'];
+    }
+
+    if (array_key_exists('collection_id', $prop)){
+        $filter .= ' AND prt.collection_id = '.$prop['collection_id'];
     }
 
     $sql = "SET SQL_BIG_SELECTS=1";
@@ -398,19 +402,47 @@ function res_new_part($id,$prop){
 
     res_update_generated_columns($res,$part);
 
-    $partObj = res_get_prt_list($id,array("part_id"=>$part))[0];
-    $rep = array("new_part"=>$partObj);
+    $newParts = res_parts_prop($id,array(
+        "part_id"=>$part,
+        "collection_id"=>$prop['collection_id']
+    ));
+
+    return array(
+        "new_parts"=>$newParts
+    );
+    // $partObj = res_get_prt_list($id,array("part_id"=>$part));
+    // $rep = array("new_parts"=>$partObj);
+    // if (array_key_exists('proj',$reload)){
+    //     proj_objects_to_reload(array(
+    //         "object_type"=>"res_part",
+    //         "action"=>"new",
+    //         "cat"=>array(
+    //             "res"=>$res,
+    //             "col"=>$prop['collection_id']
+    //         )
+    //     ));
+    // }
+    // return $rep;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_parts_prop($id,$prop){
+    global $reload;
+
     if (array_key_exists('proj',$reload)){
         proj_objects_to_reload(array(
             "object_type"=>"res_part",
             "action"=>"new",
             "cat"=>array(
-                "res"=>$res,
+                "res"=>$id['res'],
                 "col"=>$prop['collection_id']
             )
         ));
     }
-    return $rep;
+
+    return res_get_prt_list($id,$prop);
 }
 
 // --------------------------------------------------------------------------------------
@@ -1032,5 +1064,96 @@ function residx_get_level_range($id,$name,$level,$initialRange){
 
 //     return $list;
 // }
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_DICTA_upload($id,$file){
+    global $con;
+
+    $residx_id = array(
+        "res"=>1,
+        "col"=>1,
+        "idx"=>1
+    );
+    $colObj = res_new_collection($id,array("name"=>"מקובץ"));
+
+    $part_id = 0;
+    // $fileArr = explode('תנך/',$file);
+    $fileArr = preg_split("/\n/", $file);
+    for ($file_i=0;$file_i<count($fileArr);$file_i++){
+        // $lineArr = preg_split("/\n|\/|\)|\,/", $fileArr[$file_i]);
+        $lineArr = preg_split("/\/|\,/", $fileArr[$file_i]);
+        if (count($lineArr) >= 4){
+            $bibleRange = array("from"=>0,"to"=>999999999);
+
+            //source
+            $tanah = array_shift($lineArr);
+
+            //division
+            $division_heb = array_shift($lineArr);
+
+            //book
+            $book_heb = str_replace('ספר ','',array_shift($lineArr));
+            $bookRange = residx_get_level_range($residx_id,$book_heb,2,$bibleRange);
+
+            //chapter
+            $chapter_heb = str_replace('פרק ','',array_shift($lineArr));
+            $chapterRange = residx_get_level_range($residx_id,$chapter_heb,1,$bookRange);
+            // $chapter = array_search($chapter_heb,$heb_num);
+
+            //verses
+            while(count($lineArr)>0){
+                $nxt = array_shift($lineArr);
+                if (str_contains($nxt, 'פסוק ')){
+                    $verse_heb = str_replace('פסוק ','',$nxt);
+                    if ($verse_heb != ''){
+                        // $verse = array_search($verse_heb,$heb_num);
+                        $verseRange = residx_get_level_range($residx_id,$verse_heb,0,$chapterRange);
+                        $text = array_shift($lineArr);
+                        $text = str_replace('־',' ',$text);
+                        $text = str_replace('׀',' ',$text);
+                        $text = str_replace('* *',' ',$text);
+                        $textArr = explode('*',$text);
+        
+                        $toWord = 0;
+                        while(count($textArr)>0){
+                            $wordsBefore = preg_split("/\s+/", array_shift($textArr));
+                            // $wordsBefore = explode(' ',array_shift($textArr));
+                            // exit_error(count($wordsBefore));
+                            $fromWord = $toWord + count($wordsBefore) - 1;
+    
+                            if (count($textArr)>0){
+                                $wordsPart = explode(' ',array_shift($textArr));
+                                $toWord = $fromWord + count($wordsPart) - 1;
+        
+                                // add_verse($book,$chapter,$verse,$text,$part_id);
+        
+                                res_new_part($id,array(
+                                    "collection_id"=>$colObj['id'],
+                                    "src_research"=>1,
+                                    "src_collection"=>1,
+                                    "src_from_position"=>$verseRange['from'],
+                                    "src_from_word"=>$fromWord,
+                                    "src_to_position"=>$verseRange['to'],
+                                    "src_to_word"=>$toWord
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $newParts = res_parts_prop($id,array(
+        "collection_id"=>$colObj['id']
+    ));
+
+    return array(
+        "new_collection"=>$colObj,
+        "new_parts"=>$newParts
+    );
+}
 
 ?>
