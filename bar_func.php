@@ -396,7 +396,6 @@ function bar_calc_points($id,$dsp){
                AND ec.element_id = ".$id['elm']."
                ".$filter."
              GROUP BY ec.link_id,pt.research_id,pt.part_id";
-            //  exit_error($sql);
     }
     $result1 = mysqli_query($con,$sql);
     if (!$result1) {

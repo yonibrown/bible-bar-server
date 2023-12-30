@@ -201,15 +201,17 @@ function proj_delete_unlisted_elements($id,$elements){
 
     $proj = $id['proj'];
 
-    $elm_ids = array();
-    foreach ($elements as $elm) {
-        array_push($elm_ids,$elm['id']);
+    $delete_where = "WHERE project_id = ".$proj;
+    if (count($elements) > 0){
+        $elm_ids = array();
+        foreach ($elements as $elm) {
+            array_push($elm_ids,$elm['id']);
+        }
+        $delete_where .= " AND element_id NOT ".inList($elm_ids);
     }
-    $elm_ids_str = implode(",",$elm_ids);
-    $delete_where = "WHERE project_id = ".$proj." AND element_id NOT IN(".$elm_ids_str.")";
 
     $sql = "UPDATE a_proj_elements
-               SET position=0 
+               SET position = 0 
                ".$delete_where;
     $result = mysqli_query($con,$sql);
     if (!$result) {
