@@ -7,6 +7,7 @@ include 'proj_func.php';
 include 'link_func.php';
 include 'elm_func.php';
 include 'res_func.php';
+include 'residx_func.php';
 
 if (empty($_POST)){
     $_POST = json_decode(file_get_contents('php://input'), true);
@@ -260,14 +261,15 @@ switch ($type){
     case "res_index":
         switch ($oper) {
             // get research index
-            case "get":
-                $reply['data'] = residx_get($id);
+            // case "get":
+            //     $reply['data'] = residx_get($id);
+            //     break;
+
+            // get research index levels list
+            case "get_levels":
+                $reply['data'] = residx_get_levels($id,$prop);
                 break;
 
-            // // get research index levels list
-            // case "get_levels":
-            //     $reply['data'] = residx_get_levels($id,$prop);
-            //     break;
             // // get research index level's divisions list
             // case "get_level_divisions":
             //     $reply['data'] = residx_get_level_divisions($id,$prop);
@@ -349,7 +351,8 @@ switch ($type){
     //     }
     //     break;    
 }
-$reply['objects_to_reload'] = $objects_to_reload;
+
+$reply['objects_to_reload']['elements'] = array_unique($objects_to_reload['elements']);
 
 echo json_encode($reply);
 include 'disconnect_db.php';

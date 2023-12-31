@@ -201,15 +201,17 @@ function proj_delete_unlisted_elements($id,$elements){
 
     $proj = $id['proj'];
 
-    $elm_ids = array();
-    foreach ($elements as $elm) {
-        array_push($elm_ids,$elm['id']);
+    $delete_where = "WHERE project_id = ".$proj;
+    if (count($elements) > 0){
+        $elm_ids = array();
+        foreach ($elements as $elm) {
+            array_push($elm_ids,$elm['id']);
+        }
+        $delete_where .= " AND element_id NOT ".inList($elm_ids);
     }
-    $elm_ids_str = implode(",",$elm_ids);
-    $delete_where = "WHERE project_id = ".$proj." AND element_id NOT IN(".$elm_ids_str.")";
 
     $sql = "UPDATE a_proj_elements
-               SET position=0 
+               SET position = 0 
                ".$delete_where;
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -424,7 +426,7 @@ function proj_get_lnk_list($id,$prop){
 // ----                           
 // --------------------------------------------------------------------------------------
 function proj_objects_to_reload($prop){
-    global $con,$objects_to_reload,$reload;
+    global $con,$reload;
     
     // $elm_list = array();
     $in_list = '';
@@ -445,50 +447,6 @@ function proj_objects_to_reload($prop){
                     break;
             }
             break;
-
-    //     case 'link_name':
-    //         switch($prop['action']){
-    //             case 'update':
-    //                 $found = false;
-    //                 foreach($objects_to_reload['links'] as $link){
-    //                     if ($link['id'] == $prop['link']){
-    //                         $found = true;
-    //                         $link['actions']['name'] = $prop['name'];
-    //                     }
-    //                 }
-    //                 if (!$found){
-    //                     array_push($objects_to_reload['links'],array(
-    //                         "id"=>$prop['link'],
-    //                         "actions"=>array(
-    //                             "name"=>$prop['name']
-    //                         )
-    //                     ));
-    //                 }
-    //                 break;
-    //         }
-    //         break;
-
-    //     case 'research_name':
-    //         switch($prop['action']){
-    //             case 'update':
-    //                 $found = false;
-    //                 foreach($objects_to_reload['researches'] as $res){
-    //                     if ($res['id'] == $prop['res']){
-    //                         $found = true;
-    //                         $res['actions']['name'] = $prop['name'];
-    //                     }
-    //                 }
-    //                 if (!$found){
-    //                     array_push($objects_to_reload['researches'],array(
-    //                         "id"=>$prop['res'],
-    //                         "actions"=>array(
-    //                             "name"=>$prop['name']
-    //                         )
-    //                     ));
-    //                 }
-    //                 break;
-    //         }
-    //         break;
     }
 
     if ($in_list != null){
@@ -544,12 +502,7 @@ function proj_get_cat_elements($cat){
         exit_error('Error 33 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        array_push($objects_to_reload['elements'],array(
-            "id"=>(int)$row['element_id'],
-            "actions"=>array(
-                "reload"=>true
-            )
-        ));
+        array_push($objects_to_reload['elements'],(int)$row['element_id']);
         array_push($in_list,$row['element_id']);
     }
 

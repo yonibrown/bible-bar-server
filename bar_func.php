@@ -255,129 +255,6 @@ function get_segment_size($id,$row1,$total_words){
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
-function get_point_size($id,$base_table,$row1,$total_words,$big_part_ratio){
-    global $con,$heb_num;
-
-    $sql = "SELECT seq.position, seq.abs_name, seq.gen_word_count seq_count,
-                   seq.src_from_position seq_from_position,seq.src_to_position seq_to_position,
-                   seq.src_from_word seq_from_word, seq.src_to_word seq_to_word
-              FROM ".$base_table." seq
-             WHERE seq.src_research = ".$row1['pt_src_research']."
-               AND seq.src_collection = ".$row1['pt_src_collection']."
-               AND (seq.src_to_position > ".$row1['pt_from_position']." OR
-                   (seq.src_to_position = ".$row1['pt_from_position']." AND seq.src_to_word >= ".$row1['pt_from_word']."))
-               AND (seq.src_from_position < ".$row1['pt_to_position']." OR 
-                   (seq.src_from_position = ".$row1['pt_to_position']." AND seq.src_from_word <= ".$row1['pt_to_word']."))
-             ORDER BY seq.src_from_position,seq.src_from_word
-             LIMIT 1";
-    $result4 = mysqli_query($con,$sql);
-    if ($row4 = mysqli_fetch_array($result4)){
-        $sql = "SELECT SUM(former_seq.gen_word_count) seq_former_count
-                FROM ".$base_table." former_seq
-                WHERE former_seq.position < ".$row4['position'];
-        $result5 = mysqli_query($con,$sql);
-        $row5 = mysqli_fetch_array($result5);
-
-        $offset = $row5['seq_former_count'];
-        if ($row4['seq_count']/$total_words < $big_part_ratio){
-            $offset += $row4['seq_count'];
-        } else {
-            if ($row1['pt_from_position']>$row4['seq_from_position']){
-                $sql = "SELECT SUM(gen_word_count) words
-                        FROM ".$base_table." base
-                        WHERE position >= ".$row4['seq_from_position']."
-                        AND position < ".$row1['pt_from_position'];
-                $result2 = mysqli_query($con,$sql);
-                if (!$result2) {
-                    exit_error('Error 13 in bar_func.php: ' . mysqli_error($con));
-                }
-                $row2 = mysqli_fetch_array($result2);
-                $offset += $row2['words'];
-            } elseif ($row1['pt_from_position']==$row4['seq_from_position']){
-                $word_gap = $row1['pt_from_word']-$row4['seq_from_word'];
-                if ($word_gap>0){
-                    $offset += $word_gap;
-                }
-            }
-        }
-
-        $width = $row1['pt_count'];
-        if ($row1['pt_from_position']<$row4['seq_from_position']
-            || $row1['pt_to_position']>$row4['seq_to_position']){
-            $sql = "SELECT SUM(gen_word_count) words
-                    FROM ".$base_table." base
-                    WHERE position BETWEEN ".$row1['pt_from_position']." AND ".$row1['pt_to_position']."
-                    AND NOT position BETWEEN ".$row4['seq_from_position']." AND ".$row4['seq_to_position'];
-            $result2 = mysqli_query($con,$sql);
-            if (!$result2) {
-                exit_error('Error 14 in bar_func.php: ' . mysqli_error($con));
-            }
-            $row2 = mysqli_fetch_array($result2);
-            $width -= $row2['words'];
-        }
-        if ($row1['pt_from_position']==$row4['seq_from_position']){
-            $word_gap = $row4['seq_from_word']-$row1['pt_from_word'];
-            if ($word_gap>0){
-                $offset -= $word_gap;
-            }
-        }
-        if ($row1['pt_to_position']==$row4['seq_to_position']){
-            $word_gap = $row1['pt_to_word']-$row4['seq_to_word'];
-            if ($word_gap>0){
-                $offset -= $word_gap;
-            }
-        }
-
-        $offsetPct = $offset/$total_words*100;
-        $widthPct = $width/$total_words*100;
-        $name = $row4['abs_name'];
-
-        $sql = "INSERT INTO g_proj_elm_points
-                (project_id, element_id, 
-                link_id, research_id, part_id, collection_id, 
-                offset_pct, width_pct, name) 
-                VALUES (".$id['proj']."
-                ,".$id['elm']."
-                ,".$row1['link_id']."
-                ,".$row1['research_id']."
-                ,".$row1['part_id']."
-                ,".$row1['collection_id']."
-                ,".$offsetPct."
-                ,".$widthPct."
-                ,'".$name."')";
-        $result = mysqli_query($con,$sql);
-        if (!$result) {
-            exit_error('Error 13 in bar_func.php: ' . mysqli_error($con));
-        }
-
-        return array(
-            'offset_pct'=>$offsetPct.'%',
-            'width_pct'=>$widthPct.'%',
-            'name'=>$name
-        );
-    }
-
-    // $sql = "UPDATE a_res_parts
-    // SET gen_offset_pct = -1,
-    //     gen_width_pct = -1,
-    //     gen_name = ''
-    // WHERE research_id = ".$row1['research_id']." 
-    //     AND part_id = ".$row1['part_id'];
-    // $result = mysqli_query($con,$sql);
-    // if (!$result) {
-    //     exit_error('Error 14 in bar_func.php: ' . mysqli_error($con));
-    // }
-
-    return array(
-        'offset_pct'=>'',
-        'width_pct'=>'',
-        'name'=>''
-    );
-}
-
-// --------------------------------------------------------------------------------------
-// ---- 
-// --------------------------------------------------------------------------------------
 function bar_init_gen_segments($id){
     global $con;
 
@@ -503,6 +380,8 @@ function bar_calc_points($id,$dsp){
              ORDER BY pt.link_id,pt.research_id,pt.part_id";
     } else {
         bar_init_gen_points($id);
+
+        // get all parts in collections that are linked to the bar element
         $sql = "SELECT ec.link_id,
                    pt.research_id,pt.collection_id, pt.part_id,
                    pt.gen_word_count pt_count, 
@@ -558,5 +437,130 @@ function bar_calc_points($id,$dsp){
         }
     }
     return $rep;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function get_point_size($id,$base_table,$row1,$total_words,$big_part_ratio){
+    global $con,$heb_num;
+
+    // check if the part is within the bar range
+    $sql = "SELECT seq.position, seq.abs_name, seq.gen_word_count seq_count,
+                   seq.src_from_position seq_from_position,seq.src_to_position seq_to_position,
+                   seq.src_from_word seq_from_word, seq.src_to_word seq_to_word
+              FROM ".$base_table." seq
+             WHERE seq.src_research = ".$row1['pt_src_research']."
+               AND seq.src_collection = ".$row1['pt_src_collection']."
+               AND (seq.src_to_position > ".$row1['pt_from_position']." OR
+                   (seq.src_to_position = ".$row1['pt_from_position']." AND seq.src_to_word >= ".$row1['pt_from_word']."))
+               AND (seq.src_from_position < ".$row1['pt_to_position']." OR 
+                   (seq.src_from_position = ".$row1['pt_to_position']." AND seq.src_from_word <= ".$row1['pt_to_word']."))
+             ORDER BY seq.src_from_position,seq.src_from_word
+             LIMIT 1";
+    $result4 = mysqli_query($con,$sql);
+    if ($row4 = mysqli_fetch_array($result4)){
+        // sum word count in all former positions
+        $sql = "SELECT SUM(former_seq.gen_word_count) seq_former_count
+                FROM ".$base_table." former_seq
+                WHERE former_seq.position < ".$row4['position'];
+        $result5 = mysqli_query($con,$sql);
+        $row5 = mysqli_fetch_array($result5);
+        $offset = $row5['seq_former_count'];
+
+        if ($row4['seq_count']/$total_words < $big_part_ratio){
+            $offset += $row4['seq_count'];
+        } else {
+            if ($row1['pt_from_position']>$row4['seq_from_position']){
+                $sql = "SELECT SUM(gen_word_count) words
+                        FROM ".$base_table." base
+                        WHERE position >= ".$row4['seq_from_position']."
+                        AND position < ".$row1['pt_from_position'];
+                $result2 = mysqli_query($con,$sql);
+                if (!$result2) {
+                    exit_error('Error 13 in bar_func.php: ' . mysqli_error($con));
+                }
+                $row2 = mysqli_fetch_array($result2);
+                $offset += $row2['words'];
+            } elseif ($row1['pt_from_position']==$row4['seq_from_position']){
+                $word_gap = $row1['pt_from_word']-$row4['seq_from_word'];
+                if ($word_gap>0){
+                    $offset += $word_gap;
+                }
+            }
+        }
+
+        $width = $row1['pt_count'];
+        if ($row1['pt_from_position']<$row4['seq_from_position']
+            || $row1['pt_to_position']>$row4['seq_to_position']){
+            $sql = "SELECT SUM(gen_word_count) words
+                    FROM ".$base_table." base
+                    WHERE position BETWEEN ".$row1['pt_from_position']." AND ".$row1['pt_to_position']."
+                    AND NOT position BETWEEN ".$row4['seq_from_position']." AND ".$row4['seq_to_position'];
+            $result2 = mysqli_query($con,$sql);
+            if (!$result2) {
+                exit_error('Error 14 in bar_func.php: ' . mysqli_error($con));
+            }
+            $row2 = mysqli_fetch_array($result2);
+            $width -= $row2['words'];
+        }
+        if ($row1['pt_from_position']==$row4['seq_from_position']){
+            $word_gap = $row4['seq_from_word']-$row1['pt_from_word'];
+            if ($word_gap>0){
+                $offset -= $word_gap;
+            }
+        }
+        if ($row1['pt_to_position']==$row4['seq_to_position']){
+            $word_gap = $row1['pt_to_word']-$row4['seq_to_word'];
+            if ($word_gap>0){
+                $offset -= $word_gap;
+            }
+        }
+
+        $offsetPct = $offset/$total_words*100;
+        $widthPct = $width/$total_words*100;
+        $name = $row4['abs_name'];
+
+        $sql = "INSERT INTO g_proj_elm_points
+                (project_id, element_id, 
+                link_id, research_id, part_id, collection_id, 
+                offset_pct, width_pct, name) 
+                VALUES (".$id['proj']."
+                ,".$id['elm']."
+                ,".$row1['link_id']."
+                ,".$row1['research_id']."
+                ,".$row1['part_id']."
+                ,".$row1['collection_id']."
+                ,".$offsetPct."
+                ,".$widthPct."
+                ,'".$name."')";
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 13 in bar_func.php: ' . mysqli_error($con));
+        }
+
+        return array(
+            'offset_pct'=>$offsetPct.'%',
+            'width_pct'=>$widthPct.'%',
+            'name'=>$name
+        );
+    }
+
+    // $sql = "UPDATE a_res_parts
+    // SET gen_offset_pct = -1,
+    //     gen_width_pct = -1,
+    //     gen_name = ''
+    // WHERE research_id = ".$row1['research_id']." 
+    //     AND part_id = ".$row1['part_id'];
+    // $result = mysqli_query($con,$sql);
+    // if (!$result) {
+    //     exit_error('Error 14 in bar_func.php: ' . mysqli_error($con));
+    // }
+
+    return array(
+        'offset_pct'=>'',
+        'width_pct'=>'',
+        'name'=>''
+    );
 }
 ?>
