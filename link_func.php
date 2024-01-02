@@ -24,7 +24,7 @@ function lnk_create($prop){
     if (array_key_exists('research_id',$prop)){
         $res = $prop['research_id'];
         if ($name == ''){
-            $res_attr = res_get(array("res"=>$res));
+            $res_attr = res_get_basic(array("res"=>$res));
             $name = $res_attr['name'];
         }
     }

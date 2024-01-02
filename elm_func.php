@@ -486,7 +486,7 @@ function elmprt_get($id){
         'ordering'=>$row['ordering']
     );
 
-    $resProp = res_get(array(
+    $resProp = res_get_basic(array(
         "res"=>$row['research_id']
     ));
     $attr['name'] = $resProp['name'];
@@ -502,6 +502,7 @@ function elmprt_create($id,$prop){
 
     if (array_key_exists('res',$prop)){
         $res = $prop['res'];
+        $resObj = res_get(array("res"=>$res));
     } else {
         $resProp = array(
             'proj'=>$id['proj'],

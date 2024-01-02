@@ -307,7 +307,7 @@ function proj_get_res_list($id){
 
     $proj = $id['proj'];
     $list = array();
-    $sql = "SELECT r.research_id,r.name_heb res_name
+    $sql = "SELECT r.research_id,r.name_heb name
               FROM a_researches r
              WHERE r.research_id in(
                  SELECT pa.research_id
@@ -336,11 +336,9 @@ function proj_get_res_list($id){
         exit_error('Error 15 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        $catList = res_get_col_list(array("res"=>$row['research_id']));
-        array_push($list,array("id"=>(int)$row['research_id'],
-                               "name"=>$row['res_name'],
-                               "collections"=>$catList
-                            ));
+        array_push($list,res_prop(array(
+                                "res"=>$row['research_id']
+                            ),$row));
     }
     return $list;
 }
