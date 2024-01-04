@@ -28,7 +28,7 @@
 // --------------------------------------------------------------------------------------
 // ---- get research                                     
 // --------------------------------------------------------------------------------------
-function res_get($id){
+function res_get_basic($id){
     global $con;
 
     $res = $id['res'];
@@ -45,6 +45,24 @@ function res_get($id){
         'desc'=>$row['description']
     );
     return $attr;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_get($id){
+    $row = res_get_basic($id);
+    return res_prop($id,$row);
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_prop($id,$prop){
+    return array("id"=>(int)$id['res'],
+                "name"=>$prop['name'],
+                "collections"=>res_get_col_list($id)
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -554,7 +572,7 @@ function res_delete_parts($id,$prop){
 function res_duplicate($id,$prop){
     global $con;
 
-    $attr = res_get($id);
+    $attr = res_get_basic($id);
     $attr['name'] = substr($attr['name'],1,15)."-COPY";
     $newRes = res_create($attr);
     $newId = $newRes['id'];
