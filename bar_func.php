@@ -381,21 +381,19 @@ function bar_calc_points($id,$dsp){
     } else {
         bar_init_gen_points($id);
 
+        // exit_wrror('yoni');
         // get all parts in collections that are linked to the bar element
-        $sql = "SELECT ec.link_id,
-                   pt.research_id,pt.collection_id, pt.part_id,
-                   pt.gen_word_count pt_count, 
-                   pt.src_from_position pt_from_position,pt.src_to_position pt_to_position, 
-                   pt.src_from_word pt_from_word, pt.src_to_word pt_to_word,
-                   pt.src_research pt_src_research,pt.src_collection pt_src_collection
-              FROM a_res_parts pt
-              JOIN view_proj_link_elm_col ec
-                ON ec.research_id = pt.research_id
-               AND ec.collection_id = pt.collection_id
-             WHERE ec.project_id = ".$id['proj']."
-               AND ec.element_id = ".$id['elm']."
-               ".$filter."
-             GROUP BY ec.link_id,pt.research_id,pt.part_id";
+        $sql = "SELECT pt.link_id,
+                  pt.research_id,pt.collection_id, pt.part_id,
+                  pt.gen_word_count pt_count, 
+                  pt.src_from_position pt_from_position,pt.src_to_position pt_to_position, 
+                  pt.src_from_word pt_from_word, pt.src_to_word pt_to_word,
+                  pt.src_research pt_src_research,pt.src_collection pt_src_collection
+              FROM view_proj_link_elm_part pt
+             WHERE pt.project_id = ".$id['proj']."
+              AND pt.element_id = ".$id['elm']."
+              ".$filter."
+             GROUP BY pt.link_id,pt.research_id,pt.part_id";
     }
     $result1 = mysqli_query($con,$sql);
     if (!$result1) {
