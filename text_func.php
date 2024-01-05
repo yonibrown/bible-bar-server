@@ -152,28 +152,39 @@ function txt_get_segment($id){
         exit_error('Error 999 in text_func.php: ' . mysqli_error($con));
     }
 
+    // $sql1 = "SELECT seq.part_id seq_part,seq.div_name_heb name,seq.position seq_position,
+    //                 src.position src_position,src.text
+ 			//   FROM a_res_parts seq
+    //           JOIN a_res_parts src
+    //             ON src.research_id = seq.src_research
+    //           AND src.collection_id = seq.src_collection
+    //           AND src.position BETWEEN seq.src_from_position AND seq.src_to_position
+		  //   WHERE seq.research_id = ".$prop['research_id']."
+    //           AND seq.collection_id = ".$prop['collection_id']."
+    //           AND seq.position BETWEEN ".$prop['from_position']." AND ".$prop['to_position']."
+    //          GROUP BY seq.position,src.position,
+    //                   seq.part_id,seq.div_name_heb,src.text
+    //          ORDER BY seq.position,src.position";       
+
     $sql1 = "SELECT seq.part_id seq_part,seq.div_name_heb name,seq.position seq_position,
                     src.position src_position,src.text,
  				    MAX(pts.linked) linked
  			  FROM a_res_parts seq
               JOIN a_res_parts src
                 ON src.research_id = seq.src_research
-               AND src.collection_id = seq.src_collection
-               AND src.position BETWEEN seq.src_from_position AND seq.src_to_position
+              AND src.collection_id = seq.src_collection
+              AND src.position BETWEEN seq.src_from_position AND seq.src_to_position
               LEFT JOIN 
                   (SELECT 1 linked,src_from_position,src_to_position
-                     FROM a_res_parts rp
-                     JOIN view_proj_link_elm_col ec
-                       ON ec.research_id = rp.research_id
-                      AND ec.collection_id = rp.collection_id
-                      AND ec.project_id = ".$id['proj']."
-                      AND ec.element_id = ".$id['elm']."
-                    WHERE rp.src_research = ".$prop['research_id']."
+                     FROM view_proj_link_elm_part rp
+                    WHERE rp.project_id = ".$id['proj']."
+                      AND rp.element_id = ".$id['elm']."
+                      AND rp.src_research = ".$prop['research_id']."
                       AND rp.src_collection = ".$prop['collection_id'].") AS pts
 				ON src.position BETWEEN pts.src_from_position AND pts.src_to_position
 		     WHERE seq.research_id = ".$prop['research_id']."
-               AND seq.collection_id = ".$prop['collection_id']."
-               AND seq.position BETWEEN ".$prop['from_position']." AND ".$prop['to_position']."
+              AND seq.collection_id = ".$prop['collection_id']."
+              AND seq.position BETWEEN ".$prop['from_position']." AND ".$prop['to_position']."
              GROUP BY seq.position,src.position,
                       seq.part_id,seq.div_name_heb,src.text
              ORDER BY seq.position,src.position";       
@@ -206,21 +217,18 @@ function txt_get_segment($id){
             $word_linked = false;
             $space_linked = false;
             if ($row1['linked'] == 1){
-                $sql2 = "SELECT ec.research_id, ec.collection_id, ec.division_id, rp.part_id, rp.src_to_position, rp.src_to_word, ec.link_id
-                           FROM a_res_parts rp
-                           JOIN view_proj_link_elm_col ec
-                             ON ec.research_id = rp.research_id
-                            AND ec.collection_id = rp.collection_id
+                $sql2 = "SELECT rp.research_id, rp.collection_id, rp.division_id, rp.part_id, rp.src_to_position, rp.src_to_word, rp.link_id
+                           FROM view_proj_link_elm_part rp
                            LEFT JOIN a_res_idx_division rd
-                             ON ec.research_id = rd.research_id
-                            AND ec.collection_id = rd.collection_id 
-                            AND ec.division_id = rd.division_id
+                             ON rp.research_id = rd.research_id
+                            AND rp.collection_id = rd.collection_id 
+                            AND rp.division_id = rd.division_id
                           WHERE (".$src_pos." > rp.src_from_position OR (".$src_pos." = rp.src_from_position AND ".$word_no." >= rp.src_from_word)) 
                             AND (".$src_pos." < rp.src_to_position   OR (".$src_pos." = rp.src_to_position   AND ".$word_no." <= rp.src_to_word))
-                            AND ec.project_id = ".$id['proj']."
-                            AND ec.element_id = ".$id['elm']."
-                            AND (ec.division_id = 0 OR rp.position BETWEEN rd.from_position AND rd.to_position)
-                          ORDER BY rp.research_id,rp.collection_id,ec.link_id";
+                            AND rp.project_id = ".$id['proj']."
+                            AND rp.element_id = ".$id['elm']."
+                            AND (rp.division_id = 0 OR rp.position BETWEEN rd.from_position AND rd.to_position)
+                          ORDER BY rp.research_id,rp.collection_id,rp.link_id";
 
                 $result2 = mysqli_query($con,$sql2);
                 if (!$result2) {
