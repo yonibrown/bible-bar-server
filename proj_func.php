@@ -116,59 +116,6 @@ function proj_create($prop){
 }
 
 // --------------------------------------------------------------------------------------
-// ---- get default research of project
-// --------------------------------------------------------------------------------------
-// function proj_get_def_res($id){
-//     global $con;
-
-//     $proj = $id['proj'];
-//     $reply = array();
-
-//     // get the default research
-//     $sql = "SELECT research_id
-//             FROM a_researches
-//             WHERE project_id = ".$proj;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 6 in proj_func.php: ' . mysqli_error($con));
-//     }
-//     if($row = mysqli_fetch_array($result)){
-//         $reply['res'] = $row['research_id'];
-//     } else {
-//         // if there is no default research for this project, create one
-//         $res_prop = array("name"=>"project","desc"=>"default research","proj"=>$proj);
-//         $res = res_create($res_prop);
-//         $reply['res'] = $res['res'];
-
-//         // create a collection in the new research
-//         res_new_collection($res,array("name"=>"default","desc"=>"default collection"));
-//     }
-//     $cat = array('res'=>$reply['res'],'col'=>1);
-
-//     // get the link for the default research (if exists)
-//     // $sql = "SELECT l.link_id
-//     //           FROM a_proj_link_collections l
-//     //          WHERE l.project_id =  ".$proj."
-//     //            AND l.research_id = ".$reply['res']."
-//     //            AND l.collection_id = 1";
-//     // $result = mysqli_query($con,$sql);
-//     // if (!$result) {
-//     //     exit_error('Error 31 in proj_func.php: ' . mysqli_error($con));
-//     // }
-//     // if($row = mysqli_fetch_array($result)){
-//     //     $reply['lnk'] = $row['link_id'];
-//     // } else {
-//     //     $linkId = lnk_create(array("proj"=>$id['proj']));
-//     //     lnk_add_categories($linkId,array("type"=>"category","data"=>$cat));
-//     //     $reply['lnk'] = $linkId;
-//     //     // create new element
-//     //     // $newelm = jjj;
-//     // }
-
-//     return $reply;
-// }
-
-// --------------------------------------------------------------------------------------
 // ---- save elements display in project
 // --------------------------------------------------------------------------------------
 function proj_save_elements($id,$elements){
