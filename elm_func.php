@@ -14,7 +14,7 @@ function elm_get_basic($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
-                   position, open_text_element
+                   tab, position, open_text_element
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
               AND e.element_id = ".$id['elm'];
@@ -65,6 +65,7 @@ function elm_prop($id,$prop){
         "proj"=>(int)$id['proj'],
         "type"=>$prop['type'],
         "name"=>$name,
+        "tab"=>(int)$prop['tab'],
         "position"=>(float)$prop['position'],
         "attr"=>$spc_attr,
         "open_text_element"=>(int)$openTextElm

@@ -43,13 +43,15 @@ function proj_get($id){
     $elm_list = proj_get_elm_list($id);
     $lnk_list = proj_get_lnk_list($id,array('dummy'=>''));
     $res_list = proj_get_res_list($id,array('dummy'=>''));
+    $tab_list = proj_get_tab_list($id);
     
     $attr = array(
         'name'=>$row['name'],
         'desc'=>$row['description'],
         'elements'=>$elm_list,
         'links'=>$lnk_list,
-        'researches'=>$res_list
+        'researches'=>$res_list,
+        'tabs'=>$tab_list
     );
     return $attr;
 }
@@ -301,6 +303,7 @@ function proj_get_elm_list($id){
 
     $sql = "SELECT pe.element_id id,type,name,
                    opening_element,
+                   pe.tab,
                    pe.position,
                    show_props,
                    open_text_element
@@ -318,6 +321,30 @@ function proj_get_elm_list($id){
             "elm"=>$row['id']
         );
         array_push($list,elm_prop($elmId,$row));
+    }
+    return $list;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- get tab list for project                                   
+// --------------------------------------------------------------------------------------
+function proj_get_tab_list($id){
+    global $con;
+
+    $proj = $id['proj'];
+    $list = array();
+
+    $sql = "SELECT DISTINCT pe.tab
+            FROM a_proj_elements pe
+            WHERE pe.project_id = ".$proj."
+              AND position > 0
+            ORDER BY tab";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 16 in proj_func.php: ' . mysqli_error($con));
+    }
+    while($row = mysqli_fetch_array($result)) {
+        array_push($list,$row['tab']);
     }
     return $list;
 }
