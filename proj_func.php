@@ -120,19 +120,22 @@ function proj_create($prop){
 // --------------------------------------------------------------------------------------
 // ---- save elements display in project
 // --------------------------------------------------------------------------------------
-function proj_save_elements($id,$elements){
+function proj_save_elements($id,$prop){
     global $con;
 
     $proj = $id['proj'];
-
-    proj_delete_unlisted_elements($id,$elements);
+    $elements = $prop['elements'];
+    $tab = $prop['tab'];
+    
+    proj_delete_unlisted_elements($id,$prop);
     // proj_clear_redundant_data();
 
     // update display for elements in the list
     // ----------------------------------------
     foreach ($elements as $elm) {
         $sql = "UPDATE a_proj_elements
-                   SET position=".$elm['position']."
+                   SET position = ".$elm['position']."
+                     , tab = ".$tab."
                  WHERE project_id = ".$proj."
                    AND element_id = ".$elm['id'];
         $result = mysqli_query($con,$sql);
@@ -145,12 +148,15 @@ function proj_save_elements($id,$elements){
 // --------------------------------------------------------------------------------------
 // ----                                 
 // --------------------------------------------------------------------------------------
-function proj_delete_unlisted_elements($id,$elements){
+function proj_delete_unlisted_elements($id,$prop){
     global $con;
 
     $proj = $id['proj'];
+    $elements = $prop['elements'];
+    $tab = $prop['tab'];
 
-    $delete_where = "WHERE project_id = ".$proj;
+    $delete_where = "WHERE project_id = ".$proj."
+                       AND tab = ".$tab;
     if (count($elements) > 0){
         $elm_ids = array();
         foreach ($elements as $elm) {

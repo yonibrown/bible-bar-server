@@ -212,7 +212,7 @@ switch ($type){
 
             // load elements to project
             case "save_elements":
-                proj_save_elements($id,$prop['elements']);
+                proj_save_elements($id,$prop);
                 break;
         }
         break;    
