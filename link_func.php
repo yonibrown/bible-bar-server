@@ -534,44 +534,4 @@ function lnk_upd_category($id,$prop){
     }
 }
 
-// --------------------------------------------------------------------------------------
-// ---- remove categories from a link
-// --------------------------------------------------------------------------------------
-// function lnk_remove_categories($id,$prop){
-//     global $con;
-
-//     $proj = $id['proj'];
-//     $link = $id['link'];
-
-//     if ($prop['type'] == 'list'){
-//         $list = $prop['data'];
-//     } else if ($prop['type'] == 'category'){
-//         $list = array($prop['data']);
-//     }
-
-//     $catArray = array();
-//     foreach($list as $cat) {
-//         $sql = "DELETE FROM a_proj_link_collections
-//                  WHERE project_id = ".$proj."
-//                    AND link_id = ".$link."
-//                    AND research_id = ".$cat['res']."
-//                    AND collection_id = ".$cat['col']."
-//                    AND division_id = ".$cat['div'];
-//         $result = mysqli_query($con,$sql);
-//         if (!$result) {
-//             exit_error('Error 6 in link_func.php: ' . mysqli_error($con));
-//         }
-
-//         // add the category to the returned array
-//         array_push($catArray,array("proj"=>$proj,
-//                                 "link"=>$link,
-//                                 "res"=>$cat['res'],
-//                                 "col"=>$cat['col'],
-//                                 "div"=>$cat['div'],
-//                                 "color"=>$color,
-//                                 "hilight"=>true));
-//     }
-
-//     return $catArray;
-// }
 ?>

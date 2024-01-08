@@ -43,13 +43,15 @@ function proj_get($id){
     $elm_list = proj_get_elm_list($id);
     $lnk_list = proj_get_lnk_list($id,array('dummy'=>''));
     $res_list = proj_get_res_list($id,array('dummy'=>''));
+    $tab_list = proj_get_tab_list($id);
     
     $attr = array(
         'name'=>$row['name'],
         'desc'=>$row['description'],
         'elements'=>$elm_list,
         'links'=>$lnk_list,
-        'researches'=>$res_list
+        'researches'=>$res_list,
+        'tabs'=>$tab_list
     );
     return $attr;
 }
@@ -116,74 +118,24 @@ function proj_create($prop){
 }
 
 // --------------------------------------------------------------------------------------
-// ---- get default research of project
-// --------------------------------------------------------------------------------------
-// function proj_get_def_res($id){
-//     global $con;
-
-//     $proj = $id['proj'];
-//     $reply = array();
-
-//     // get the default research
-//     $sql = "SELECT research_id
-//             FROM a_researches
-//             WHERE project_id = ".$proj;
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 6 in proj_func.php: ' . mysqli_error($con));
-//     }
-//     if($row = mysqli_fetch_array($result)){
-//         $reply['res'] = $row['research_id'];
-//     } else {
-//         // if there is no default research for this project, create one
-//         $res_prop = array("name"=>"project","desc"=>"default research","proj"=>$proj);
-//         $res = res_create($res_prop);
-//         $reply['res'] = $res['res'];
-
-//         // create a collection in the new research
-//         res_new_collection($res,array("name"=>"default","desc"=>"default collection"));
-//     }
-//     $cat = array('res'=>$reply['res'],'col'=>1);
-
-//     // get the link for the default research (if exists)
-//     // $sql = "SELECT l.link_id
-//     //           FROM a_proj_link_collections l
-//     //          WHERE l.project_id =  ".$proj."
-//     //            AND l.research_id = ".$reply['res']."
-//     //            AND l.collection_id = 1";
-//     // $result = mysqli_query($con,$sql);
-//     // if (!$result) {
-//     //     exit_error('Error 31 in proj_func.php: ' . mysqli_error($con));
-//     // }
-//     // if($row = mysqli_fetch_array($result)){
-//     //     $reply['lnk'] = $row['link_id'];
-//     // } else {
-//     //     $linkId = lnk_create(array("proj"=>$id['proj']));
-//     //     lnk_add_categories($linkId,array("type"=>"category","data"=>$cat));
-//     //     $reply['lnk'] = $linkId;
-//     //     // create new element
-//     //     // $newelm = jjj;
-//     // }
-
-//     return $reply;
-// }
-
-// --------------------------------------------------------------------------------------
 // ---- save elements display in project
 // --------------------------------------------------------------------------------------
-function proj_save_elements($id,$elements){
+function proj_save_elements($id,$prop){
     global $con;
 
     $proj = $id['proj'];
-
-    proj_delete_unlisted_elements($id,$elements);
+    $elements = $prop['elements'];
+    $tab = $prop['tab'];
+    
+    proj_delete_unlisted_elements($id,$prop);
     // proj_clear_redundant_data();
 
     // update display for elements in the list
     // ----------------------------------------
     foreach ($elements as $elm) {
         $sql = "UPDATE a_proj_elements
-                   SET position=".$elm['position']."
+                   SET position = ".$elm['position']."
+                     , tab = ".$tab."
                  WHERE project_id = ".$proj."
                    AND element_id = ".$elm['id'];
         $result = mysqli_query($con,$sql);
@@ -196,12 +148,15 @@ function proj_save_elements($id,$elements){
 // --------------------------------------------------------------------------------------
 // ----                                 
 // --------------------------------------------------------------------------------------
-function proj_delete_unlisted_elements($id,$elements){
+function proj_delete_unlisted_elements($id,$prop){
     global $con;
 
     $proj = $id['proj'];
+    $elements = $prop['elements'];
+    $tab = $prop['tab'];
 
-    $delete_where = "WHERE project_id = ".$proj;
+    $delete_where = "WHERE project_id = ".$proj."
+                       AND tab = ".$tab;
     if (count($elements) > 0){
         $elm_ids = array();
         foreach ($elements as $elm) {
@@ -354,6 +309,7 @@ function proj_get_elm_list($id){
 
     $sql = "SELECT pe.element_id id,type,name,
                    opening_element,
+                   pe.tab,
                    pe.position,
                    show_props,
                    open_text_element
@@ -371,6 +327,30 @@ function proj_get_elm_list($id){
             "elm"=>$row['id']
         );
         array_push($list,elm_prop($elmId,$row));
+    }
+    return $list;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- get tab list for project                                   
+// --------------------------------------------------------------------------------------
+function proj_get_tab_list($id){
+    global $con;
+
+    $proj = $id['proj'];
+    $list = array();
+
+    $sql = "SELECT DISTINCT pe.tab
+            FROM a_proj_elements pe
+            WHERE pe.project_id = ".$proj."
+              AND position > 0
+            ORDER BY tab";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 16 in proj_func.php: ' . mysqli_error($con));
+    }
+    while($row = mysqli_fetch_array($result)) {
+        array_push($list,$row['tab']);
     }
     return $list;
 }

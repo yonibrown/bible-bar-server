@@ -14,7 +14,7 @@ function elm_get_basic($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
-                   position, open_text_element
+                   tab, position, open_text_element
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
               AND e.element_id = ".$id['elm'];
@@ -65,6 +65,7 @@ function elm_prop($id,$prop){
         "proj"=>(int)$id['proj'],
         "type"=>$prop['type'],
         "name"=>$name,
+        "tab"=>(int)$prop['tab'],
         "position"=>(float)$prop['position'],
         "attr"=>$spc_attr,
         "open_text_element"=>(int)$openTextElm
@@ -258,122 +259,6 @@ function elm_links_changed($id){
 }
 
 // --------------------------------------------------------------------------------------
-// ---- get element's linked categories
-// --------------------------------------------------------------------------------------
-// function elm_get_categories($id,$prop){
-//     global $con;
-
-//     $filter = '';
-//     if ($prop != null){
-//         foreach($prop as $attr => $val) {
-//             switch ($attr) {
-//                 case "include_selection":
-//                 case "exclude_selection":
-//                     $selection_exists = "EXISTS(
-//                             SELECT 1
-//                               FROM a_res_parts rp
-//                              WHERE rp.research_id = rc.research_id
-//                                AND rp.collection_id = rc.collection_id
-//                                AND rp.src_from_position = ".$val['from_position']."
-//                                AND rp.src_from_word = ".$val['from_word']."
-//                                AND rp.src_to_position = ".$val['to_position']."
-//                                AND rp.src_to_word = ".$val['to_word'].")";
-//                     if ($attr == "include_selection"){
-//                         $filter .= " AND ".$selection_exists;
-//                     } else {
-//                         $filter .= " AND NOT ".$selection_exists;
-//                     }
-//                     break;
-//                 case "research_id":
-//                     $filter .= " AND ec.research_id = ".$val;
-//                     break;
-//                 // case "part_id":
-//                 //     $filter .= " AND EXISTS( 
-//                 //             SELECT 1
-//                 //               FROM a_res_parts rp
-//                 //              WHERE rp.research_id = rc.research_id
-//                 //                AND rp.collection_id = rc.collection_id
-//                 //                AND rp.part_id = ".$val.")";
-//                 //     break;
-//             }   
-//         }
-//     }
-
-//     $sql = "SET SQL_BIG_SELECTS=1";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 999 in elm_func.php: ' . mysqli_error($con));
-//     }
-
-//     $sql = "SELECT ec.research_id,ec.collection_id,ec.division_id,ec.link_id,ec.color,ec.hilight,
-//                    rd.name_heb div_name,rc.name_heb col_name,r.name_heb res_name
-//               FROM view_proj_link_elm_col ec
-//               JOIN a_researches r
-//                 ON ec.research_id = r.research_id
-//               JOIN a_res_collections rc
-//                 ON ec.research_id = rc.research_id
-//                AND ec.collection_id = rc.collection_id
-//               LEFT JOIN a_res_idx_division rd
-//                 ON ec.research_id = rd.research_id
-//                AND ec.collection_id = rd.collection_id
-//                AND ec.division_id = rd.division_id
-//              WHERE ec.project_id = ".$id['proj']."
-//                AND ec.element_id = ".$id['elm']."
-//                ".$filter."
-//              ORDER BY ec.research_id,ec.collection_id,ec.division_id";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 13 in elm_func.php: ' . mysqli_error($con));
-//     }
-
-//     $catArray = array();
-//     $index = 0;
-//     while($row = mysqli_fetch_array($result)) {
-//         $catArray[$index] = array("link"=>$row['link_id'],
-//                                 "color"=>$row['color'],
-//                                 "hilight"=>($row['hilight'] == 1),
-//                                 "res"=>$row['research_id'],
-//                                 "res_name"=>$row['res_name'],
-//                                 "col"=>$row['collection_id'],
-//                                 "col_name"=>$row['col_name'],
-//                                 "div"=>$row['division_id'],
-//                                 "div_name"=>$row['div_name']);
-//         $index++;
-//     }
-
-//     return $catArray;
-// }
-
-// --------------------------------------------------------------------------------------
-// ---- get element's links
-// --------------------------------------------------------------------------------------
-// function elm_get_links($id){
-//     global $con;
-
-//     $sql = "SELECT link_id 
-//               FROM a_proj_link_elements
-//              WHERE project_id = ".$id['proj']."
-//                AND element_id = ".$id['elm']."
-//              ORDER BY link_id";
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 14 in elm_func.php: ' . mysqli_error($con));
-//     }
-
-//     $lnkArray = array();
-//     $index = 0;
-//     while($row = mysqli_fetch_array($result)) {
-//         $lnkArray[$index] = array(
-//             "proj"=>$id['proj'],
-//             "link"=>$row['link_id']
-//         );
-//         $index++;
-//     }
-
-//     return $lnkArray;
-// }
-
-// --------------------------------------------------------------------------------------
 // ---- get link element                                     
 // --------------------------------------------------------------------------------------
 function elmlnk_get($id){
@@ -425,27 +310,6 @@ function elmlnk_create($id,$prop){
         exit_error('Error 7 in elm_func.php: ' . mysqli_error($con));
     }
 }
-
-// --------------------------------------------------------------------------------------
-// ---- get research element                                     
-// --------------------------------------------------------------------------------------
-// function elmres_get($id){
-//     global $con;
-
-//     $sql = "SELECT research_id
-//             FROM a_proj_elm_research
-//             WHERE project_id = ".$id['proj']."
-//               AND element_id = ".$id['elm'];
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 8 in elm_func.php: ' . mysqli_error($con));
-//     }
-//     $row = mysqli_fetch_array($result);
-//     $attr = array(
-//         'res'=>(int)$row['research_id']
-//     );
-//     return $attr;
-// }
 
 // --------------------------------------------------------------------------------------
 // ---- create new research element
@@ -604,32 +468,6 @@ function elmlnk_set($id,$prop){
         }
     }
 }
-
-// --------------------------------------------------------------------------------------
-// ---- 
-// --------------------------------------------------------------------------------------
-// function elm_link_to_cat($id,$prop){
-//     global $con;
-
-//     $sql = "SELECT link_id
-//               FROM a_proj_link_collections 
-//              WHERE project_id = ".$id['proj']."
-//                AND research_id = ".$prop['res']."
-//                AND collection_id = ".$prop['col'];
-//     $result = mysqli_query($con,$sql);
-//     if (!$result) {
-//         exit_error('Error 12 in link_func.php: ' . mysqli_error($con));
-//     }
-//     if ($row = mysqli_fetch_array($result)){
-//         $linkId = $row['link_id'];
-//     } else {
-//         $linkId = lnk_create(array("proj"=>$id['proj']));
-//         lnk_add_categories($linkId,array("type"=>"category","data"=>$prop));
-//     }
-
-//     $link_obj = array('proj'=>$id['proj'],'link'=>$linkId);
-//     lnk_add_element($link_obj,$id);
-// }
 
 // --------------------------------------------------------------------------------------
 // ---- get bar/text element
