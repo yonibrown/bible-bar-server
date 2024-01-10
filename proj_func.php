@@ -135,7 +135,7 @@ function proj_save_elements($id,$prop){
     foreach ($elements as $elm) {
         $sql = "UPDATE a_proj_elements
                    SET position = ".$elm['position']."
-                     , tab = ".$tab."
+                     , tab_id = ".$tab."
                  WHERE project_id = ".$proj."
                    AND element_id = ".$elm['id'];
         $result = mysqli_query($con,$sql);
@@ -156,7 +156,7 @@ function proj_delete_unlisted_elements($id,$prop){
     $tab = $prop['tab'];
 
     $delete_where = "WHERE project_id = ".$proj."
-                       AND tab = ".$tab;
+                       AND tab_id = ".$tab;
     if (count($elements) > 0){
         $elm_ids = array();
         foreach ($elements as $elm) {
@@ -309,7 +309,7 @@ function proj_get_elm_list($id){
 
     $sql = "SELECT pe.element_id id,type,name,
                    opening_element,
-                   pe.tab,
+                   pe.tab_id tab,
                    pe.position,
                    show_props,
                    open_text_element
@@ -340,17 +340,20 @@ function proj_get_tab_list($id){
     $proj = $id['proj'];
     $list = array();
 
-    $sql = "SELECT DISTINCT pe.tab
-            FROM a_proj_elements pe
-            WHERE pe.project_id = ".$proj."
-              AND position > 0
-            ORDER BY tab";
+    $sql = "SELECT DISTINCT pe.tab_id id,IFNULL(pt.width_pct,100) width_pct,IFNULL(pt.type,'elements') type
+              FROM a_proj_elements pe
+              LEFT JOIN a_proj_tabs pt
+                ON pe.project_id = pt.project_id
+               AND pe.tab_id = pt.tab_id 
+             WHERE pe.project_id = ".$proj."
+               AND pe.position > 0
+             ORDER BY pe.tab_id";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 16 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        array_push($list,$row['tab']);
+        array_push($list,$row);
     }
     return $list;
 }
