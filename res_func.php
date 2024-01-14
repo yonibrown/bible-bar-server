@@ -61,7 +61,8 @@ function res_get($id){
 function res_prop($id,$prop){
     return array("id"=>(int)$id['res'],
                 "name"=>$prop['name'],
-                "collections"=>res_get_col_list($id)
+                "collections"=>res_get_col_list($id),
+                "parts"=>res_parts_prop($id,array())
     );
 }
 
@@ -240,7 +241,11 @@ function res_get_prt_list($id,$prop){
             "sort_key" => array(
                 "col"=>$row['col_sort_key'],
                 "src"=>$row['src_sort_key']
-            )
+            ),
+            "src_from_position"=>$row['src_from_position'],
+            "src_from_word"=>$row['src_from_word'],
+            "src_to_position"=>$row['src_to_position'],
+            "src_to_word"=>$row['src_to_word']
         ));
     }
     return $list;
@@ -436,7 +441,7 @@ function res_new_part($id,$prop){
 function res_parts_prop($id,$prop){
     global $reload;
 
-    if (array_key_exists('proj',$reload)){
+    if (array_key_exists('proj',$reload) && array_key_exists('collection_id',$prop)){
         proj_objects_to_reload(array(
             "object_type"=>"res_part",
             "action"=>"new",
