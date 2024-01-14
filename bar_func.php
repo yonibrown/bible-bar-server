@@ -547,7 +547,7 @@ function get_point_size($id,$base_table,$row1,$total_words,$big_part_ratio){
     // $sql = "UPDATE a_res_parts
     // SET gen_offset_pct = -1,
     //     gen_width_pct = -1,
-    //     gen_name = ''
+    //     gen_from_name = ''
     // WHERE research_id = ".$row1['research_id']." 
     //     AND part_id = ".$row1['part_id'];
     // $result = mysqli_query($con,$sql);
