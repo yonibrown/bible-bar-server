@@ -172,7 +172,7 @@ function res_get_prt_list($id,$prop){
 
     $sort_key = array(
         'col'=>"CONCAT(LPAD(prt.collection_id,5,0),'_',LPAD(prt.position,11,0))",
-        "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0),'_',LPAD(src.position,11,0))"
+        "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0))"
     );
 
     if (array_key_exists('ordering', $prop)){
@@ -207,14 +207,10 @@ function res_get_prt_list($id,$prop){
 
     $sql = "SELECT prt.part_id, prt.collection_id, c.name_heb col_name, 
                    prt.src_from_position, prt.src_to_position, prt.src_from_word, prt.src_to_word, 
-                   prt.gen_name src_name,src.text src_text,
+                   prt.gen_name src_name,prt.gen_text src_text,
                    ".$sort_key['src']." src_sort_key,
                    ".$sort_key['col']." col_sort_key
             FROM a_res_parts prt
-            JOIN a_res_parts src
-              ON src.research_id = prt.src_research
-             AND src.collection_id = prt.src_collection
-             AND src.position BETWEEN prt.src_from_position AND prt.src_to_position
             JOIN a_res_collections c
               ON c.research_id = prt.research_id
              AND c.collection_id = prt.collection_id
@@ -634,6 +630,11 @@ function res_update_generated_columns($res,$part){
 
     $sql = "UPDATE a_res_parts prt
                SET gen_name = (SELECT src.abs_name_heb
+                                 FROM a_res_parts src
+                                WHERE src.research_id = prt.src_research
+                                  AND src.collection_id = prt.src_collection
+                                  AND src.position = prt.src_from_position) 
+                 , gen_text = (SELECT src.text
                                  FROM a_res_parts src
                                 WHERE src.research_id = prt.src_research
                                   AND src.collection_id = prt.src_collection
