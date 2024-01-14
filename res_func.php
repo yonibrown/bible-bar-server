@@ -206,7 +206,7 @@ function res_get_prt_list($id,$prop){
 
     $sql = "SELECT prt.part_id, prt.collection_id, c.name_heb col_name, 
                    prt.src_from_position, prt.src_to_position, prt.src_from_word, prt.src_to_word, 
-                   src.abs_name_heb src_name,src.text src_text,
+                   prt.gen_name src_name,src.text src_text,
                    ".$sort_key['src']." src_sort_key,
                    ".$sort_key['col']." col_sort_key
             FROM a_res_parts prt
@@ -401,7 +401,7 @@ function res_new_part($id,$prop){
                 (research_id, part_id, type, 
                  collection_id, position,
                  div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
-                 src_research, src_part, src_collection, 
+                 src_research, src_collection, 
                  src_from_position, src_from_word, src_to_position, src_to_word, 
                  gen_word_count, 
                  text, comment) 
@@ -409,7 +409,7 @@ function res_new_part($id,$prop){
             ".$res.",".$part.",'pointer',
             ".$prop['collection_id'].",".$pos.",
             '','','','',
-            ".$prop['src_research'].",0,".$prop['src_collection'].",
+            ".$prop['src_research'].",".$prop['src_collection'].",
             ".$prop['src_from_position'].",".$prop['src_from_word'].",
             ".$prop['src_to_position'].",".$prop['src_to_word'].",
             0,'','')";
@@ -544,13 +544,13 @@ function res_duplicate($id,$prop){
     $sql = "INSERT INTO  a_res_parts 
                 (research_id, part_id, type, collection_id, position, 
                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
-                text, comment, src_research, src_part, src_collection, 
+                text, comment, src_research, src_collection, 
                 src_from_position, src_from_word, src_to_position, 
                 src_to_word, gen_word_count, gen_text)
             SELECT ".$newId.",ROW_NUMBER() OVER (ORDER BY part_id), 
                 type, collection_id, position, 
                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
-                text, comment, src_research, src_part, src_collection, 
+                text, comment, src_research, src_collection, 
                 src_from_position, src_from_word, src_to_position, 
                 src_to_word, gen_word_count, gen_text 
             FROM a_res_parts
@@ -625,6 +625,19 @@ function res_update_generated_columns($res,$part){
         if (!$result3) {
             exit_error('Error 21 in res_func.php: ' . mysqli_error($con));
         }
+    }
+
+    $sql = "UPDATE a_res_parts prt
+               SET gen_name = (SELECT src.abs_name_heb
+                                 FROM a_res_parts src
+                                WHERE src.research_id = prt.src_research
+                                  AND src.collection_id = prt.src_collection
+                                  AND src.position = prt.src_from_position) 
+             WHERE research_id = ".$res."
+               AND part_id = ".$part;
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 21 in res_func.php: ' . mysqli_error($con));
     }
 }
 

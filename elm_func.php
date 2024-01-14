@@ -14,7 +14,7 @@ function elm_get_basic($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
-                   tab, position, open_text_element
+                   tab_id tab, position, open_text_element
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
               AND e.element_id = ".$id['elm'];
