@@ -153,21 +153,12 @@ function txt_get_segment($id){
     }
 
     $sql1 = "SELECT seq.part_id seq_part,seq.div_name_heb name,seq.position seq_position,
-                    src.position src_position,src.text,
- 				    MAX(pts.linked) linked
+                    src.position src_position,src.text
  			  FROM a_res_parts seq
               JOIN a_res_parts src
                 ON src.research_id = seq.src_research
               AND src.collection_id = seq.src_collection
               AND src.position BETWEEN seq.src_from_position AND seq.src_to_position
-              LEFT JOIN 
-                  (SELECT 1 linked,src_from_position,src_to_position
-                     FROM view_proj_link_elm_part rp
-                    WHERE rp.project_id = ".$id['proj']."
-                      AND rp.element_id = ".$id['elm']."
-                      AND rp.src_research = ".$prop['research_id']."
-                      AND rp.src_collection = ".$prop['collection_id'].") AS pts
-				ON src.position BETWEEN pts.src_from_position AND pts.src_to_position
 		     WHERE seq.research_id = ".$prop['research_id']."
               AND seq.collection_id = ".$prop['collection_id']."
               AND seq.position BETWEEN ".$prop['from_position']." AND ".$prop['to_position']."
@@ -200,48 +191,11 @@ function txt_get_segment($id){
             $text_word = mb_substr($text,$start_offset,$word_length);
             $text_space = mb_substr($text,$next_offset,1);
 
-            $word_linked = false;
-            $space_linked = false;
-            if ($row1['linked'] == 1){
-                $sql2 = "SELECT rp.research_id, rp.collection_id, rp.division_id, rp.part_id, rp.src_to_position, rp.src_to_word, rp.link_id
-                           FROM view_proj_link_elm_part rp
-                           LEFT JOIN a_res_idx_division rd
-                             ON rp.research_id = rd.research_id
-                            AND rp.collection_id = rd.collection_id 
-                            AND rp.division_id = rd.division_id
-                          WHERE (".$src_pos." > rp.src_from_position OR (".$src_pos." = rp.src_from_position AND ".$word_no." >= rp.src_from_word)) 
-                            AND (".$src_pos." < rp.src_to_position   OR (".$src_pos." = rp.src_to_position   AND ".$word_no." <= rp.src_to_word))
-                            AND rp.project_id = ".$id['proj']."
-                            AND rp.element_id = ".$id['elm']."
-                            AND (rp.division_id = 0 OR rp.position BETWEEN rd.from_position AND rd.to_position)
-                          ORDER BY rp.research_id,rp.collection_id,rp.link_id";
-
-                $result2 = mysqli_query($con,$sql2);
-                if (!$result2) {
-                    exit_error('Error 6 in text_func.php: ' . mysqli_error($con));
-                }
-                if($row2 = mysqli_fetch_array($result2)){
-                    $word_linked = true;
-                    if ($src_pos < $row2['src_to_position'] || $word_no < $row2['src_to_word']){
-                        $space_linked = true;
-                    }
-                }
-            }
-
             $wordObj = array(
                 "id"=>$word_no,
                 "word"=>$text_word,
-                "space"=>$text_space,
-                "word_linked"=>$word_linked,
-                "space_linked"=>$space_linked
+                "space"=>$text_space
             );
-            if ($word_linked){
-                $wordObj['link'] = (int)$row2['link_id'];
-                $wordObj['res'] = $row2['research_id'];
-                $wordObj['col'] = $row2['collection_id'];
-                $wordObj['div'] = $row2['division_id'];
-                $wordObj['prt'] = $row2['part_id'];
-            }
 
             if ($anchor_part && $word_no == $prop['anchor_word']){
                 $anchor_part = false;

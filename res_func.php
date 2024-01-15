@@ -61,7 +61,8 @@ function res_get($id){
 function res_prop($id,$prop){
     return array("id"=>(int)$id['res'],
                 "name"=>$prop['name'],
-                "collections"=>res_get_col_list($id)
+                "collections"=>res_get_col_list($id),
+                "parts"=>res_parts_prop($id,array())
     );
 }
 
@@ -171,7 +172,7 @@ function res_get_prt_list($id,$prop){
 
     $sort_key = array(
         'col'=>"CONCAT(LPAD(prt.collection_id,5,0),'_',LPAD(prt.position,11,0))",
-        "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0),'_',LPAD(src.position,11,0))"
+        "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0))"
     );
 
     if (array_key_exists('ordering', $prop)){
@@ -206,14 +207,10 @@ function res_get_prt_list($id,$prop){
 
     $sql = "SELECT prt.part_id, prt.collection_id, c.name_heb col_name, 
                    prt.src_from_position, prt.src_to_position, prt.src_from_word, prt.src_to_word, 
-                   prt.gen_name src_name,src.text src_text,
+                   prt.gen_from_name,prt.gen_to_name,prt.gen_from_text src_text,gen_to_text,
                    ".$sort_key['src']." src_sort_key,
                    ".$sort_key['col']." col_sort_key
             FROM a_res_parts prt
-            JOIN a_res_parts src
-              ON src.research_id = prt.src_research
-             AND src.collection_id = prt.src_collection
-             AND src.position BETWEEN prt.src_from_position AND prt.src_to_position
             JOIN a_res_collections c
               ON c.research_id = prt.research_id
              AND c.collection_id = prt.collection_id
@@ -236,11 +233,18 @@ function res_get_prt_list($id,$prop){
             "text_before"=>mb_substr($row['src_text'],0,$mark['start']),
             "text_part"=>$mark['text'],
             "text_after"=> mb_substr($row['src_text'],$mark['end']),
-            "src_name" => $row['src_name'],
+            "src_name" => $row['gen_from_name'],
+            "src_to_name" => $row['gen_to_name'],
+            "src_from_text" => $row['src_text'],
+            "src_to_text" => $row['gen_to_text'],
             "sort_key" => array(
                 "col"=>$row['col_sort_key'],
                 "src"=>$row['src_sort_key']
-            )
+            ),
+            "src_from_position"=>$row['src_from_position'],
+            "src_from_word"=>$row['src_from_word'],
+            "src_to_position"=>$row['src_to_position'],
+            "src_to_word"=>$row['src_to_word']
         ));
     }
     return $list;
@@ -436,7 +440,7 @@ function res_new_part($id,$prop){
 function res_parts_prop($id,$prop){
     global $reload;
 
-    if (array_key_exists('proj',$reload)){
+    if (array_key_exists('proj',$reload) && array_key_exists('collection_id',$prop)){
         proj_objects_to_reload(array(
             "object_type"=>"res_part",
             "action"=>"new",
@@ -546,13 +550,13 @@ function res_duplicate($id,$prop){
                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
                 text, comment, src_research, src_collection, 
                 src_from_position, src_from_word, src_to_position, 
-                src_to_word, gen_word_count, gen_text)
+                src_to_word, gen_word_count, gen_from_text)
             SELECT ".$newId.",ROW_NUMBER() OVER (ORDER BY part_id), 
                 type, collection_id, position, 
                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
                 text, comment, src_research, src_collection, 
                 src_from_position, src_from_word, src_to_position, 
-                src_to_word, gen_word_count, gen_text 
+                src_to_word, gen_word_count, gen_from_text 
             FROM a_res_parts
             WHERE research_id = ".$id['res']."
               AND part_id ".inList($partArr);
@@ -628,11 +632,26 @@ function res_update_generated_columns($res,$part){
     }
 
     $sql = "UPDATE a_res_parts prt
-               SET gen_name = (SELECT src.abs_name_heb
+               SET gen_from_name = (SELECT src.abs_name_heb
                                  FROM a_res_parts src
                                 WHERE src.research_id = prt.src_research
                                   AND src.collection_id = prt.src_collection
                                   AND src.position = prt.src_from_position) 
+                 , gen_from_text = (SELECT src.text
+                                 FROM a_res_parts src
+                                WHERE src.research_id = prt.src_research
+                                  AND src.collection_id = prt.src_collection
+                                  AND src.position = prt.src_from_position) 
+                 , gen_to_name = (SELECT src.abs_name_heb
+                                 FROM a_res_parts src
+                                WHERE src.research_id = prt.src_research
+                                  AND src.collection_id = prt.src_collection
+                                  AND src.position = prt.src_to_position) 
+                 , gen_to_text = (SELECT src.text
+                                 FROM a_res_parts src
+                                WHERE src.research_id = prt.src_research
+                                  AND src.collection_id = prt.src_collection
+                                  AND src.position = prt.src_to_position) 
              WHERE research_id = ".$res."
                AND part_id = ".$part;
     $result = mysqli_query($con,$sql);

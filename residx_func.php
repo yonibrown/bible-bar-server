@@ -92,7 +92,11 @@ function residx_get_max_level($id){
 function residx_get_divisions($id,$prop){
     global $con;
 
-    $key = $prop['key'];
+    if (array_key_exists('position',$prop)){
+        $key = residx_position_to_key($id,$prop);
+    } else {
+        $key = $prop['key'];
+    }
     $divs = array();
 
     $parent_div = -999;
