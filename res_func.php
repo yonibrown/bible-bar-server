@@ -206,6 +206,7 @@ function res_get_prt_list($id,$prop){
     }
 
     $sql = "SELECT prt.part_id, prt.collection_id, c.name_heb col_name, 
+                   prt.src_research, prt.src_collection, 
                    prt.src_from_position, prt.src_to_position, prt.src_from_word, prt.src_to_word, 
                    prt.gen_from_name,prt.gen_to_name,prt.gen_from_text src_text,gen_to_text,
                    ".$sort_key['src']." src_sort_key,
@@ -234,6 +235,7 @@ function res_get_prt_list($id,$prop){
             "text_part"=>$mark['text'],
             "text_after"=> mb_substr($row['src_text'],$mark['end']),
             "src_name" => $row['gen_from_name'],
+            "src_from_name" => $row['gen_from_name'],
             "src_to_name" => $row['gen_to_name'],
             "src_from_text" => $row['src_text'],
             "src_to_text" => $row['gen_to_text'],
@@ -241,6 +243,8 @@ function res_get_prt_list($id,$prop){
                 "col"=>$row['col_sort_key'],
                 "src"=>$row['src_sort_key']
             ),
+            "src_research"=>$row['src_research'],
+            "src_collection"=>$row['src_collection'],
             "src_from_position"=>$row['src_from_position'],
             "src_from_word"=>$row['src_from_word'],
             "src_to_position"=>$row['src_to_position'],
