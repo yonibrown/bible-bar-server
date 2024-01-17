@@ -177,43 +177,15 @@ function txt_get_segment($id){
 
         $anchor_part = ($row1['seq_position'] == $prop['anchor_position']);
 
-        $plain = plain_text($text);
-        $next_offset = -1;
-        $word_no = 0;
-        $txt_list = array();
-        while ($next_offset < mb_strlen($plain)-1){
-            $start_offset = $next_offset + 1;
-            $next_offset = mb_strpos($plain," ",$start_offset);
-            if (!$next_offset){
-                $next_offset = mb_strlen($plain); 
-            }
-            $word_length = $next_offset - $start_offset;
-            $text_word = mb_substr($text,$start_offset,$word_length);
-            $text_space = mb_substr($text,$next_offset,1);
-
-            $wordObj = array(
-                "id"=>$word_no,
-                "word"=>$text_word,
-                "space"=>$text_space
-            );
-
-            if ($anchor_part && $word_no == $prop['anchor_word']){
-                $anchor_part = false;
-                $wordObj['anchor'] = true;
-            }
-
-            array_push($txt_list,$wordObj);
-            $word_no++;
-        }
-
+        $txt_list = verse_to_list($text,$anchor_part,$prop['anchor_word']);
         $partObj = array(
             "part_id"=>$row1['seq_part'],
             "position"=>$row1['seq_position'],
             "part_name"=>$row1['name'],
-            "txt_list"=>$txt_list
+            "txt_list"=>$txt_list['list']
         );
 
-        if ($anchor_part){
+        if ($anchor_part && !$txt_list['anchor_set']){
             $partObj['anchor'] = true;
         }
 
