@@ -31,7 +31,7 @@ function proj_get($id){
 
     $proj = $id['proj'];
     
-    $sql = "SELECT name,description
+    $sql = "SELECT name,description,primary_link
             FROM a_projects
             WHERE project_id = ".$proj;
     $result = mysqli_query($con,$sql);
@@ -48,6 +48,7 @@ function proj_get($id){
     $attr = array(
         'name'=>$row['name'],
         'desc'=>$row['description'],
+        'primary_link'=>(int)$row['primary_link'],
         'elements'=>$elm_list,
         'links'=>$lnk_list,
         'researches'=>$res_list,
@@ -100,14 +101,22 @@ function proj_create($prop){
     $sql = "INSERT INTO a_projects
                 (project_id, 
                 name, 
-                description) 
+                description,
+                primary_link) 
             VALUES(".$proj.", 
                 '".$prop['name']."', 
-                '".$prop['desc']."')";
+                '".$prop['desc']."',
+                1)";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 5 in proj_func.php: ' . mysqli_error($con));
     }
+
+    // create primary link
+    lnk_create(array(
+        "name"=>"primary link",
+        "proj"=>$proj
+    ));
 
     // create default research for project
     // $res_prop = array("name"=>"project","desc"=>"project default research","proj"=>$proj);
@@ -340,13 +349,15 @@ function proj_get_tab_list($id){
     $proj = $id['proj'];
     $list = array();
 
-    $sql = "SELECT DISTINCT pe.tab_id id,IFNULL(pt.width_pct,100) width_pct,IFNULL(pt.type,'elements') type
-              FROM a_proj_elements pe
-              LEFT JOIN a_proj_tabs pt
-                ON pe.project_id = pt.project_id
-               AND pe.tab_id = pt.tab_id 
-             WHERE pe.project_id = ".$proj."
+    $sql = "SELECT DISTINCT IFNULL(pt.tab_id,0) id,IFNULL(pt.width_pct,100) width_pct,IFNULL(pt.type,'elements') type
+              FROM a_projects p
+              LEFT JOIN a_proj_elements pe
+                ON p.project_id = pe.project_id
                AND pe.position > 0
+              LEFT JOIN a_proj_tabs pt
+                ON p.project_id = pt.project_id
+               AND pe.tab_id = pt.tab_id 
+             WHERE p.project_id = ".$proj."
              ORDER BY pe.tab_id";
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -355,6 +366,12 @@ function proj_get_tab_list($id){
     while($row = mysqli_fetch_array($result)) {
         array_push($list,$row);
     }
+    // if (count($list) == 0){
+    //     array_push($list,array(
+    //         "id"=>0,
+            
+    //         ));
+    // }
     return $list;
 }
 
@@ -410,7 +427,7 @@ function proj_objects_to_reload($prop){
     global $con,$reload;
     
     // $elm_list = array();
-    $in_list = '';
+    $in_list = null;
     $points_reload = false;
     $segments_reload = false;
 
@@ -423,7 +440,9 @@ function proj_objects_to_reload($prop){
                 case 'delete':
                     $elmListObj = proj_get_cat_elements($cat);
                     // $elm_list = $elmListObj['elm_list'];
-                    $in_list = $elmListObj['in_list'];
+                    if (!is_null($elmListObj)){
+                        $in_list = $elmListObj['in_list'];
+                    }
                     $points_reload = true;
                     break;
             }
@@ -485,6 +504,10 @@ function proj_get_cat_elements($cat){
     while($row = mysqli_fetch_array($result)) {
         array_push($objects_to_reload['elements'],(int)$row['element_id']);
         array_push($in_list,$row['element_id']);
+    }
+
+    if (count($in_list) == 0){
+        return null;
     }
 
     return array(
