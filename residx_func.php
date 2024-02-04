@@ -258,4 +258,29 @@ function residx_get_level_range($id,$name,$level,$initialRange){
     return null;
 }
 
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function residx_get_division($prop){
+    global $con;
+    $sql = "SELECT from_position,to_position,level
+              FROM a_res_idx_division
+             WHERE research_id   = ".$prop['research_id']." 
+               AND collection_id = ".$prop['collection_id']."
+               AND division_id   = ".$prop['division_id'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error description2: ' . mysqli_error($con));
+    }
+    if($row = mysqli_fetch_array($result)){
+        return array(
+            "from_position"=>$row['from_position'],
+            "to_position"=>$row['to_position'],
+            "level"=>$row['level']
+        );
+    }
+
+    return null;
+}
+
 ?>

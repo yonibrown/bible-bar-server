@@ -475,19 +475,7 @@ function elmlnk_set($id,$prop){
 function elmseq_get($id){
     global $con;
 
-    $sql = "SELECT e.research_id, e.collection_id,
-                   e.from_position, e.to_position, 
-                   e.seq_index index_id, e.seq_level, e.color_level, 
-                   e.anchor_position, e.anchor_word, 
-                   e.segments_generated, e.points_generated, e.gen_total_words
-            FROM a_proj_elm_sequence e
-            WHERE e.project_id = ".$id['proj']." 
-              AND e.element_id = ".$id['elm'];
-    $result = mysqli_query($con,$sql);
-    if (!$result) {
-        exit_error('Error 15 in elm_func.php: ' . mysqli_error($con));
-    }
-    $row = mysqli_fetch_array($result);
+    $row = elmseq_get_basic($id);
 
     $indexId = array(
         'res'=>$row['research_id'],
@@ -522,6 +510,29 @@ function elmseq_get($id){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function elmseq_get_basic($id){
+    global $con;
+
+    $sql = "SELECT e.research_id, e.collection_id,
+                   e.from_position, e.to_position, 
+                   e.seq_index index_id, e.seq_level, e.color_level, 
+                   e.anchor_position, e.anchor_word, 
+                   e.segments_generated, e.points_generated, e.gen_total_words
+            FROM a_proj_elm_sequence e
+            WHERE e.project_id = ".$id['proj']." 
+              AND e.element_id = ".$id['elm'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in elm_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+
+    return $row;
+}
+
+// --------------------------------------------------------------------------------------
 // ---- set text attributes
 // --------------------------------------------------------------------------------------
 function elmseq_set($id,$prop){
@@ -530,16 +541,10 @@ function elmseq_set($id,$prop){
     $sql_set = '';
     $sep = '';
 
-    if (array_key_exists('research_id',$prop) && array_key_exists('collection_id',$prop)){
-        $res_pred = " AND research_id = ".$prop['research_id']." 
-                        AND collection_id = ".$prop['collection_id'];
-    } else {
-        $res_pred = " AND (research_id,collection_id) = (
-                        SELECT research_id,collection_id
-                            FROM a_proj_elm_sequence
-                            WHERE project_id = ".$id['proj']."
-                            AND element_id = ".$id['elm']."
-                            )";
+    if (!array_key_exists('research_id',$prop) || !array_key_exists('collection_id',$prop)){
+        $row = elmseq_get_basic($id);
+        $prop['research_id'] = $row['research_id'];
+        $prop['collection_id'] = $row['collection_id'];
     }
 
     $cancel_generated = FALSE;
@@ -548,15 +553,11 @@ function elmseq_set($id,$prop){
             case "division_id":
             case "from_div":
             case "to_div":
-                $sql = "SELECT from_position,to_position,level
-                            FROM a_res_idx_division
-                            WHERE division_id = ".$val."
-                            ".$res_pred;
-                $result = mysqli_query($con,$sql);
-                if (!$result) {
-                    exit_error('Error 17 in elm_func.php: ' . mysqli_error($con));
-                }
-                $row = mysqli_fetch_array($result);
+                $row = residx_get_division(array(
+                    "research_id"=>$prop['research_id'],
+                    "collection_id"=>$prop['collection_id'],
+                    "division_id"=>$val
+                ));
 
                 if ($attr == "division_id" || $attr == "from_div"){
                     $sql_set .= $sep."from_position = ".$row['from_position'];
