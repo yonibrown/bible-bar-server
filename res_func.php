@@ -462,7 +462,7 @@ function res_parts_prop($id,$prop){
 // ---- 
 // --------------------------------------------------------------------------------------
 function res_upd_parts($id,$prop){
-    global $con;
+    global $con,$reload;
 
     $res = $id['res'];
 
