@@ -320,6 +320,7 @@ function proj_get_elm_list($id){
                    opening_element,
                    pe.tab_id tab,
                    pe.position,
+                   pe.y_addition,
                    show_props,
                    open_text_element
             FROM a_proj_elements pe

@@ -14,7 +14,7 @@ function elm_get_basic($id){
     global $con;
 
     $sql = "SELECT type, name, description, opening_element,
-                   tab_id tab, position, open_text_element
+                   tab_id tab, position, y_addition, open_text_element
             FROM a_proj_elements e
             WHERE e.project_id = ".$id['proj']."
               AND e.element_id = ".$id['elm'];
@@ -67,6 +67,7 @@ function elm_prop($id,$prop){
         "name"=>$name,
         "tab"=>(int)$prop['tab'],
         "position"=>(float)$prop['position'],
+        "y_addition"=>(int)$prop['y_addition'],
         "attr"=>$spc_attr,
         "open_text_element"=>(int)$openTextElm
     );
@@ -98,13 +99,13 @@ function elm_create($prop){
 
     $sql = "INSERT INTO a_proj_elements
                 (project_id, element_id, type, 
-                 name, description, position, 
+                 name, description, position, y_addition,
                  show_props, opening_element) 
             VALUES(".$proj.", 
                 ".$elm.", 
                 '".$type."',
                 '".$prop['name']."',' ',
-                ".$prop['position'].", 
+                ".$prop['position'].",0, 
                 0,
                 ".$openingElm.")";
     $result = mysqli_query($con,$sql);
@@ -224,6 +225,7 @@ function elm_set_basic($id,$prop){
                 break;
             case "open_text_element":
             case "position":
+            case "y_addition":
                 $sql_set .= $sep.$attr." = ".$val;
                 $sep = ',';
                 break;
