@@ -305,7 +305,7 @@ function elmlnk_create($id,$prop){
                 (project_id, element_id, link_id, link_display)
             VALUES(".$id['proj'].", 
                    ".$id['elm'].", 
-                   ".$prop['link_id'].",
+                   ".$prop['link'].",
                    'list')";
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -545,8 +545,12 @@ function elmseq_set($id,$prop){
 
     if (!array_key_exists('research_id',$prop) || !array_key_exists('collection_id',$prop)){
         $row = elmseq_get_basic($id);
-        $prop['research_id'] = $row['research_id'];
-        $prop['collection_id'] = $row['collection_id'];
+    }
+    if (array_key_exists('research_id',$prop)){
+        $row['research_id'] = $prop['research_id'];
+    }
+    if (array_key_exists('collection_id',$prop)){
+        $row['collection_id'] = $prop['collection_id'];
     }
 
     $cancel_generated = FALSE;
@@ -556,8 +560,8 @@ function elmseq_set($id,$prop){
             case "from_div":
             case "to_div":
                 $row = residx_get_division(array(
-                    "research_id"=>$prop['research_id'],
-                    "collection_id"=>$prop['collection_id'],
+                    "research_id"=>$row['research_id'],
+                    "collection_id"=>$row['collection_id'],
                     "division_id"=>$val
                 ));
 
