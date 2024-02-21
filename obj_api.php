@@ -103,6 +103,11 @@ switch ($type){
                 lnk_upd_category($id,$prop);
                 break;
 
+            // 
+            case "add_cat":
+                lnk_add_categories($id,$prop);
+                break;
+
             // add element to link
             case "add_elm":
                 $reply['data'] = lnk_add_element($id,$prop);

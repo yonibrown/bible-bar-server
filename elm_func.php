@@ -60,6 +60,12 @@ function elm_prop($id,$prop){
         $openTextElm = $prop['open_text_element'];
     }
 
+    $yAddition = 0;
+    if (array_key_exists('y_addition',$prop)){
+        $yAddition = (int)$prop['y_addition'];
+    }
+
+
     return array(
         "id"=>(int)$id['elm'],
         "proj"=>(int)$id['proj'],
@@ -67,7 +73,7 @@ function elm_prop($id,$prop){
         "name"=>$name,
         "tab"=>(int)$prop['tab'],
         "position"=>(float)$prop['position'],
-        "y_addition"=>(int)$prop['y_addition'],
+        "y_addition"=>$yAddition,
         "attr"=>$spc_attr,
         "open_text_element"=>(int)$openTextElm
     );
@@ -305,7 +311,7 @@ function elmlnk_create($id,$prop){
                 (project_id, element_id, link_id, link_display)
             VALUES(".$id['proj'].", 
                    ".$id['elm'].", 
-                   ".$prop['link_id'].",
+                   ".$prop['link'].",
                    'list')";
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -545,8 +551,12 @@ function elmseq_set($id,$prop){
 
     if (!array_key_exists('research_id',$prop) || !array_key_exists('collection_id',$prop)){
         $row = elmseq_get_basic($id);
-        $prop['research_id'] = $row['research_id'];
-        $prop['collection_id'] = $row['collection_id'];
+    }
+    if (array_key_exists('research_id',$prop)){
+        $row['research_id'] = $prop['research_id'];
+    }
+    if (array_key_exists('collection_id',$prop)){
+        $row['collection_id'] = $prop['collection_id'];
     }
 
     $cancel_generated = FALSE;
@@ -555,22 +565,22 @@ function elmseq_set($id,$prop){
             case "division_id":
             case "from_div":
             case "to_div":
-                $row = residx_get_division(array(
-                    "research_id"=>$prop['research_id'],
-                    "collection_id"=>$prop['collection_id'],
+                $row2 = residx_get_division(array(
+                    "research_id"=>$row['research_id'],
+                    "collection_id"=>$row['collection_id'],
                     "division_id"=>$val
                 ));
 
                 if ($attr == "division_id" || $attr == "from_div"){
-                    $sql_set .= $sep."from_position = ".$row['from_position'];
+                    $sql_set .= $sep."from_position = ".$row2['from_position'];
                     $sep = ',';
                 }
                 if ($attr == "division_id" || $attr == "to_div"){
-                    $sql_set .= $sep."to_position = ".$row['to_position'];
+                    $sql_set .= $sep."to_position = ".$row2['to_position'];
                     $sep = ',';
                 }
                 if ($attr == "division_id"){
-                    $level = $row['level']-1;
+                    $level = $row2['level']-1;
                     $sql_set .= $sep."seq_level = ".$level;
                     $sep = ',';
                 }
