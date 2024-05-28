@@ -8,6 +8,8 @@ include 'link_func.php';
 include 'elm_func.php';
 include 'res_func.php';
 include 'residx_func.php';
+include 'b_text_func.php';
+
 
 if (empty($_POST)){
     $_POST = json_decode(file_get_contents('php://input'), true);

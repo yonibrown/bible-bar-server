@@ -47,6 +47,9 @@ function elm_prop($id,$prop){
         case 'parts':
             $spc_attr = elmprt_get($id);
             break;
+        case 'btext':
+            $spc_attr = b_elmseq_get($id);
+            break;
         default:
             $spc_attr = array();
     }
@@ -520,6 +523,23 @@ function elmseq_get($id){
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
+function b_elmseq_get($id){
+    global $con;
+
+    $row = b_elmseq_get_basic($id);
+
+    $attr = array(
+        'source_id'=>(int)$row['source_id'],
+        'from_part'=>(int)$row['from_part'],
+        'to_part'=>(int)$row['to_part'],
+    );
+
+    return $attr;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
 function elmseq_get_basic($id){
     global $con;
 
@@ -529,6 +549,25 @@ function elmseq_get_basic($id){
                    e.anchor_position, e.anchor_word, 
                    e.segments_generated, e.points_generated, e.gen_total_words
             FROM a_proj_elm_sequence e
+            WHERE e.project_id = ".$id['proj']." 
+              AND e.element_id = ".$id['elm'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 15 in elm_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+
+    return $row;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function b_elmseq_get_basic($id){
+    global $con;
+
+    $sql = "SELECT e.source_id, e.from_part, e.to_part
+            FROM b_proj_elm_sequence e
             WHERE e.project_id = ".$id['proj']." 
               AND e.element_id = ".$id['elm'];
     $result = mysqli_query($con,$sql);
