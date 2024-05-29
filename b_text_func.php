@@ -35,6 +35,7 @@ function b_txt_get_segment($id){
             "book_id"=>$row1['book_id'],
             "chapter"=>$row1['chapter'],
             "verse"=>$row1['verse'],
+            "verse_heb"=>$heb_num[$row1['verse']],
             "txt_list"=>$txt_list['list']
         );
         array_push($rep['part_list'],$partObj);
