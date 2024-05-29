@@ -67,7 +67,10 @@ switch ($type){
             case "get_segment":
                 $reply['data'] = txt_get_segment($id);
                 break;
-
+            case "b_get_segment":
+                $reply['data'] = b_txt_get_segment($id);
+                break;
+    
             // bar methods
             // ------------
             
