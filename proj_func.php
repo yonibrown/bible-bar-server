@@ -365,7 +365,11 @@ function proj_get_tab_list($id){
         exit_error('Error 16 in proj_func.php: ' . mysqli_error($con));
     }
     while($row = mysqli_fetch_array($result)) {
-        array_push($list,$row);
+        array_push($list,array(
+            "id"=>(int)$row['id'],
+            "width_pct"=>(int)$row['width_pct'],
+            "type"=>$row['type']
+        ));
     }
     // if (count($list) == 0){
     //     array_push($list,array(
