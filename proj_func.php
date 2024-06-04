@@ -52,7 +52,8 @@ function proj_get($id){
         'elements'=>$elm_list,
         'links'=>$lnk_list,
         'researches'=>$res_list,
-        'tabs'=>$tab_list
+        'tabs'=>$tab_list,
+        'sources'=>array(1)
     );
     return $attr;
 }

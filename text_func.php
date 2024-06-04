@@ -234,4 +234,26 @@ function txt_get_title($id){
 
     return $title;
 }
+
+function src_get_books($id){
+    global $con,$heb_num;
+
+    $list = array();
+
+    $sql = "SELECT  book_id, name
+              FROM b_source_books
+             WHERE source_id = ".$id['source_id']."
+             ORDER BY book_id";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error: ' . mysqli_error($con));
+    }
+    while($row = mysqli_fetch_array($result)) {
+        array_push($list,array(
+            "book_id"=>$row['book_id'],
+            "name"=>$row['name']
+        ));
+    }
+    return $list;
+}
 ?>

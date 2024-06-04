@@ -567,7 +567,7 @@ function b_elmseq_get_basic($id){
     global $con;
 
     $sql = "SELECT e.source_id, e.from_part, e.to_part
-            FROM b_proj_elm_sequence e
+            FROM a_proj_elm_sequence e
             WHERE e.project_id = ".$id['proj']." 
               AND e.element_id = ".$id['elm'];
     $result = mysqli_query($con,$sql);

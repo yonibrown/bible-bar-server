@@ -125,6 +125,15 @@ switch ($type){
         }
         break;    
 
+    case "source":
+        switch ($oper) {
+            // get source level ids
+            case "get_books":
+                $reply['data'] = src_get_books($id);
+                break;
+        }
+        break;    
+
     case "research":
         switch ($oper) {
             // set research attributes
