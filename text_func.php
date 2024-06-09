@@ -16,11 +16,11 @@ function txt_create($id,$prop){
                 (project_id, element_id, 
                  research_id, collection_id, from_position, to_position, 
                  seq_index, seq_level, color_level, 
-                 anchor_position, anchor_word)
+                 anchor_position, anchor_word, numbering)
             VALUES(".$id['proj'].",".$id['elm'].", 
                    ".$attr['src_research'].",".$attr['src_collection'].",".$attr['from_position'].",".$attr['to_position'].",
                    1,0,0,
-                   ".$attr['anchor_position'].",0)";
+                   ".$attr['anchor_position'].",0,'letters')";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 2 in text_func.php: ' . mysqli_error($con));
@@ -71,7 +71,8 @@ function txt_set($id,$prop){
                    seq_level = 0, 
                    color_level = 0, 
                    anchor_position = ".$attr['anchor_position'].", 
-                   anchor_word = 0
+                   anchor_word = 0,
+                   numbering = 'letters'
              WHERE project_id = ".$id['proj']."
                AND element_id = ".$id['elm'];
     $result = mysqli_query($con,$sql);
@@ -152,7 +153,7 @@ function txt_get_segment($id){
         exit_error('Error 999 in text_func.php: ' . mysqli_error($con));
     }
 
-    $sql1 = "SELECT seq.part_id seq_part,seq.div_name_heb name,seq.position seq_position,
+    $sql1 = "SELECT seq.part_id seq_part,seq.div_name_eng name_eng,seq.div_name_heb name_heb,seq.position seq_position,
                     src.position src_position,src.text
  			  FROM a_res_parts seq
               JOIN a_res_parts src
@@ -181,7 +182,8 @@ function txt_get_segment($id){
         $partObj = array(
             "part_id"=>$row1['seq_part'],
             "position"=>$row1['seq_position'],
-            "part_name"=>$row1['name'],
+            "name_letter"=>$row1['name_heb'],
+            "name_number"=>$row1['name_eng'],
             "txt_list"=>$txt_list['list']
         );
 
