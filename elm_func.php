@@ -47,6 +47,9 @@ function elm_prop($id,$prop){
         case 'parts':
             $spc_attr = elmprt_get($id);
             break;
+        case 'board':
+            $spc_attr = elmbrd_get($id);
+            break;
         default:
             $spc_attr = array();
     }
@@ -166,6 +169,9 @@ function elm_create($prop){
         case 'parts':
             $resp = elmprt_create($id,$prop);
             break;
+        case 'board':
+            $resp = elmbrd_create($id,$prop);
+            break;
     }
 
     $upd = array();
@@ -206,6 +212,9 @@ function elm_set($id,$prop){
             break;
         case 'parts':
             elmprt_set($id,$prop);
+            break;
+        case 'board':
+            elmbrd_set($id,$prop);
             break;
         case 'link':
             elmlnk_set($id,$prop);
@@ -342,7 +351,8 @@ function elmres_create($id,$prop){
 function elmprt_get($id){
     global $con;
 
-    $sql = "SELECT research_id, tab,sort,ordering
+    $sql = "SELECT research_id, tab,sort,ordering,
+                   parts_col_width_pct, parts_src_width_pct
             FROM a_proj_elm_parts
             WHERE project_id = ".$id['proj']."
               AND element_id = ".$id['elm'];
@@ -355,13 +365,46 @@ function elmprt_get($id){
         'res'=>(int)$row['research_id'],
         'tab'=>$row['tab'],
         'sort'=>$row['sort'],
-        'ordering'=>$row['ordering']
+        'ordering'=>$row['ordering'],
+        'col_width'=>(int)$row['parts_col_width_pct'],
+        'src_width'=>(int)$row['parts_src_width_pct']
     );
 
     $resProp = res_get_basic(array(
         "res"=>$row['research_id']
     ));
     $attr['name'] = $resProp['name'];
+
+    return $attr;
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function elmbrd_get($id){
+    global $con;
+
+    $sql = "SELECT field_id, title,field_type,width_pct
+            FROM a_proj_elm_board_fields
+            WHERE project_id = ".$id['proj']."
+              AND element_id = ".$id['elm']."
+            ORDER BY field_id";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
+    }
+    $fields = array();
+    while($row = mysqli_fetch_array($result)){
+        array_push($fields,array(
+            'id'=>(int)$row['field_id'],
+            'title'=>$row['title'],
+            'type'=>$row['field_type'],
+            'width_pct'=>(int)$row['width_pct']
+        ));
+    };
+    $attr = array(
+        'fields'=>$fields
+    );
 
     return $attr;
 }
@@ -417,7 +460,21 @@ function elmprt_set($id,$prop){
                 $sql_set .= $sep.$attr." = '".$val."'";
                 $sep = ',';
                 break;
-        }   
+            case "width":
+                if (array_key_exists('fieldIndex',$prop)){
+                    switch ($prop['fieldIndex']){
+                        case 0:
+                            $sql_set .= $sep."parts_col_width_pct = ".(int)$val;
+                            $sep = ',';
+                            break;
+                        case 1:
+                            $sql_set .= $sep."parts_src_width_pct = ".(int)$val;
+                            $sep = ',';
+                            break;
+                        }
+                }
+                break;
+            }   
     }
 
     if ($sql_set != ''){
