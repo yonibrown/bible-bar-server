@@ -163,6 +163,31 @@ function res_get_col_list($id){
 }
 
 // --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function res_get_default_col($id){
+    global $con;
+
+    $res = $id['res'];
+    $sql = "SELECT collection_id
+            FROM a_res_collections
+            WHERE research_id = ".$res."
+            ORDER BY collection_id
+            LIMIT 1";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 6 in res_func.php: ' . mysqli_error($con));
+    }
+    if ($row = mysqli_fetch_array($result)){
+        $col = $row['collection_id'];
+    } else {
+        $col = res_new_collection($id)['id'];
+    }
+
+    return $col;
+}
+
+// --------------------------------------------------------------------------------------
 // ---- get point list for research                                   
 // --------------------------------------------------------------------------------------
 function res_get_prt_list($id,$prop){
@@ -274,6 +299,11 @@ function res_new_collection($id,$prop){
     $col = $row['col']+1;
     $pos = $row['pos']+1;
     
+    $name = 'ברירת מחדל';
+    if (array_key_exists('name',$prop)){
+        $name = $prop['name'];
+    }
+    
     $desc = '';
     if (array_key_exists('description',$prop)){
         $desc = $prop['description'];
@@ -286,8 +316,8 @@ function res_new_collection($id,$prop){
                 ".$col.", 
                 'list',
                 ".$pos.", 
-                '".$prop['name']."', 
-                '".$prop['name']."', 
+                '".$name."', 
+                '".$name."', 
                 '".$desc."')";
             
     $result = mysqli_query($con,$sql);
@@ -298,7 +328,7 @@ function res_new_collection($id,$prop){
     $catObj = array(
         "res"=>(int)$res,
         "id"=>(int)$col,
-        "name"=>$prop['name'],
+        "name"=>$name,
         "description"=>$desc
     );
     lnk_new_collection($catObj); // add collection to links
@@ -406,22 +436,49 @@ function res_new_part($id,$prop){
     $part = $row['part']+1;
     $pos = $row['pos']+1;
 
-    $sql = "INSERT INTO a_res_parts
-                (research_id, part_id, type, 
-                 collection_id, position,
-                 div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
-                 src_research, src_collection, 
-                 src_from_position, src_from_word, src_to_position, src_to_word, 
-                 gen_word_count, 
-                 text, comment, fields_generated) 
+    if (array_key_exists('collection_id',$prop)){
+        $col = $prop['collection_id'];
+    } else {
+        $col = res_get_default_col($id);
+    }
+
+    if (array_key_exists('src_research',$prop)){
+        $sql = "INSERT INTO a_res_parts
+            (research_id, part_id, type, 
+            collection_id, position,
+            div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
+            src_research, src_collection, 
+            src_from_position, src_from_word, src_to_position, src_to_word, 
+            gen_word_count, 
+            text, comment, fields_generated) 
             VALUES(
             ".$res.",".$part.",'pointer',
-            ".$prop['collection_id'].",".$pos.",
+            ".$col.",".$pos.",
             '','','','',
             ".$prop['src_research'].",".$prop['src_collection'].",
             ".$prop['src_from_position'].",".$prop['src_from_word'].",
             ".$prop['src_to_position'].",".$prop['src_to_word'].",
             0,'','',FALSE)";
+    } else {
+        $sql = "INSERT INTO a_res_parts
+            (research_id, part_id, type, 
+            collection_id, position,
+            div_name_eng, div_name_heb, abs_name_heb, abs_name_eng, 
+            src_research, src_collection, 
+            src_from_position, src_from_word, src_to_position, src_to_word, 
+            gen_word_count, 
+            text, comment, fields_generated)
+            SELECT ".$res.",".$part.",'pointer',
+            ".$col.",".$pos.",
+            '','','','',
+            research_id,collection_id,
+            from_position,".$prop['src_from_word'].",
+            to_position,".$prop['src_to_word'].",
+            0,'','',FALSE
+            FROM a_proj_elm_sequence
+            WHERE project_id = ".$prop['project_id']."
+            AND element_id = ".$prop['element_id'];
+    }
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 11 in res_func.php: ' . mysqli_error($con));
@@ -431,7 +488,7 @@ function res_new_part($id,$prop){
 
     $newParts = res_parts_prop($id,array(
         "part_id"=>$part,
-        "collection_id"=>$prop['collection_id']
+        "collection_id"=>$col
     ));
 
     return array(
