@@ -384,11 +384,12 @@ function elmprt_get($id){
 function elmbrd_get($id){
     global $con;
 
-    $sql = "SELECT field_id, title,field_type,width_pct
+    $sql = "SELECT field_id, title,field_type,width_pct,position
             FROM a_proj_elm_board_fields
             WHERE project_id = ".$id['proj']."
               AND element_id = ".$id['elm']."
-            ORDER BY field_id";
+              AND position > 0
+            ORDER BY position";
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
@@ -397,6 +398,7 @@ function elmbrd_get($id){
     while($row = mysqli_fetch_array($result)){
         array_push($fields,array(
             'id'=>(int)$row['field_id'],
+            'position'=>(float)$row['position'],
             'title'=>$row['title'],
             'type'=>$row['field_type'],
             'width_pct'=>(int)$row['width_pct']
@@ -460,9 +462,9 @@ function elmprt_set($id,$prop){
                 $sql_set .= $sep.$attr." = '".$val."'";
                 $sep = ',';
                 break;
-            case "width":
-                if (array_key_exists('fieldIndex',$prop)){
-                    switch ($prop['fieldIndex']){
+            case "width_pct":
+                if (array_key_exists('field_id',$prop)){
+                    switch ($prop['field_id']){
                         case 0:
                             $sql_set .= $sep."parts_col_width_pct = ".(int)$val;
                             $sep = ',';
@@ -482,6 +484,44 @@ function elmprt_set($id,$prop){
                 SET ".$sql_set."  
                 WHERE project_id = ".$id['proj']."
                 AND element_id = ".$id['elm'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- set attributes
+// --------------------------------------------------------------------------------------
+function elmbrd_set_field($id,$prop){
+    global $con;
+
+    $sql_set = '';
+    $sep = '';
+
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "sort":
+            case "ordering":
+                $sql_set .= $sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+            case "position":
+            case "width_pct":
+                $sql_set .= $sep.$attr." = ".(int)$val;
+                $sep = ',';
+                break;
+    break;
+            }   
+    }
+
+    if ($sql_set != ''){
+        $sql = "UPDATE a_proj_elm_board_fields 
+                SET ".$sql_set."  
+                WHERE project_id = ".$id['proj']."
+                AND element_id = ".$id['elm']."
+                AND field_id = ".$prop['field_id'];
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
