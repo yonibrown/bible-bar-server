@@ -384,6 +384,20 @@ function elmprt_get($id){
 function elmbrd_get($id){
     global $con;
 
+    $attr = array(
+        'fields'=>elmbrd_get_fields($id),
+        'lines'=>elmbrd_get_lines($id)
+    );
+
+    return $attr;
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function elmbrd_get_fields($id){
+    global $con;
+
     $sql = "SELECT field_id, title,field_type,width_pct,position
             FROM a_proj_elm_board_fields
             WHERE project_id = ".$id['proj']."
@@ -404,11 +418,64 @@ function elmbrd_get($id){
             'width_pct'=>(int)$row['width_pct']
         ));
     };
-    $attr = array(
-        'fields'=>$fields
-    );
 
-    return $attr;
+    return $fields;
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function elmbrd_get_lines($id){
+    global $con;
+
+    $sql = "SELECT li.line_id,li.position
+              FROM a_proj_elm_board_lines li 
+             WHERE li.project_id = ".$id['proj']."
+               AND li.element_id = ".$id['elm']."
+             ORDER BY li.position";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
+    }
+    $lines = array();
+    while($row = mysqli_fetch_array($result)){
+
+        array_push($lines,array(
+            'id'=>(int)$row['line_id'],
+            'position'=>(float)$row['position'],
+            "content"=>elmbrd_get_content($id,$row['line_id'])
+        ));
+    };
+
+    return $lines;
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function elmbrd_get_content($id,$lineId){
+    global $con;
+
+    $sql = "SELECT co.field_id,co.text
+              FROM a_proj_elm_board_content co 
+             WHERE co.project_id = ".$id['proj']."
+               AND co.element_id = ".$id['elm']."
+               AND co.line_id = ".$lineId."
+             ORDER BY co.field_id";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
+    }
+    $content = array();
+    while($row = mysqli_fetch_array($result)){
+
+        array_push($content,array(
+            'id'=>(int)$row['field_id'],
+            'text'=>$row['text']
+        ));
+    };
+
+    return $content;
 }
 
 // --------------------------------------------------------------------------------------
@@ -512,7 +579,6 @@ function elmbrd_set_field($id,$prop){
                 $sql_set .= $sep.$attr." = ".(int)$val;
                 $sep = ',';
                 break;
-    break;
             }   
     }
 
