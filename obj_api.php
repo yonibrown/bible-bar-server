@@ -78,6 +78,15 @@ switch ($type){
             case "get_points":
                 $reply['data'] = bar_calc_points($id,$prop);
                 break;
+
+            // board methods
+            // ------------
+            
+            // set field of board
+            case "set_field":
+                elmbrd_set_field($id,$prop);
+                break;
+
         }
         break;    
 

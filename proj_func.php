@@ -6,7 +6,7 @@ function proj_get_list(){
     global $con;
     $list = array();
 
-    $sql = "SELECT project_id id,name,description
+    $sql = "SELECT project_id id,name,description,display_version
                 FROM a_projects
                 ORDER BY project_id";
     $result = mysqli_query($con,$sql);
@@ -15,9 +15,10 @@ function proj_get_list(){
     }
     while($row = mysqli_fetch_array($result)) {
         array_push($list,array(
-            "id"=>$row['id'],
+            "id"=>(int)$row['id'],
             "name"=>$row['name'],
-            "desc"=>$row['description']
+            "desc"=>$row['description'],
+            "display_version"=>(int)$row['display_version']
         ));
     }
     return $list;
