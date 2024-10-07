@@ -598,6 +598,38 @@ function elmbrd_set_field($id,$prop){
 // --------------------------------------------------------------------------------------
 // ---- set attributes
 // --------------------------------------------------------------------------------------
+function elmbrd_set_content($id,$prop){
+    global $con;
+
+    $sql_set = '';
+    $sep = '';
+
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "text":
+                $sql_set .= $sep.$attr." = '".$val."'";
+                $sep = ',';
+                break;
+            }   
+    }
+
+    if ($sql_set != ''){
+        $sql = "UPDATE a_proj_elm_board_fields 
+                SET ".$sql_set."  
+                WHERE project_id = ".$id['proj']."
+                AND element_id = ".$id['elm']."
+                AND line_id = ".$prop['line_id']."
+                AND field_id = ".$prop['field_id'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
+        }
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- set attributes
+// --------------------------------------------------------------------------------------
 function elmlnk_set($id,$prop){
     global $con;
 

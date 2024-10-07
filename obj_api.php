@@ -87,6 +87,11 @@ switch ($type){
                 elmbrd_set_field($id,$prop);
                 break;
 
+            // set field of board
+            case "set_content":
+                elmbrd_set_content($id,$prop);
+                break;
+
         }
         break;    
 
