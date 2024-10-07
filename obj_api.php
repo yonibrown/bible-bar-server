@@ -86,15 +86,29 @@ switch ($type){
             case "set_field":
                 elmbrd_set_field($id,$prop);
                 break;
+        }
+        break;    
 
-            // set field of board
-            case "set_content":
-                elmbrd_set_content($id,$prop);
+    case "brd_line":
+        switch ($oper) {
+            // 
+            case "new_content":
+                elmbrd_new_content($id,$prop);
                 break;
 
         }
         break;    
 
+    case "brd_content":
+        switch ($oper) {
+            // 
+            case "set":
+                elmbrd_set_content($id,$prop);
+                break;
+
+        }
+        break;    
+    
     case "link":
         switch ($oper) {
             // create new link
