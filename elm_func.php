@@ -470,7 +470,7 @@ function elmbrd_get_content($id,$lineId){
     while($row = mysqli_fetch_array($result)){
 
         array_push($content,array(
-            'id'=>(int)$row['field_id'],
+            'field'=>(int)$row['field_id'],
             'text'=>$row['text']
         ));
     };
@@ -614,16 +614,36 @@ function elmbrd_set_content($id,$prop){
     }
 
     if ($sql_set != ''){
-        $sql = "UPDATE a_proj_elm_board_fields 
-                SET ".$sql_set."  
-                WHERE project_id = ".$id['proj']."
-                AND element_id = ".$id['elm']."
-                AND line_id = ".$prop['line_id']."
-                AND field_id = ".$prop['field_id'];
+        $sql = "UPDATE a_proj_elm_board_content 
+                   SET ".$sql_set."  
+                 WHERE project_id = ".$id['proj']."
+                   AND element_id = ".$id['elm']."
+                   AND line_id = ".$id['line']."
+                   AND field_id = ".$id['field'];
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
         }
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- set attributes
+// --------------------------------------------------------------------------------------
+function elmbrd_new_content($id,$prop){
+    global $con;
+
+    $sql = "INSERT INTO a_proj_elm_board_content 
+                (project_id, element_id, line_id, field_id, text)
+                VALUES(".$id['proj'].",
+                        ".$id['elm'].",
+                        ".$id['line'].",
+                        ".$prop['field'].",
+                        '".$prop['text']."' 
+                )";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
     }
 }
 
