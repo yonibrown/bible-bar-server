@@ -196,8 +196,8 @@ function res_get_prt_list($id,$prop){
     $res = $id['res'];
 
     $sort_key = array(
-        'col'=>"CONCAT(LPAD(prt.collection_id,5,0),'_',LPAD(prt.position,11,0))",
-        "src"=>"CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0))"
+        "CONCAT(LPAD(prt.collection_id,5,0),'_',LPAD(prt.position,11,0))",
+        "CONCAT(LPAD(prt.src_from_position,11,0),'_',LPAD(prt.src_from_word,5,0))"
     );
 
     if (array_key_exists('ordering', $prop)){
@@ -234,8 +234,8 @@ function res_get_prt_list($id,$prop){
                    prt.src_research, prt.src_collection, 
                    prt.src_from_position, prt.src_to_position, prt.src_from_word, prt.src_to_word, 
                    prt.gen_from_name,prt.gen_to_name,prt.gen_from_text src_text,gen_to_text,gen_to_word_count,
-                   ".$sort_key['src']." src_sort_key,
-                   ".$sort_key['col']." col_sort_key
+                   ".$sort_key[0]." sort_key_0,
+                   ".$sort_key[1]." sort_key_1
             FROM a_res_parts prt
             JOIN a_res_collections c
               ON c.research_id = prt.research_id
@@ -266,8 +266,8 @@ function res_get_prt_list($id,$prop){
             "src_to_text" => $row['gen_to_text'],
             "src_to_word_count" => $row['gen_to_word_count'],
             "sort_key" => array(
-                "col"=>$row['col_sort_key'],
-                "src"=>$row['src_sort_key']
+                $row['sort_key_0'],
+                $row['sort_key_1']
             ),
             "src_research"=>$row['src_research'],
             "src_collection"=>$row['src_collection'],
