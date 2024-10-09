@@ -81,8 +81,8 @@ function brd_add_line($id,$prop){
 
     $sql = "SELECT MAX(line_id) line_id
               FROM a_proj_elm_board_lines
-             WHERE li.project_id = ".$id['proj']."
-               AND li.element_id = ".$id['elm'];
+             WHERE project_id = ".$id['proj']."
+               AND element_id = ".$id['elm'];
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 2 in elm_func.php: ' . mysqli_error($con));
