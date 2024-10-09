@@ -8,6 +8,7 @@ include 'link_func.php';
 include 'elm_func.php';
 include 'res_func.php';
 include 'residx_func.php';
+include 'board_func.php';
 
 if (empty($_POST)){
     $_POST = json_decode(file_get_contents('php://input'), true);
@@ -78,14 +79,6 @@ switch ($type){
             case "get_points":
                 $reply['data'] = bar_calc_points($id,$prop);
                 break;
-
-            // board methods
-            // ------------
-            
-            // set field of board
-            case "set_field":
-                elmbrd_set_field($id,$prop);
-                break;
         }
         break;    
 
@@ -93,21 +86,29 @@ switch ($type){
         switch ($oper) {
             // 
             case "add_line":
-                $reply['data'] = elmbrd_add_line($id,$prop);
+                $reply['data'] = brd_add_line($id,$prop);
                 break;
-
         }
         break;    
 
+    case "brd_field":
+        switch ($oper) {
+            // set field of board
+            case "set":
+                brdfld_set_field($id,$prop);
+                break;   
+        }
+        break;    
+    
     case "brd_line":
         switch ($oper) {
             // 
             case "new_content":
-                elmbrd_new_content($id,$prop);
+                brdlin_new_content($id,$prop);
                 break;
 
             case "set":
-                elmbrd_set_line($id,$prop);
+                brdlin_set_line($id,$prop);
                 break;
 
         }
@@ -117,7 +118,7 @@ switch ($type){
         switch ($oper) {
             // 
             case "set":
-                elmbrd_set_content($id,$prop);
+                brdcnt_set_content($id,$prop);
                 break;
 
         }
