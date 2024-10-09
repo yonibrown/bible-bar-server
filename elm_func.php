@@ -459,6 +459,40 @@ function elmbrd_get_lines($id){
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------
+function elmbrd_add_line($id,$prop){
+    global $con;
+
+    $sql = "SELECT MAX(line_id) line_id
+              FROM a_proj_elm_board_lines
+             WHERE li.project_id = ".$id['proj']."
+               AND li.element_id = ".$id['elm'];
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 2 in elm_func.php: ' . mysqli_error($con));
+    }
+    $row = mysqli_fetch_array($result);
+    $lineId = $row['line_id']+1;
+
+    $sql = "INSERT INTO a_proj_elm_board_lines
+                (project_id, element_id, line_id, position) 
+            VALUES(".$id['proj'].", 
+                ".$id['elm'].", 
+                ".$lineId.",
+                ".$prop['position'].")";
+    $result = mysqli_query($con,$sql);
+    if (!$result) {
+        exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));
+    }
+    return array(
+            'id'=>$lineId,
+            'position'=>$prop['position'],
+            "content"=>array()
+        );
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
 function elmbrd_get_content($id,$lineId){
     global $con;
 
@@ -657,6 +691,37 @@ function elmbrd_new_content($id,$prop){
     $result = mysqli_query($con,$sql);
     if (!$result) {
         exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
+    }
+}
+
+// --------------------------------------------------------------------------------------
+// ---- set attributes
+// --------------------------------------------------------------------------------------
+function elmbrd_set_line($id,$prop){
+    global $con;
+
+    $sql_set = '';
+    $sep = '';
+
+    foreach($prop as $attr => $val) {
+        switch ($attr) {
+            case "position":
+                $sql_set .= $sep.$attr." = ".$val;
+                $sep = ',';
+                break;
+            }   
+    }
+
+    if ($sql_set != ''){
+        $sql = "UPDATE a_proj_elm_board_lines 
+                   SET ".$sql_set."  
+                 WHERE project_id = ".$id['proj']."
+                   AND element_id = ".$id['elm']."
+                   AND line_id = ".$id['line'];
+        $result = mysqli_query($con,$sql);
+        if (!$result) {
+            exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
+        }
     }
 }
 

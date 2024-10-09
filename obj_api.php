@@ -89,11 +89,25 @@ switch ($type){
         }
         break;    
 
+    case "board":
+        switch ($oper) {
+            // 
+            case "add_line":
+                $reply['data'] = elmbrd_add_line($id,$prop);
+                break;
+
+        }
+        break;    
+
     case "brd_line":
         switch ($oper) {
             // 
             case "new_content":
                 elmbrd_new_content($id,$prop);
+                break;
+
+            case "set":
+                elmbrd_set_line($id,$prop);
                 break;
 
         }
@@ -108,6 +122,7 @@ switch ($type){
 
         }
         break;    
+
     
     case "link":
         switch ($oper) {
