@@ -361,10 +361,16 @@ function elmprt_get($id){
         exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
     }
     $row = mysqli_fetch_array($result);
+    
+    $sort = 0;
+    if ($row['sort'] == 'src'){
+        $sort = 1;
+    }
+    
     $attr = array(
         'res'=>(int)$row['research_id'],
         'tab'=>$row['tab'],
-        'sort'=>$row['sort'],
+        'sort'=>(int)$sort,
         'ordering'=>$row['ordering'],
         'col_width'=>(int)$row['parts_col_width_pct'],
         'src_width'=>(int)$row['parts_src_width_pct']
@@ -524,6 +530,13 @@ function elmprt_set($id,$prop){
     foreach($prop as $attr => $val) {
         switch ($attr) {
             case "sort":
+                if ($val == 1){
+                    $sql_set .= $sep.$attr." = 'src'";
+                } else {
+                    $sql_set .= $sep.$attr." = 'col'";
+                }
+                $sep = ',';
+                break;
             case "ordering":
             case "tab":
                 $sql_set .= $sep.$attr." = '".$val."'";
