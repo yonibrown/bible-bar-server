@@ -85,6 +85,10 @@ switch ($type) {
     case "board":
         switch ($oper) {
             // 
+            case "add_field":
+                $reply['data'] = brd_add_field($id, $prop);
+                break;
+            // 
             case "add_line":
                 $reply['data'] = brd_add_line($id, $prop);
                 break;
