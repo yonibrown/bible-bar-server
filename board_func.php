@@ -55,6 +55,7 @@ function elmbrd_get_lines($id){
               FROM a_proj_elm_board_lines li 
              WHERE li.project_id = ".$id['proj']."
                AND li.element_id = ".$id['elm']."
+               AND position > 0
              ORDER BY li.position";
     $result = mysqli_query($con,$sql);
     if (!$result) {
@@ -164,7 +165,7 @@ function brdfld_set_field($id,$prop){
                 SET ".$sql_set."  
                 WHERE project_id = ".$id['proj']."
                 AND element_id = ".$id['elm']."
-                AND field_id = ".$prop['field_id'];
+                AND field_id = ".$id['field'];
         $result = mysqli_query($con,$sql);
         if (!$result) {
             exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));

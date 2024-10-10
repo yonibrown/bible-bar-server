@@ -4,16 +4,16 @@ include 'res_func.php';
 
 // invoke with url: http://localhost/bibar-vue-php/a_utilities.php?util=upd_word_count
 
-$reply = array('field'=>'nothing');
+$reply = array('field' => 'nothing');
 
 $util = $_GET['util'];
-if ($util == 'regen_res'){
+if ($util == 'regen_res') {
     $res = $_GET['res'];
-    echo 'regenerate columns for research:'.$res;
+    echo 'regenerate columns for research:' . $res;
     $reply = res_regen($res);
 }
 
-if ($util == 'res_index'){
+if ($util == 'res_index') {
     // sequence - טקסט
     // $reply = res_get_sequences_list();
 
