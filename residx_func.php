@@ -112,23 +112,27 @@ function residx_get_divisions($id, $prop)
         if ($parent_div != -999) {
             $level_prop['parent_div'] = $parent_div;
         }
-        $divisions = residx_get_level_divisions($id, $level_prop)['list'];
+        $divisions = residx_get_level_divisions($id, $level_prop);
 
-        $selected_div = $level['division_id'];
-        if ($selected_div == 0) {
-            $selected_div = $divisions[0]['id'];
-        } elseif ($selected_div == -1) {
-            $selected_div = end($divisions)['id'];
+        switch ($level['division_id']) {
+            case 0:
+                $selected_div = $divisions['list'][0];
+                break;
+            case -1:
+                $selected_div = end($divisions)['list'];
+                break;
+            default:
+                $selected_div = $divisions['selected_div'];
         }
 
         $level_divs = array(
             'level' => $level['level'],
-            'divisions' => $divisions,
+            'divisions' => $divisions['list'],
             'selected_div' => $selected_div
         );
         array_push($divs, $level_divs);
 
-        $parent_div = $selected_div;
+        $parent_div = $selected_div['id'];
     }
 
     return $divs;
@@ -168,14 +172,21 @@ function residx_get_level_divisions($id, $prop)
     if (!$result) {
         exit_error('Error 29 in res_func.php: ' . mysqli_error($con));
     }
+    $selected_div = array();
     while ($row = mysqli_fetch_array($result)) {
         array_push($list, array(
             "id" => (int)$row['division_id'],
             "name" => $row['name'],
             "selected" => ($row['division_id'] == $prop['selected_div'])
         ));
+        if ($row['division_id'] == $prop['selected_div']) {
+            $selected_div = array(
+                "id" => (int)$row['division_id'],
+                "name" => $row['name']
+            );
+        }
     }
-    return array('list' => $list);
+    return array('list' => $list, 'selected_div' => $selected_div);
 }
 
 // --------------------------------------------------------------------------------------
