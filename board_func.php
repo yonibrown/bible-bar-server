@@ -137,7 +137,7 @@ function brd_add_field($id, $prop)
                 " . $id['elm'] . ", 
                 " . $fieldId . ",
                 " . $prop['position'] . ",
-                'חדש','text',10)";
+                'חדש','freeText',10)";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));
@@ -158,12 +158,15 @@ function elmbrd_get_content($id, $lineId)
 {
     global $con;
 
-    $sql = "SELECT co.field_id,co.text
-              FROM a_proj_elm_board_content co 
-             WHERE co.project_id = " . $id['proj'] . "
-               AND co.element_id = " . $id['elm'] . "
-               AND co.line_id = " . $lineId . "
-             ORDER BY co.field_id";
+    $sql = "SELECT field_id,text,
+                   src_research, src_collection, 
+                   src_from_position, src_from_word, src_to_position, src_to_word,
+                   gen_from_name, gen_to_name 
+              FROM a_proj_elm_board_content  
+             WHERE project_id = " . $id['proj'] . "
+               AND element_id = " . $id['elm'] . "
+               AND line_id = " . $lineId . "
+             ORDER BY field_id";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
@@ -173,7 +176,15 @@ function elmbrd_get_content($id, $lineId)
 
         array_push($content, array(
             'field' => (int)$row['field_id'],
-            'text' => $row['text']
+            'text' => $row['text'],
+            'src_research' => $row['src_research'],
+            'src_collection' => $row['src_collection'],
+            'src_from_position' => $row['src_from_position'],
+            'src_from_word' => $row['src_from_word'],
+            'src_to_position' => $row['src_to_position'],
+            'src_to_word' => $row['src_to_word'],
+            'src_from_name' => $row['gen_from_name'],
+            'src_to_name' => $row['gen_to_name']
         ));
     };
 
@@ -259,12 +270,15 @@ function brdlin_new_content($id, $prop)
     global $con;
 
     $sql = "INSERT INTO a_proj_elm_board_content 
-                (project_id, element_id, line_id, field_id, text)
+                (project_id, element_id, line_id, field_id, text,
+                src_research, src_collection, src_from_position, src_from_word, 
+                src_to_position, src_to_word)
                 VALUES(" . $id['proj'] . ",
                         " . $id['elm'] . ",
                         " . $id['line'] . ",
                         " . $prop['field'] . ",
-                        '" . $prop['text'] . "' 
+                        '" . $prop['text'] . "',
+                        1,1,1,1,1,1
                 )";
     $result = mysqli_query($con, $sql);
     if (!$result) {
