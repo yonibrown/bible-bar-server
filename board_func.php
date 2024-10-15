@@ -160,7 +160,7 @@ function elmbrd_get_content($id, $lineId)
 
     $sql = "SELECT field_id,text,
                    src_research, src_collection, 
-                   src_from_position, src_from_word, src_to_position, src_to_word,
+                   src_from_division, src_from_word, src_to_division, src_to_word,
                    gen_from_name, gen_to_name 
               FROM a_proj_elm_board_content  
              WHERE project_id = " . $id['proj'] . "
@@ -179,9 +179,9 @@ function elmbrd_get_content($id, $lineId)
             'text' => $row['text'],
             'src_research' => $row['src_research'],
             'src_collection' => $row['src_collection'],
-            'src_from_position' => $row['src_from_position'],
+            'src_from_division' => $row['src_from_division'],
             'src_from_word' => $row['src_from_word'],
-            'src_to_position' => $row['src_to_position'],
+            'src_to_division' => $row['src_to_division'],
             'src_to_word' => $row['src_to_word'],
             'src_from_name' => $row['gen_from_name'],
             'src_to_name' => $row['gen_to_name']
@@ -245,6 +245,21 @@ function brdcnt_set_content($id, $prop)
                 $sql_set .= $sep . $attr . " = '" . $val . "'";
                 $sep = ',';
                 break;
+            case "src_from_division":
+            case "src_from_word":
+            case "src_to_division":
+            case "src_to_word":
+                $sql_set .= $sep . $attr . " = '" . $val . "'";
+                $sep = ',';
+                break;
+            case "src_from_name":
+                $sql_set .= $sep . "gen_from_name = '" . $val . "'";
+                $sep = ',';
+                break;
+            case "src_to_name":
+                $sql_set .= $sep . "gen_to_name = '" . $val . "'";
+                $sep = ',';
+                break;
         }
     }
 
@@ -271,8 +286,8 @@ function brdlin_new_content($id, $prop)
 
     $sql = "INSERT INTO a_proj_elm_board_content 
                 (project_id, element_id, line_id, field_id, text,
-                src_research, src_collection, src_from_position, src_from_word, 
-                src_to_position, src_to_word)
+                src_research, src_collection, src_from_division, src_from_word, 
+                src_to_division, src_to_word)
                 VALUES(" . $id['proj'] . ",
                         " . $id['elm'] . ",
                         " . $id['line'] . ",

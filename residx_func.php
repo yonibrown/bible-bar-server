@@ -197,8 +197,29 @@ function residx_position_to_key($id, $prop)
     global $con;
 
     $list = array();
-    if ($prop['position'] > 0) {
+    if (array_key_exists('division_id', $prop)) {
         $sql = "SELECT d.level,d.division_id,d.name_heb name
+                  FROM a_res_idx_division p
+                  JOIN a_res_idx_division d
+                    ON d.research_id = p.research_id
+                   AND d.collection_id = p.collection_id
+                   AND d.index_id = p.index_id
+                   AND d.from_position <= p.from_position
+                   AND d.to_position >= p.to_position
+                  JOIN a_res_idx_levels l
+                    ON l.research_id = d.research_id
+                   AND l.collection_id = d.collection_id
+                   AND l.index_id = d.index_id
+                   AND l.level = d.level
+                   AND l.part_of_key = TRUE
+                 WHERE p.research_id = " . $id['res'] . " 
+                   AND p.collection_id = " . $id['col'] . " 
+                   AND p.index_id = " . $id['idx'] . " 
+                   AND p.division_id = " . $prop['division_id'] . "
+                 ORDER BY d.level DESC;";
+    } else {
+        if ($prop['position'] > 0) {
+            $sql = "SELECT d.level,d.division_id,d.name_heb name
                   FROM a_res_idx_division d
                   JOIN a_res_idx_levels l
                     ON l.research_id = d.research_id
@@ -211,13 +232,13 @@ function residx_position_to_key($id, $prop)
                    AND d.index_id = " . $id['idx'] . " 
                    AND " . $prop['position'] . " BETWEEN d.from_position AND d.to_position
                  ORDER BY d.level DESC";
-    } else {
-        if ($prop['position'] == 0) {
-            $group_func = 'MIN';
         } else {
-            $group_func = 'MAX';
-        }
-        $sql = "SELECT d.level," . $group_func . "(d.division_id) division_id,d.name_heb name
+            if ($prop['position'] == 0) {
+                $group_func = 'MIN';
+            } else { /* $prop['position'] == -1 */
+                $group_func = 'MAX';
+            }
+            $sql = "SELECT d.level," . $group_func . "(d.division_id) division_id,d.name_heb name
                   FROM a_res_idx_division d
                   JOIN a_res_idx_levels l
                     ON l.research_id = d.research_id
@@ -230,6 +251,7 @@ function residx_position_to_key($id, $prop)
                    AND d.index_id = " . $id['idx'] . " 
                  GROUP BY d.level
                  ORDER BY d.level DESC";
+        }
     }
 
     $result = mysqli_query($con, $sql);

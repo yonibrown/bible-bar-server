@@ -124,7 +124,6 @@ switch ($type) {
             case "set":
                 brdcnt_set_content($id, $prop);
                 break;
-
         }
         break;
 

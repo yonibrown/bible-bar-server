@@ -564,7 +564,7 @@ function res_upd_parts($id, $prop)
                 $sql_set = $sql_set . $sep . "rp." . $attr . " = " . $val;
                 $sep = ',';
                 break;
-            case 'src_from_div':
+            case 'src_from_division':
                 $sql_set = $sql_set . $sep . "rp.src_from_position = (
                     SELECT from_position 
                       FROM a_res_idx_division rd
@@ -574,7 +574,7 @@ function res_upd_parts($id, $prop)
                 )";
                 $sep = ',';
                 break;
-            case 'src_to_div':
+            case 'src_to_division':
                 $sql_set = $sql_set . $sep . "rp.src_to_position = (
                     SELECT to_position 
                       FROM a_res_idx_division rd
