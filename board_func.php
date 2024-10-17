@@ -284,17 +284,52 @@ function brdlin_new_content($id, $prop)
 {
     global $con;
 
+    $text = '';
+    $fromDiv = 0;
+    $fromWord = 0;
+    $fromName = '';
+    $toDiv = 0;
+    $toWord = 999;
+    $toName = '';
+
+    foreach ($prop as $attr => $val) {
+        switch ($attr) {
+            case "text":
+                $text = $val;
+                break;
+            case "src_from_division":
+                $fromDiv = $val;
+                break;
+            case "src_from_word":
+                $fromWord = $val;
+                break;
+            case "src_to_division":
+                $toDiv = $val;
+                break;
+            case "src_to_word":
+                $toWord = $val;
+                break;
+            case "src_from_name":
+                $fromName = $val;
+                break;
+            case "src_to_name":
+                $toName = $val;
+                break;
+        }
+    }
+
     $sql = "INSERT INTO a_proj_elm_board_content 
                 (project_id, element_id, line_id, field_id, text,
                 src_research, src_collection, src_from_division, src_from_word, 
-                src_to_division, src_to_word)
+                src_to_division, src_to_word,gen_from_name,gen_to_name)
                 VALUES(" . $id['proj'] . ",
                         " . $id['elm'] . ",
                         " . $id['line'] . ",
                         " . $prop['field'] . ",
-                        '" . $prop['text'] . "',
-                        1,1,1,1,1,1
-                )";
+                        '" . $text . "',
+                        1,1,".$fromDiv.",
+                        ".$fromWord.",".$toDiv.",".$toWord.",
+                        '".$fromName."','".$toName."')";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
