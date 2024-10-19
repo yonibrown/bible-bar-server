@@ -203,6 +203,7 @@ function brdfld_set_field($id, $prop)
 
     foreach ($prop as $attr => $val) {
         switch ($attr) {
+            case "title":
             case "sort":
             case "ordering":
                 $sql_set .= $sep . $attr . " = '" . $val . "'";
@@ -292,7 +293,7 @@ function brdlin_new_content($id, $prop)
     $toWord = 999;
     $toName = '';
 
-    foreach ($prop as $attr => $val) {
+    foreach ($prop['content'] as $attr => $val) {
         switch ($attr) {
             case "text":
                 $text = $val;
@@ -327,9 +328,9 @@ function brdlin_new_content($id, $prop)
                         " . $id['line'] . ",
                         " . $prop['field'] . ",
                         '" . $text . "',
-                        1,1,".$fromDiv.",
-                        ".$fromWord.",".$toDiv.",".$toWord.",
-                        '".$fromName."','".$toName."')";
+                        1,1," . $fromDiv . ",
+                        " . $fromWord . "," . $toDiv . "," . $toWord . ",
+                        '" . $fromName . "','" . $toName . "')";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));

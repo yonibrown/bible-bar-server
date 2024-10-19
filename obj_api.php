@@ -114,7 +114,6 @@ switch ($type) {
             case "set":
                 brdlin_set_line($id, $prop);
                 break;
-
         }
         break;
 
