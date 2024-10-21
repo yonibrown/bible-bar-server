@@ -90,13 +90,10 @@ function residx_get_max_level($id)
 }
 
 // --------------------------------------------------------------------------------------
-// ----                                   
+// ---- get division of every level of the key                                   
 // --------------------------------------------------------------------------------------
 function residx_get_divisions($id, $prop)
 {
-
-    $firstLevel = TRUE;
-
     if (array_key_exists('position', $prop)) {
         $key = residx_position_to_key($id, $prop);
     } else {
@@ -104,26 +101,40 @@ function residx_get_divisions($id, $prop)
     }
     $divs = array();
 
-    $parent_div = -999;
+    if (count($key) == 0){
+        // get divisions of max level
+    }
+
+    $firstLevel = TRUE;
+    $parent_div = 0;
     foreach ($key as $level) {
         $level_prop = array(
             'level' => $level['level'],
             'selected_div' => $level['division_id']
         );
-        if ($parent_div != -999) {
+
+        if ($firstLevel) {
+            $firstLevel = FALSE;
+        } else {
             $level_prop['parent_div'] = $parent_div;
         }
-        $divisions = residx_get_level_divisions($id, $level_prop);
-
-        switch ($level['division_id']) {
-            case 0:
-                $selected_div = $divisions['list'][0];
-                break;
-            case -1:
-                $selected_div = end($divisions)['list'];
-                break;
-            default:
-                $selected_div = $divisions['selected_div'];
+        if ($parent_div != -999) {
+            $divisions = residx_get_level_divisions($id, $level_prop);
+            switch ($level['division_id']) {
+                case -999:
+                    $selected_div = -999;
+                case 0:
+                    $selected_div = $divisions['list'][0]['id'];
+                    break;
+                case -1:
+                    $selected_div = end($divisions)['list']['id'];
+                    break;
+                default:
+                    $selected_div = $divisions['selected_div']['id'];
+            }
+        } else {
+            $divisions = array();
+            $selected_div = 0;
         }
 
         $level_divs = array(
@@ -133,7 +144,7 @@ function residx_get_divisions($id, $prop)
         );
         array_push($divs, $level_divs);
 
-        $parent_div = $selected_div['id'];
+        $parent_div = $selected_div;
     }
 
     return $divs;
@@ -191,14 +202,16 @@ function residx_get_level_divisions($id, $prop)
 }
 
 // --------------------------------------------------------------------------------------
-// ---- convert position to index key
+// ---- convert position/division to index key
 // --------------------------------------------------------------------------------------
 function residx_position_to_key($id, $prop)
 {
     global $con;
 
     $list = array();
+
     if (array_key_exists('division_id', $prop)) {
+        // get by division
         $sql = "SELECT d.level,d.division_id,d.name_heb name
                   FROM a_res_idx_division p
                   JOIN a_res_idx_division d
@@ -217,8 +230,9 @@ function residx_position_to_key($id, $prop)
                    AND p.collection_id = " . $id['col'] . " 
                    AND p.index_id = " . $id['idx'] . " 
                    AND p.division_id = " . $prop['division_id'] . "
-                 ORDER BY d.level DESC;";
-    } else {
+                 ORDER BY d.level DESC";
+    } else if (array_key_exists('position', $prop)) {
+        // get by position
         if ($prop['position'] > 0) {
             $sql = "SELECT d.level,d.division_id,d.name_heb name
                   FROM a_res_idx_division d
@@ -253,6 +267,15 @@ function residx_position_to_key($id, $prop)
                  GROUP BY d.level
                  ORDER BY d.level DESC";
         }
+    } else {
+        // get default key
+        $sql = "SELECT l.level level, -999 division_id,' ' name
+                  FROM a_res_idx_levels l
+                 WHERE l.research_id = " . $id['res'] . " 
+                   AND l.collection_id = " . $id['col'] . " 
+                   AND l.index_id = " . $id['idx'] . "
+                   AND l.part_of_key = TRUE
+                 ORDER BY l.level DESC";
     }
 
     $result = mysqli_query($con, $sql);

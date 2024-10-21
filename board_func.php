@@ -137,7 +137,9 @@ function brd_add_field($id, $prop)
                 " . $id['elm'] . ", 
                 " . $fieldId . ",
                 " . $prop['position'] . ",
-                'חדש','freeText',10)";
+                'חדש',
+                '".$prop['fieldType']."',
+                10)";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));
