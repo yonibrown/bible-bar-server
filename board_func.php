@@ -137,7 +137,9 @@ function brd_add_field($id, $prop)
                 " . $id['elm'] . ", 
                 " . $fieldId . ",
                 " . $prop['position'] . ",
-                'חדש','freeText',10)";
+                'חדש',
+                '".$prop['fieldType']."',
+                10)";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));
@@ -160,7 +162,7 @@ function elmbrd_get_content($id, $lineId)
 
     $sql = "SELECT field_id,text,
                    src_research, src_collection, 
-                   src_from_position, src_from_word, src_to_position, src_to_word,
+                   src_from_division, src_from_word, src_to_division, src_to_word,
                    gen_from_name, gen_to_name 
               FROM a_proj_elm_board_content  
              WHERE project_id = " . $id['proj'] . "
@@ -179,9 +181,9 @@ function elmbrd_get_content($id, $lineId)
             'text' => $row['text'],
             'src_research' => $row['src_research'],
             'src_collection' => $row['src_collection'],
-            'src_from_position' => $row['src_from_position'],
+            'src_from_division' => $row['src_from_division'],
             'src_from_word' => $row['src_from_word'],
-            'src_to_position' => $row['src_to_position'],
+            'src_to_division' => $row['src_to_division'],
             'src_to_word' => $row['src_to_word'],
             'src_from_name' => $row['gen_from_name'],
             'src_to_name' => $row['gen_to_name']
@@ -203,6 +205,7 @@ function brdfld_set_field($id, $prop)
 
     foreach ($prop as $attr => $val) {
         switch ($attr) {
+            case "title":
             case "sort":
             case "ordering":
                 $sql_set .= $sep . $attr . " = '" . $val . "'";
@@ -245,6 +248,21 @@ function brdcnt_set_content($id, $prop)
                 $sql_set .= $sep . $attr . " = '" . $val . "'";
                 $sep = ',';
                 break;
+            case "src_from_division":
+            case "src_from_word":
+            case "src_to_division":
+            case "src_to_word":
+                $sql_set .= $sep . $attr . " = '" . $val . "'";
+                $sep = ',';
+                break;
+            case "src_from_name":
+                $sql_set .= $sep . "gen_from_name = '" . $val . "'";
+                $sep = ',';
+                break;
+            case "src_to_name":
+                $sql_set .= $sep . "gen_to_name = '" . $val . "'";
+                $sep = ',';
+                break;
         }
     }
 
@@ -269,17 +287,52 @@ function brdlin_new_content($id, $prop)
 {
     global $con;
 
+    $text = '';
+    $fromDiv = 0;
+    $fromWord = 0;
+    $fromName = '';
+    $toDiv = 0;
+    $toWord = 999;
+    $toName = '';
+
+    foreach ($prop['content'] as $attr => $val) {
+        switch ($attr) {
+            case "text":
+                $text = $val;
+                break;
+            case "src_from_division":
+                $fromDiv = $val;
+                break;
+            case "src_from_word":
+                $fromWord = $val;
+                break;
+            case "src_to_division":
+                $toDiv = $val;
+                break;
+            case "src_to_word":
+                $toWord = $val;
+                break;
+            case "src_from_name":
+                $fromName = $val;
+                break;
+            case "src_to_name":
+                $toName = $val;
+                break;
+        }
+    }
+
     $sql = "INSERT INTO a_proj_elm_board_content 
                 (project_id, element_id, line_id, field_id, text,
-                src_research, src_collection, src_from_position, src_from_word, 
-                src_to_position, src_to_word)
+                src_research, src_collection, src_from_division, src_from_word, 
+                src_to_division, src_to_word,gen_from_name,gen_to_name)
                 VALUES(" . $id['proj'] . ",
                         " . $id['elm'] . ",
                         " . $id['line'] . ",
                         " . $prop['field'] . ",
-                        '" . $prop['text'] . "',
-                        1,1,1,1,1,1
-                )";
+                        '" . $text . "',
+                        1,1," . $fromDiv . ",
+                        " . $fromWord . "," . $toDiv . "," . $toWord . ",
+                        '" . $fromName . "','" . $toName . "')";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
