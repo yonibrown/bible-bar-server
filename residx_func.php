@@ -103,65 +103,69 @@ function residx_get_max_level($id, $prop)
 function residx_get_divisions($id, $prop)
 {
     if (array_key_exists('position', $prop)) {
+        // get key from position
         $key = residx_position_to_key($id, $prop);
     } else {
-        $key = $prop['key'];
+        if (count($prop['key']) == 0) {
+            // get key levels from index
+            $level_list = residx_get_levels($id, array('levels' => 'key'));
+            $key = array_map("level_list_to_empty_key", $level_list);
+        } else {
+            $key = $prop['key'];
+        }
     }
     $divs = array();
-
-    if (count($key) == 0) {
-        // get divisions of max level
-        $maxLevel = residx_get_max_level($id, array("part_of_key" => TRUE));
-        array_push($key, array(
-            "level" => $maxLevel,
-            "division_id" => -999
-        ));
-    }
 
     $firstLevel = TRUE;
     $parent_div = 0;
     foreach ($key as $level) {
-        $level_prop = array(
-            'level' => $level['level'],
-            'selected_div' => $level['division_id']
-        );
-
-        if ($firstLevel) {
-            $firstLevel = FALSE;
-        } else {
-            $level_prop['parent_div'] = $parent_div;
-        }
         if ($parent_div != -999) {
-            $divisions = residx_get_level_divisions($id, $level_prop);
+            $level_prop = array(
+                'level' => $level['level'],
+                'selected_div' => $level['division_id']
+            );
+            if (!$firstLevel) {
+                $level_prop['parent_div'] = $parent_div;
+            }
+            $levelDivs = residx_get_level_divisions($id, $level_prop);
             switch ($level['division_id']) {
-                case -999:
-                    $selected_div = -999;
-                    break;
                 case 0:
-                    $selected_div = $divisions['list'][0]['id'];
+                    // first division
+                    $selected_div = $levelDivs['list'][0]['id'];
                     break;
                 case -1:
-                    $selected_div = end($divisions)['list']['id'];
+                    // last division
+                    $selected_div = end($levelDivs)['list']['id'];
                     break;
                 default:
-                    $selected_div = $divisions['selected_div']['id'];
+                    $selected_div = $level['division_id'];
             }
         } else {
-            $divisions = array();
-            $selected_div = 0;
+            // if the high level div is -999 return empty lists in lower levels
+            $levelDivs = array("list" => array());
+            $selected_div = -999;
         }
 
         $level_divs = array(
             'level' => $level['level'],
-            'divisions' => $divisions['list'],
+            'divisions' => $levelDivs['list'],
             'selected_div' => $selected_div
         );
         array_push($divs, $level_divs);
 
         $parent_div = $selected_div;
+        $firstLevel = FALSE;
     }
 
     return $divs;
+}
+
+function level_list_to_empty_key($level)
+{
+    return array(
+        "level" => $level['id'],
+        "division_id" => -999
+    );
 }
 
 // --------------------------------------------------------------------------------------
