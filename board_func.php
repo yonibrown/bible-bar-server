@@ -23,7 +23,7 @@ function elmbrd_get_fields($id)
 {
     global $con;
 
-    $sql = "SELECT field_id, title,field_type,width_pct,position
+    $sql = "SELECT field_id, title,field_type,width_pct,position,parent_field
             FROM a_proj_elm_board_fields
             WHERE project_id = " . $id['proj'] . "
               AND element_id = " . $id['elm'] . "
@@ -40,7 +40,8 @@ function elmbrd_get_fields($id)
             'position' => (float)$row['position'],
             'title' => $row['title'],
             'type' => $row['field_type'],
-            'width_pct' => (int)$row['width_pct']
+            'width_pct' => (int)$row['width_pct'],
+            'parent_field' => (int)$row['parent_field']
         ));
     };
 
@@ -132,14 +133,15 @@ function brd_add_field($id, $prop)
 
     $sql = "INSERT INTO a_proj_elm_board_fields
                 (project_id, element_id, field_id, position,
-                 title, field_type, width_pct) 
+                 title, field_type, width_pct, parent_field) 
             VALUES(" . $id['proj'] . ", 
                 " . $id['elm'] . ", 
                 " . $fieldId . ",
                 " . $prop['position'] . ",
                 'חדש',
                 '".$prop['fieldType']."',
-                10)";
+                10,
+                " . $fieldId . ")";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));

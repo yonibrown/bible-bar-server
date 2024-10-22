@@ -312,6 +312,28 @@ function residx_position_to_key($id, $prop)
 }
 
 // --------------------------------------------------------------------------------------
+// ---- get the division of level 0 that the position is in it
+// --------------------------------------------------------------------------------------
+// function residx_position_to_div($id, $prop)
+// {
+//     global $con;
+
+//     $sql = "SELECT d.division_id,d.name_heb name
+//                   FROM a_res_idx_division d
+//                  WHERE d.research_id = " . $id['res'] . " 
+//                    AND d.collection_id = " . $id['col'] . " 
+//                    AND d.index_id = " . $id['idx'] . " 
+//                    AND d.level = 0
+//                    AND " . $prop['position'] . " BETWEEN d.from_position AND d.to_position";
+//     $result = mysqli_query($con, $sql);
+//     if (!$result) {
+//         exit_error('Error 30 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     return array('division_id' => $row['division_id']);
+// }
+
+// --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
 function residx_get_level_range($id, $name, $level, $initialRange)

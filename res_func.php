@@ -200,7 +200,7 @@ function res_get_default_col($id)
 // --------------------------------------------------------------------------------------
 function res_get_prt_list($id, $prop)
 {
-    global $con, $heb_num;
+    global $con;
 
     $res = $id['res'];
 

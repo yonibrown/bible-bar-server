@@ -241,6 +241,11 @@ switch ($type) {
             case "get_key":
                 $reply['data'] = residx_position_to_key($id, $prop);
                 break;
+
+            // 
+            // case "get_division":
+            //     $reply['data'] = residx_position_to_div($id, $prop);
+            //     break;
         }
         break;
 
