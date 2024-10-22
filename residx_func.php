@@ -72,13 +72,13 @@ function residx_get_levels($id, $prop)
 // --------------------------------------------------------------------------------------
 // ----                
 // --------------------------------------------------------------------------------------
-function residx_get_max_level($id,$prop)
+function residx_get_max_level($id, $prop)
 {
     global $con;
-    
+
     $partOfKeyCrit = " ";
-    if (array_key_exists('part_of_key',$prop)){
-        if ($prop['part_of_key']){
+    if (array_key_exists('part_of_key', $prop)) {
+        if ($prop['part_of_key']) {
             $partOfKeyCrit = " AND part_of_key = true";
         }
     }
@@ -87,8 +87,8 @@ function residx_get_max_level($id,$prop)
               FROM a_res_idx_levels
              WHERE research_id = " . $id['res'] . "
                AND collection_id = " . $id['col'] . "
-               AND index_id = " . $id['idx'].
-               $partOfKeyCrit;
+               AND index_id = " . $id['idx'] .
+        $partOfKeyCrit;
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 32 in res_func.php: ' . mysqli_error($con));
@@ -109,15 +109,15 @@ function residx_get_divisions($id, $prop)
     }
     $divs = array();
 
-    if (count($key) == 0){
+    if (count($key) == 0) {
         // get divisions of max level
-        $maxLevel = residx_get_max_level($id,array("part_of_key"=>TRUE));
+        $maxLevel = residx_get_max_level($id, array("part_of_key" => TRUE));
         array_push($key, array(
-            "level"=>$maxLevel,
-            "division_id"=>-999
+            "level" => $maxLevel,
+            "division_id" => -999
         ));
     }
-    
+
     $firstLevel = TRUE;
     $parent_div = 0;
     foreach ($key as $level) {
