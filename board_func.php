@@ -6,14 +6,13 @@
 // --------------------------------------------------------------------------------------
 function elmbrd_get($id)
 {
-    global $con;
+    $fields = elmbrd_get_fields($id);
+    $lines = elmbrd_get_lines($id, array("fields" => $fields));
 
-    $attr = array(
-        'fields' => elmbrd_get_fields($id),
-        'lines' => elmbrd_get_lines($id)
+    return array(
+        'fields' => $fields,
+        'lines' => $lines
     );
-
-    return $attr;
 }
 
 // --------------------------------------------------------------------------------------
@@ -51,7 +50,7 @@ function elmbrd_get_fields($id)
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------
-function elmbrd_get_lines($id)
+function elmbrd_get_lines($id, $prop)
 {
     global $con;
 
@@ -75,7 +74,7 @@ function elmbrd_get_lines($id)
                 "proj" => $id['proj'],
                 "elm" => $id['elm'],
                 "line" => $row['line_id']
-            ))
+            ), $prop)
         ));
     };
 
@@ -168,60 +167,34 @@ function brd_add_field($id, $prop)
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------
-function brdlin_get_content($id)
+function brdlin_get_content($id,$prop)
 {
     global $con;
 
-    // todo: change the query to get all fields of the board and for every field 
-    //       call a function to get the content.
-
-    $sql = "SELECT field_id,text,
-                   src_research, src_collection, 
-                   src_from_division, src_from_word, src_to_division, src_to_word,
-                   gen_from_name, gen_to_name 
-              FROM a_proj_elm_board_content  
-             WHERE project_id = " . $id['proj'] . "
-               AND element_id = " . $id['elm'] . "
-               AND line_id = " . $id['line'] . "
-               AND field_id IN (SELECT field_id
-                                  FROM a_proj_elm_board_fields
-                                 WHERE position > 0) 
-             ORDER BY field_id";
-    $result = mysqli_query($con, $sql);
-    if (!$result) {
-        exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
+    $lineContent = array();
+    foreach($prop['fields'] as $field){
+        $cntId = array_merge($id,array("field"=>$field['id']));
+        if ($content = brdcnt_get_content($cntId)){
+            array_push($lineContent,$content);
+        }
     }
-    $content = array();
-    while ($row = mysqli_fetch_array($result)) {
-
-        array_push($content, array(
-            'field' => (int)$row['field_id'],
-            'text' => $row['text'],
-            'src_research' => $row['src_research'],
-            'src_collection' => $row['src_collection'],
-            'src_from_division' => $row['src_from_division'],
-            'src_from_word' => $row['src_from_word'],
-            'src_to_division' => $row['src_to_division'],
-            'src_to_word' => $row['src_to_word'],
-            'src_from_name' => $row['gen_from_name'],
-            'src_to_name' => $row['gen_to_name']
-        ));
-    };
-
-    return $content;
+    return $lineContent;
 }
 
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------
-function brdcnt_get_content($id)
+function brdcnt_get_content_basic($id)
 {
     global $con;
 
     $sql = "SELECT field_id,text,
                    src_research, src_collection, 
                    src_from_division, src_from_word, src_to_division, src_to_word,
-                   gen_from_name, gen_to_name 
+                   fields_generated,
+                   gen_from_name, gen_to_name, 
+                   gen_from_position, gen_to_position, 
+                   gen_from_text, gen_to_text 
               FROM a_proj_elm_board_content  
              WHERE project_id = " . $id['proj'] . "
                AND element_id = " . $id['elm'] . "
@@ -232,19 +205,42 @@ function brdcnt_get_content($id)
         exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
     }
     if ($row = mysqli_fetch_array($result)) {
-        return array(
+        $content = array(
             'field' => (int)$row['field_id'],
             'text' => $row['text'],
-            'src_research' => $row['src_research'],
-            'src_collection' => $row['src_collection'],
-            'src_from_division' => $row['src_from_division'],
-            'src_from_word' => $row['src_from_word'],
-            'src_to_division' => $row['src_to_division'],
-            'src_to_word' => $row['src_to_word'],
+            'src_research' => (int)$row['src_research'],
+            'src_collection' => (int)$row['src_collection'],
+            'src_from_division' => (int)$row['src_from_division'],
+            'src_from_word' => (int)$row['src_from_word'],
+            'src_to_division' => (int)$row['src_to_division'],
+            'src_to_word' => (int)$row['src_to_word'],
             'src_from_name' => $row['gen_from_name'],
-            'src_to_name' => $row['gen_to_name']
+            'src_to_name' => $row['gen_to_name'],
+            'fields_generated' => $row['fields_generated'],
+            'gen_from_position' => (float)$row['gen_from_position'],
+            'gen_to_position' => (float)$row['gen_to_position'],
+            'gen_from_text' => $row['gen_from_text'],
+            'gen_to_text' => $row['gen_to_text']
         );
+        return $content;
     };
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function brdcnt_get_content($id)
+{
+    $content = brdcnt_get_content_basic($id);
+
+    if (!$content){
+        return null;
+    }
+
+    if (!$content['fields_generated']){
+        return brdcnt_update_generated_columns($id,$content);
+    }
+    return $content;
 }
 
 // --------------------------------------------------------------------------------------
@@ -340,11 +336,38 @@ function brdcnt_set_content($id, $prop)
 // --------------------------------------------------------------------------------------
 // ---- 
 // --------------------------------------------------------------------------------------
-function brdcnt_update_generated_columns($id)
+function brdcnt_update_generated_columns($id,$content=null)
 {
     global $con;
 
-    $content = brdcnt_get_content($id);
+    if (!$content){
+        $content = brdcnt_get_content_basic($id);
+    }
+
+    if ($content['src_research'] > 0 && $content['src_from_division'] > 0){
+        return brdcnt_update_generated_research($id,$content);
+    }
+
+    $sql1 = "UPDATE a_proj_elm_board_content
+                SET fields_generated = TRUE
+              WHERE project_id = " . $id['proj'] . "
+                AND element_id = " . $id['elm'] . "
+                AND line_id = " . $id['line'] . "
+                AND field_id = " . $id['field'];
+    $result1 = mysqli_query($con, $sql1);
+    if (!$result1) {
+        exit_error('Error 21 in board_func.php: ' . mysqli_error($con));
+    }
+    return $content;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function brdcnt_update_generated_research($id,$content)
+{
+    global $con;
+
     $div_from = residx_get_division(array(
         "research_id" => $content['src_research'],
         "collection_id" => $content['src_collection'],
@@ -386,20 +409,21 @@ function brdcnt_update_generated_columns($id)
                   , gen_to_position = " . $to_position . "
                   , gen_from_text = '" . $row_from['text'] . "'
                   , gen_to_text = '" . $row_to['text'] . "'
+                  , fields_generated = TRUE
               WHERE project_id = " . $id['proj'] . "
-                AND element_id = " . $id['elm']. "
-                AND line_id = " . $id['line']. "
+                AND element_id = " . $id['elm'] . "
+                AND line_id = " . $id['line'] . "
                 AND field_id = " . $id['field'];
     $result1 = mysqli_query($con, $sql1);
     if (!$result1) {
         exit_error('Error 21 in board_func.php: ' . mysqli_error($con));
     }
 
-    return array_merge($content,array(
-        "gen_from_position"=>$from_position,
-        "gen_to_position"=>$to_position,
-        "gen_from_text"=>$row_from['text'],
-        "gen_to_text"=>$row_to['text']
+    return array_merge($content, array(
+        "gen_from_position" => $from_position,
+        "gen_to_position" => $to_position,
+        "gen_from_text" => $row_from['text'],
+        "gen_to_text" => $row_to['text']
     ));
 }
 
