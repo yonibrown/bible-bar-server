@@ -121,7 +121,7 @@ switch ($type) {
         switch ($oper) {
             // 
             case "set":
-                brdcnt_set_content($id, $prop);
+                $reply["data"] = brdcnt_set_content($id, $prop);
                 break;
         }
         break;

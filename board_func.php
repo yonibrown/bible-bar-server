@@ -71,7 +71,11 @@ function elmbrd_get_lines($id)
         array_push($lines, array(
             'id' => (int)$row['line_id'],
             'position' => (float)$row['position'],
-            "content" => elmbrd_get_content($id, $row['line_id'])
+            "content" => brdlin_get_content(array(
+                "proj" => $id['proj'],
+                "elm" => $id['elm'],
+                "line" => $row['line_id']
+            ))
         ));
     };
 
@@ -131,6 +135,11 @@ function brd_add_field($id, $prop)
     $row = mysqli_fetch_array($result);
     $fieldId = $row['field_id'] + 1;
 
+    $parentField = $fieldId;
+    if (array_key_exists('parent_field', $prop)) {
+        $parentField = $prop['parent_field'];
+    }
+
     $sql = "INSERT INTO a_proj_elm_board_fields
                 (project_id, element_id, field_id, position,
                  title, field_type, width_pct, parent_field) 
@@ -139,9 +148,9 @@ function brd_add_field($id, $prop)
                 " . $fieldId . ",
                 " . $prop['position'] . ",
                 'חדש',
-                '".$prop['fieldType']."',
+                '" . $prop['type'] . "',
                 10,
-                " . $fieldId . ")";
+                " . $parentField . ")";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 3 in elm_func.php: ' . mysqli_error($con));
@@ -150,17 +159,21 @@ function brd_add_field($id, $prop)
         'id' => $fieldId,
         'position' => $prop['position'],
         'title' => 'חדש',
-        'type' => 'text',
-        "width_pct" => 10
+        'type' => $prop['type'],
+        "width_pct" => 10,
+        "parent_field" => $parentField
     );
 }
 
 // --------------------------------------------------------------------------------------
 // ----                                     
 // --------------------------------------------------------------------------------------
-function elmbrd_get_content($id, $lineId)
+function brdlin_get_content($id)
 {
     global $con;
+
+    // todo: change the query to get all fields of the board and for every field 
+    //       call a function to get the content.
 
     $sql = "SELECT field_id,text,
                    src_research, src_collection, 
@@ -169,7 +182,10 @@ function elmbrd_get_content($id, $lineId)
               FROM a_proj_elm_board_content  
              WHERE project_id = " . $id['proj'] . "
                AND element_id = " . $id['elm'] . "
-               AND line_id = " . $lineId . "
+               AND line_id = " . $id['line'] . "
+               AND field_id IN (SELECT field_id
+                                  FROM a_proj_elm_board_fields
+                                 WHERE position > 0) 
              ORDER BY field_id";
     $result = mysqli_query($con, $sql);
     if (!$result) {
@@ -193,6 +209,42 @@ function elmbrd_get_content($id, $lineId)
     };
 
     return $content;
+}
+
+// --------------------------------------------------------------------------------------
+// ----                                     
+// --------------------------------------------------------------------------------------
+function brdcnt_get_content($id)
+{
+    global $con;
+
+    $sql = "SELECT field_id,text,
+                   src_research, src_collection, 
+                   src_from_division, src_from_word, src_to_division, src_to_word,
+                   gen_from_name, gen_to_name 
+              FROM a_proj_elm_board_content  
+             WHERE project_id = " . $id['proj'] . "
+               AND element_id = " . $id['elm'] . "
+               AND line_id = " . $id['line'] . "
+               AND field_id = " . $id['field'];
+    $result = mysqli_query($con, $sql);
+    if (!$result) {
+        exit_error('Error 10 in elm_func.php: ' . mysqli_error($con));
+    }
+    if ($row = mysqli_fetch_array($result)) {
+        return array(
+            'field' => (int)$row['field_id'],
+            'text' => $row['text'],
+            'src_research' => $row['src_research'],
+            'src_collection' => $row['src_collection'],
+            'src_from_division' => $row['src_from_division'],
+            'src_from_word' => $row['src_from_word'],
+            'src_to_division' => $row['src_to_division'],
+            'src_to_word' => $row['src_to_word'],
+            'src_from_name' => $row['gen_from_name'],
+            'src_to_name' => $row['gen_to_name']
+        );
+    };
 }
 
 // --------------------------------------------------------------------------------------
@@ -280,6 +332,75 @@ function brdcnt_set_content($id, $prop)
             exit_error('Error 16 in elm_func.php: ' . mysqli_error($con));
         }
     }
+
+    $updated_content = brdcnt_update_generated_columns($id);
+    return $updated_content;
+}
+
+// --------------------------------------------------------------------------------------
+// ---- 
+// --------------------------------------------------------------------------------------
+function brdcnt_update_generated_columns($id)
+{
+    global $con;
+
+    $content = brdcnt_get_content($id);
+    $div_from = residx_get_division(array(
+        "research_id" => $content['src_research'],
+        "collection_id" => $content['src_collection'],
+        "division_id" => $content['src_from_division']
+    ));
+    $div_to = residx_get_division(array(
+        "research_id" => $content['src_research'],
+        "collection_id" => $content['src_collection'],
+        "division_id" => $content['src_to_division']
+    ));
+
+    $from_position = $div_from['from_position'];
+    $to_position = $div_to['to_position'];
+
+    $sql_from = "SELECT src.abs_name_heb name, src.text
+                   FROM a_res_parts src
+                  WHERE src.research_id = " . $content['src_research'] . "
+                    AND src.collection_id = " . $content['src_collection'] . "
+                    AND src.position = " . $from_position;
+    $result_from = mysqli_query($con, $sql_from);
+    if (!$result_from) {
+        exit_error('Error 19 in board_func.php: ' . mysqli_error($con));
+    }
+    $row_from = mysqli_fetch_array($result_from);
+
+    $sql_to = "SELECT src.abs_name_heb name, src.text
+                   FROM a_res_parts src
+                  WHERE src.research_id = " . $content['src_research'] . "
+                    AND src.collection_id = " . $content['src_collection'] . "
+                    AND src.position = " . $to_position;
+    $result_to = mysqli_query($con, $sql_to);
+    if (!$result_to) {
+        exit_error('Error 19 in board_func.php: ' . mysqli_error($con));
+    }
+    $row_to = mysqli_fetch_array($result_to);
+
+    $sql1 = "UPDATE a_proj_elm_board_content
+                SET gen_from_position = " . $from_position . "
+                  , gen_to_position = " . $to_position . "
+                  , gen_from_text = '" . $row_from['text'] . "'
+                  , gen_to_text = '" . $row_to['text'] . "'
+              WHERE project_id = " . $id['proj'] . "
+                AND element_id = " . $id['elm']. "
+                AND line_id = " . $id['line']. "
+                AND field_id = " . $id['field'];
+    $result1 = mysqli_query($con, $sql1);
+    if (!$result1) {
+        exit_error('Error 21 in board_func.php: ' . mysqli_error($con));
+    }
+
+    return array_merge($content,array(
+        "gen_from_position"=>$from_position,
+        "gen_to_position"=>$to_position,
+        "gen_from_text"=>$row_from['text'],
+        "gen_to_text"=>$row_to['text']
+    ));
 }
 
 // --------------------------------------------------------------------------------------
