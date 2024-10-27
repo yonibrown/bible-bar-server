@@ -145,7 +145,7 @@ function txt_gen_attr($id, $prop)
 // --------------------------------------------------------------------------------------
 function txt_get_segment($id)
 {
-    global $con, $heb_num;
+    global $con;
 
     $rep = array();
 
@@ -209,9 +209,9 @@ function txt_get_segment($id)
 // --------------------------------------------------------------------------------------
 function txt_get_title($id)
 {
-    global $con, $heb_num;
+    global $con;
 
-    $sql = "SELECT d.level,d.division_id,d.name_heb name
+    $sql = "SELECT d.level,d.division_id,d.name2 name
                FROM a_res_idx_division d
                JOIN a_proj_elm_sequence s
                  ON d.research_id = s.research_id

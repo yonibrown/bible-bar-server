@@ -236,7 +236,7 @@ function lnk_get_cat_name($prop)
     global $con;
 
     if ($prop['division_id'] != 0) {
-        $sql = "SELECT name_heb name
+        $sql = "SELECT name2 name
                   FROM a_res_idx_division
                  WHERE research_id  = " . $prop['research_id'] . "
                    AND collection_id = " . $prop['collection_id'] . "

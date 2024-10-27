@@ -133,7 +133,7 @@ function bar_calc_segments($id, $dsp)
              ORDER BY d.to_position,d.division_id";
     } else {
         bar_init_gen_segments($id);
-        $sql = "SELECT d.division_id,d.name_heb name, SUM(base.gen_word_count) words, 
+        $sql = "SELECT d.division_id,d.name2 name, SUM(base.gen_word_count) words, 
                        d.to_position to_pos
               FROM a_res_parts base
               JOIN a_res_idx_division d
@@ -143,7 +143,7 @@ function bar_calc_segments($id, $dsp)
              WHERE " . $base_where . "
                AND d.index_id = " . $prop['seq_index'] . "
                AND d.level = " . $prop['seq_level'] . "
-             GROUP BY d.to_position,d.division_id,d.name_heb";
+             GROUP BY d.to_position,d.division_id,d.name2";
     }
     $result = mysqli_query($con, $sql);
     if (!$result) {

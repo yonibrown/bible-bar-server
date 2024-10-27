@@ -72,15 +72,23 @@ function residx_get_levels($id, $prop)
 // --------------------------------------------------------------------------------------
 // ----                
 // --------------------------------------------------------------------------------------
-function residx_get_max_level($id)
+function residx_get_max_level($id, $prop)
 {
     global $con;
+
+    $partOfKeyCrit = " ";
+    if (array_key_exists('part_of_key', $prop)) {
+        if ($prop['part_of_key']) {
+            $partOfKeyCrit = " AND part_of_key = true";
+        }
+    }
 
     $sql = "SELECT MAX(level) level
               FROM a_res_idx_levels
              WHERE research_id = " . $id['res'] . "
                AND collection_id = " . $id['col'] . "
-               AND index_id = " . $id['idx'];
+               AND index_id = " . $id['idx'] .
+        $partOfKeyCrit;
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error 32 in res_func.php: ' . mysqli_error($con));
@@ -95,59 +103,69 @@ function residx_get_max_level($id)
 function residx_get_divisions($id, $prop)
 {
     if (array_key_exists('position', $prop)) {
+        // get key from position
         $key = residx_position_to_key($id, $prop);
     } else {
-        $key = $prop['key'];
+        if (count($prop['key']) == 0) {
+            // get key levels from index
+            $level_list = residx_get_levels($id, array('levels' => 'key'));
+            $key = array_map("level_list_to_empty_key", $level_list);
+        } else {
+            $key = $prop['key'];
+        }
     }
     $divs = array();
-
-    if (count($key) == 0){
-        // get divisions of max level
-    }
 
     $firstLevel = TRUE;
     $parent_div = 0;
     foreach ($key as $level) {
-        $level_prop = array(
-            'level' => $level['level'],
-            'selected_div' => $level['division_id']
-        );
-
-        if ($firstLevel) {
-            $firstLevel = FALSE;
-        } else {
-            $level_prop['parent_div'] = $parent_div;
-        }
         if ($parent_div != -999) {
-            $divisions = residx_get_level_divisions($id, $level_prop);
+            $level_prop = array(
+                'level' => $level['level'],
+                'selected_div' => $level['division_id']
+            );
+            if (!$firstLevel) {
+                $level_prop['parent_div'] = $parent_div;
+            }
+            $levelDivs = residx_get_level_divisions($id, $level_prop);
             switch ($level['division_id']) {
-                case -999:
-                    $selected_div = -999;
                 case 0:
-                    $selected_div = $divisions['list'][0]['id'];
+                    // first division
+                    $selected_div = $levelDivs['list'][0]['id'];
                     break;
                 case -1:
-                    $selected_div = end($divisions)['list']['id'];
+                    // last division
+                    $selected_div = end($levelDivs)['list']['id'];
                     break;
                 default:
-                    $selected_div = $divisions['selected_div']['id'];
+                    $selected_div = $level['division_id'];
             }
         } else {
-            $divisions = array();
-            $selected_div = 0;
+            // if the high level div is -999 return empty lists in lower levels
+            $levelDivs = array("list" => array());
+            $selected_div = -999;
         }
 
         $level_divs = array(
             'level' => $level['level'],
-            'divisions' => $divisions['list'],
+            'divisions' => $levelDivs['list'],
             'selected_div' => $selected_div
         );
         array_push($divs, $level_divs);
 
         $parent_div = $selected_div;
+        $firstLevel = FALSE;
     }
 
     return $divs;
+}
+
+function level_list_to_empty_key($level)
+{
+    return array(
+        "level" => $level['id'],
+        "division_id" => -999
+    );
 }
 
 // --------------------------------------------------------------------------------------
@@ -172,7 +190,7 @@ function residx_get_level_divisions($id, $prop)
     }
 
     $list = array();
-    $sql = "SELECT division_id,name_heb name 
+    $sql = "SELECT division_id,name1,name2,name3 
               FROM a_res_idx_division
              WHERE research_id = " . $id['res'] . " 
                AND collection_id = " . $id['col'] . " 
@@ -188,13 +206,15 @@ function residx_get_level_divisions($id, $prop)
     while ($row = mysqli_fetch_array($result)) {
         array_push($list, array(
             "id" => (int)$row['division_id'],
-            "name" => $row['name'],
+            "name" => $row['name2'],
+            "nameArr" => array($row['name1'],$row['name2'],$row['name3']),
             "selected" => ($row['division_id'] == $prop['selected_div'])
         ));
         if ($row['division_id'] == $prop['selected_div']) {
             $selected_div = array(
                 "id" => (int)$row['division_id'],
-                "name" => $row['name']
+                "name" => $row['name2'],
+                "nameArr" => array($row['name1'],$row['name2'],$row['name3'])
             );
         }
     }
@@ -212,7 +232,7 @@ function residx_position_to_key($id, $prop)
 
     if (array_key_exists('division_id', $prop)) {
         // get by division
-        $sql = "SELECT d.level,d.division_id,d.name_heb name
+        $sql = "SELECT d.level,d.division_id,d.name1,d.name2,d.name3
                   FROM a_res_idx_division p
                   JOIN a_res_idx_division d
                     ON d.research_id = p.research_id
@@ -234,7 +254,7 @@ function residx_position_to_key($id, $prop)
     } else if (array_key_exists('position', $prop)) {
         // get by position
         if ($prop['position'] > 0) {
-            $sql = "SELECT d.level,d.division_id,d.name_heb name
+            $sql = "SELECT d.level,d.division_id,d.name1,d.name2,d.name3
                   FROM a_res_idx_division d
                   JOIN a_res_idx_levels l
                     ON l.research_id = d.research_id
@@ -253,7 +273,7 @@ function residx_position_to_key($id, $prop)
             } else { /* $prop['position'] == -1 */
                 $group_func = 'MAX';
             }
-            $sql = "SELECT d.level," . $group_func . "(d.division_id) division_id,d.name_heb name
+            $sql = "SELECT d.level," . $group_func . "(d.division_id) division_id,d.name1,d.name2,d.name3
                   FROM a_res_idx_division d
                   JOIN a_res_idx_levels l
                     ON l.research_id = d.research_id
@@ -269,7 +289,7 @@ function residx_position_to_key($id, $prop)
         }
     } else {
         // get default key
-        $sql = "SELECT l.level level, -999 division_id,' ' name
+        $sql = "SELECT l.level level, -999 division_id,' ' name1,' ' name2,' ' name3
                   FROM a_res_idx_levels l
                  WHERE l.research_id = " . $id['res'] . " 
                    AND l.collection_id = " . $id['col'] . " 
@@ -287,11 +307,34 @@ function residx_position_to_key($id, $prop)
         array_push($list, array(
             "level" => (int)$row['level'],
             "division_id" => (int)$row['division_id'],
-            "name" => $row['name']
+            "name" => $row['name2'],
+            "nameArr" => array($row['name1'],$row['name2'],$row['name3'])
         ));
     }
     return $list;
 }
+
+// --------------------------------------------------------------------------------------
+// ---- get the division of level 0 that the position is in it
+// --------------------------------------------------------------------------------------
+// function residx_position_to_div($id, $prop)
+// {
+//     global $con;
+
+//     $sql = "SELECT d.division_id,d.name2 name
+//                   FROM a_res_idx_division d
+//                  WHERE d.research_id = " . $id['res'] . " 
+//                    AND d.collection_id = " . $id['col'] . " 
+//                    AND d.index_id = " . $id['idx'] . " 
+//                    AND d.level = 0
+//                    AND " . $prop['position'] . " BETWEEN d.from_position AND d.to_position";
+//     $result = mysqli_query($con, $sql);
+//     if (!$result) {
+//         exit_error('Error 30 in res_func.php: ' . mysqli_error($con));
+//     }
+//     $row = mysqli_fetch_array($result);
+//     return array('division_id' => $row['division_id']);
+// }
 
 // --------------------------------------------------------------------------------------
 // ---- 
@@ -307,7 +350,7 @@ function residx_get_level_range($id, $name, $level, $initialRange)
                 AND level = " . $level . "
                 AND from_position >= " . $initialRange['from'] . "
                 AND to_position <= " . $initialRange['to'] . "
-                AND name_heb = '" . $name . "'";
+                AND name2 = '" . $name . "'";
     $result = mysqli_query($con, $sql);
     if (!$result) {
         exit_error('Error description2: ' . mysqli_error($con));
